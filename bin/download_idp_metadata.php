@@ -1,14 +1,23 @@
 #!/usr/bin/php
 <?php
 // downloads the metadata for all current idps from the registry
-// and stores them all in the idp_metadata directory
+// and stores them all in the specified directory
 //
 // prerequisites:
-//   mkdir -p idp_metadata
 //   sudo apt install php-curl
+//
+// usage:
+//   ./bin/download_idp_metadata.php /tmp/idp_metadata
 //
 // Copyright (c) 2018, Paolo Greppi <paolo.greppi@simevo.com>
 // License: BSD 3-Clause
+
+if (count($argv) <= 1) {
+    echo "Usage: download_idp_metadata.php destination_dir_without_trailing_slash\n";
+    exit(-1);
+}
+
+$dir = $argv[1];
 
 $idp_list_url = 'https://registry.spid.gov.it/assets/data/idp.json';
 $ch = curl_init();
@@ -34,6 +43,6 @@ foreach ($idps->data as $idp) {
     echo "Contacting $metadata_url" . PHP_EOL;
     $xml = curl_exec($ch);
     curl_close($ch);
-    $file = "example/idp_metadata/$ipa_entity_code.xml";
+    $file = "$dir/$ipa_entity_code.xml";
     file_put_contents($file, $xml);
 }

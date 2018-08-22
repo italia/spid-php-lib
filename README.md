@@ -56,7 +56,7 @@ All steps can be performed in an unattended fashion with:
 ```sh
 composer install --no-dev
 make
-bin/download_idp_metadata.php
+bin/download_idp_metadata.php ./example/idp_metadata
 ```
 
 **NOTE**: during testing, it is highly adviced to use the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2).
