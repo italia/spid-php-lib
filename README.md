@@ -105,8 +105,9 @@ $sp->logout();
 
 A basic demo application is provided in the [example/](example/) directory.
 
-To use:
+To use it you have two options: directly or from a docker-compose file
 
+#### Directly
 1. in `example/index.php`:
 
   - adapt the base url (`$base`) to your needs (use am IP address or a FQDN that is visible to the IdP)
@@ -122,6 +123,18 @@ To use:
 This screencast shows what you should see if all goes well:
 
 ![img](images/screencast.gif)
+
+#####Using docker-compose
+ 
+1. copy the `.env.example` file as `.env` and edit to your needs
+2. run `make`
+    this creates the needed certificates and configurations
+3. run `docker-compose up --build`
+
+Check that the FQDN you chose actually resolves. This can be achieved by adding a directive in `/etc/hosts` or equivalent
+    
+    
+
 
 ## Troubleshooting
 
