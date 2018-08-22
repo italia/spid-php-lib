@@ -144,8 +144,13 @@ In addition, you can use the [SAML Developer Tools](https://www.samltool.com/onl
 
 ### Unit tests
 
-Launch unit tests with PHPunit:
+Install & configure example as described above. Make sure to download the metadata for all production IdPs and for the testenv2 in `example/idp_metadata`, for example:
+```sh
+curl -k -o example/idp_metadata/testenv2.xml https://teamdigitale4.simevo.com/metadata  
 ```
+
+Then launch unit tests with PHPunit:
+```sh
 phpunit --stderr --testdox tests
 ```
 

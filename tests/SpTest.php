@@ -41,4 +41,32 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $metadata = $sp->getSPMetadata();
         $this->validateXml($metadata, "./tests/schemas/saml-schema-metadata-SPID-SP.xsd");
     }
+
+    public function testCanLoadAllIdpMetadata(): void
+    {
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $idps = ['idp_1', 'idp_2', 'idp_3', 'idp_4', 'idp_5', 'idp_6', 'idp_7', 'idp_8', 'testenv2'];
+        foreach ($idps as $idp) {
+            $sp->loadIdpFromFile($idp);
+            $retrievedIdp = $sp->getIdp($idp);
+            $this->assertEquals($retrievedIdp->idpFileName, $idp);
+        }
+    }
+
+    public function testSettingsWithoutEntityId(): void
+    {
+        // TODO check other missing keys:
+        // sp_key_file
+        // sp_cert_file
+        // sp_assertionconsumerservice
+        // sp_singlelogoutservice
+        // sp_org_name
+        // sp_org_display_name
+        // idp_metadata_folder
+        // sp_attributeconsumingservice
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_entityid']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
 }
