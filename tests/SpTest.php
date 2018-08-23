@@ -50,6 +50,12 @@ final class SpTest extends PHPUnit\Framework\TestCase
             $sp->loadIdpFromFile($idp);
             $retrievedIdp = $sp->getIdp($idp);
             $this->assertEquals($retrievedIdp->idpFileName, $idp);
+            // var_dump($retrievedIdp);
+            $idpEntityId = $retrievedIdp->metadata['idpEntityId'];
+            $idpSSO = $retrievedIdp->metadata['idpSSO'];
+            $this->assertContains($idpEntityId, $idpSSO);
+            $idpSLO = $retrievedIdp->metadata['idpSLO'];
+            $this->assertContains($idpEntityId, $idpSLO);
         }
     }
 
