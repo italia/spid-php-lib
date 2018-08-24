@@ -1,0 +1,23 @@
+version: '3.3'
+services:
+  example:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - '8099:80'
+    volumes:
+      - '.:/tmp/app'
+#      - '/tmp/log:/var/log'
+
+  spid-testenv2:
+    image: italia/spid-testenv2
+    ports:
+      - 8088:8088
+    restart: always
+    volumes:
+      - type: bind
+        source: ./example/spid-testenv2
+        target: /app/conf

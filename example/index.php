@@ -1,11 +1,22 @@
 <?php
+require_once(__DIR__ . "/config.php");
 require_once(__DIR__ . "/../vendor/autoload.php");
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-$base = "https://sp.example.com";
+$idp_metadata_folder = 'idp_metadata';
+$idp_metadata_file = __DIR__ . DIRECTORY_SEPARATOR . $idp_metadata_folder .DIRECTORY_SEPARATOR . IDP_METADATA_NAME.'.xml';
+
+if(!file_exists($idp_metadata_file)) {
+    /**
+     * TODO: retrieve the correct values from configuration
+     */
+    copy('http://spid-testenv2:'.IDP_PORT.'/metadata',$idp_metadata_file);
+}
+
+$base = SP_SCHEMA."://".SP_FQDN.":".SP_PORT;
 $settings = [
     'sp_entityid' => $base,
     'sp_key_file' => './sp.key',
@@ -23,8 +34,6 @@ $settings = [
         ]
     ];
 $sp = new Italia\Spid\Sp($settings);
-
-//$spid->loadIdpMetadata("");
 $request_uri = explode('?', $_SERVER['REQUEST_URI'], 2);
 
 switch ($request_uri[0]) {
