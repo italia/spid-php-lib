@@ -4,7 +4,7 @@ require_once(__DIR__ . "/../vendor/autoload.php");
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(E_ERROR);
+error_reporting(E_ALL);
 
 $idp_metadata_folder = 'idp_metadata';
 $idp_metadata_file = __DIR__ . DIRECTORY_SEPARATOR . $idp_metadata_folder .DIRECTORY_SEPARATOR . IDP_METADATA_NAME.'.xml';

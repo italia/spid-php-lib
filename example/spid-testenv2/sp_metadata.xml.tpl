@@ -28,13 +28,13 @@
         
         <md:SingleLogoutService 
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-            Location="${SP_SCHEMA}://${SP_FQDN}:${SP_PORT}/idp/logout" />
+            Location="${SP_SCHEMA}://${SP_FQDN}:${SP_PORT}/logout" />
 
         <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat> 
 
         <md:AssertionConsumerService  
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"  
-            Location="${SP_SCHEMA}://${SP_FQDN}:${SP_PORT}/idp/login"
+            Location="${SP_SCHEMA}://${SP_FQDN}:${SP_PORT}/acs"
             index="0"  
             isDefault="true" /> 
 
