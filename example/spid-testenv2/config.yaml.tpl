@@ -3,7 +3,7 @@
 
 # URL da usare per generare l'entityID dell'IdP e gli URL degli endpoint
 # SAML indicati nel metadata dell'IdP
-base_url: "${IDP_SCHEMA}://${IDP_FQDN}:8088"
+base_url: "${IDP_SCHEMA}://${IDP_FQDN}:${IDP_PORT}"
 
 # Chiave e certificato necessari per la firma dei messaggi SAML
 key_file: "./conf/idp.key"
@@ -34,7 +34,7 @@ debug: true
 # Indirizzo IP dell'interfaccia su cui esporre il server e porta
 # (0.0.0.0 per ascoltare su tutte le interfacce)
 host: 0.0.0.0
-port: 8088
+port: ${IDP_PORT}
 
 # Abilita (true) o disabilita (false) la modalità HTTPS per l'IdP
 https: false

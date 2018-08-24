@@ -13,10 +13,10 @@ if(!file_exists($idp_metadata_file)) {
     /**
      * TODO: retrieve the correct values from configuration
      */
-    copy('http://spid-testenv2:8088/metadata',$idp_metadata_file);
+    copy('http://spid-testenv2:'.IDP_PORT.'/metadata',$idp_metadata_file);
 }
 
-$base = SP_SCHEMA."://".SP_FQDN;
+$base = SP_SCHEMA."://".SP_FQDN.":".SP_PORT;
 $settings = [
     'sp_entityid' => $base,
     'sp_key_file' => './sp.key',

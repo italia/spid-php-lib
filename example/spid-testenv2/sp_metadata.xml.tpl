@@ -2,7 +2,7 @@
 <md:EntityDescriptor 
     xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"  
     xmlns:ds="http://www.w3.org/2000/09/xmldsig#"  
-    entityID="${SP_SCHEMA}://${SP_FQDN}"
+    entityID="${SP_SCHEMA}://${SP_FQDN}:${SP_PORT}"
     ID="_fbec471-cc7d-4eb4-a1b1-216df7c0f4ab"> 
      
     <md:SPSSODescriptor  
@@ -28,13 +28,13 @@
         
         <md:SingleLogoutService 
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-            Location="${SP_SCHEMA}://${SP_FQDN}/idp/logout" />
+            Location="${SP_SCHEMA}://${SP_FQDN}:${SP_PORT}/idp/logout" />
 
         <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat> 
 
         <md:AssertionConsumerService  
             Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"  
-            Location="${SP_SCHEMA}://${SP_FQDN}/idp/login"
+            Location="${SP_SCHEMA}://${SP_FQDN}:${SP_PORT}/idp/login"
             index="0"  
             isDefault="true" /> 
 

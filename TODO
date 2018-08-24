@@ -1,3 +1,0 @@
-build config.yaml so that it loads the right sp_metadata
-
-Fill the IDP mounted folder, with crt, key, config, sp_metadata.xml

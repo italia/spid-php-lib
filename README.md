@@ -124,7 +124,7 @@ This screencast shows what you should see if all goes well:
 
 ![img](images/screencast.gif)
 
-#####Using docker-compose
+#### Using docker-compose
  
 1. copy the `.env.example` file as `.env` and edit to your needs
 2. run `make`
