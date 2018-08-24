@@ -1,10 +1,4 @@
 <?php
 
-define('SP_NAME', '${SP_NAME}');
-define('SP_FQDN', '${SP_FQDN}');
-define('SP_SCHEMA', '${SP_SCHEMA}');
-define('IDP_SCHEMA', '${IDP_SCHEMA}');
-define('IDP_FQDN', '${IDP_FQDN}');
-define('IDP_METADATA_NAME', 'idp_test');
-define('SP_PORT', '${SP_PORT}');
-define('IDP_PORT', '${IDP_PORT}');
+define('SP_ENTITYID', '${SP_ENTITYID}');
+define('IDP_ENTITYID', '${IDP_ENTITYID}');

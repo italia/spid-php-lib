@@ -6,17 +6,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ERROR);
 
-$idp_metadata_folder = 'idp_metadata';
-$idp_metadata_file = __DIR__ . DIRECTORY_SEPARATOR . $idp_metadata_folder .DIRECTORY_SEPARATOR . IDP_METADATA_NAME.'.xml';
-
-if(!file_exists($idp_metadata_file)) {
-    /**
-     * TODO: retrieve the correct values from configuration
-     */
-    copy('http://spid-testenv2:'.IDP_PORT.'/metadata',$idp_metadata_file);
-}
-
-$base = SP_SCHEMA."://".SP_FQDN.":".SP_PORT;
+$base = SP_ENTITYID;
 $settings = [
     'sp_entityid' => $base,
     'sp_key_file' => './sp.key',

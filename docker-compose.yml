@@ -9,8 +9,9 @@ services:
     ports:
       - '8099:80'
     volumes:
-      - '.:/tmp/app'
-#      - '/tmp/log:/var/log'
+      - type: bind
+        source: .
+        target: /app
 
   spid-testenv2:
     image: italia/spid-testenv2
