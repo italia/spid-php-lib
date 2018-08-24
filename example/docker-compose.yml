@@ -10,7 +10,7 @@ services:
       - '8099:80'
     volumes:
       - type: bind
-        source: .
+        source: ..
         target: /app
 
   spid-testenv2:
@@ -20,5 +20,5 @@ services:
     restart: always
     volumes:
       - type: bind
-        source: ./example/spid-testenv2
+        source: ./spid-testenv2
         target: /app/conf

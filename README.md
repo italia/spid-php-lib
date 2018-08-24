@@ -46,20 +46,20 @@ sudo apt install composer make openssl php-curl php-zip php-xml phpunit
 
 Before using this package, you must:
 
-1. Install prerequisites with composer
-
-2. Download and verify the Identity Provider (IdP) metadata files; it is advised to place them in a separate [idp_metadata/](example/idp_metadata/) directory. A convenience tool is provided for this purpose: [bin/download_idp_metadata.php](bin/download_idp_metadata.php).
-
-3. Generate key and certificate for the Service Provider (SP).
-
-All steps can be performed in an unattended fashion with:
+1. Install required PHP packages with composer:
 ```sh
 composer install --no-dev
-make
-bin/download_idp_metadata.php ./example/idp_metadata
 ```
 
-**NOTE**: during testing, it is highly adviced to use the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2).
+2. Download and verify the Identity Provider (IdP) metadata files; it is advised to place them in a separate `idp_metadata` directory. A [convenience tool](bin/download_idp_metadata.php) is provided to automatically do that for the production IdP, for example:
+```sh
+bin/download_idp_metadata.php ./example/idp_metadata
+```
+**NOTE**: During testing, it is highly adviced to use the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2).
+
+3. Generate key and certificate for the Service Provider (SP)
+
+4. Visit https://sp.example.com/metadata.php to get the SP metadata, then copy these over to the IdPs and register the SP.
 
 ### Usage
 
@@ -105,46 +105,41 @@ $sp->logout();
 
 A basic demo application is provided in the [example/](example/) directory.
 
-To use it you have two options: either directly or with the supplied [docker-compose](https://docs.docker.com/compose/overview/) file.
+To try it out you have two options: either manually or with the supplied [docker-compose](https://docs.docker.com/compose/overview/) file.
 
 In either case, this screencast shows what you should see if all goes well:
 
 ![img](images/screencast.gif)
 
-#### Directly
+#### Manual install
 
 1. Configure and install this package
 
 2. Configure and install the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2)
 
-3. In `example/index.php` adapt the base url (`$base`) to your needs
+2. In `example/index.php` adapt the base url (`$base`) to your needs
 
-4. In `example/login.php` change the IdP that will be used to login
+3. In `example/login.php` change the IdP shortname that will be used to login
 
-5. Serve the `example` dir from your preferred webserver
+4. Serve the `example` dir from your preferred webserver
 
-6. Visit https://sp.example.com/metadata.php to get the SP (Service Provider) metadata, then copy these over to the IdP and register the SP
-
-7. Visit: https://sp.example.com and click `login`.
+5. Visit: https://sp.example.com and click `login`.
 
 #### Using docker-compose
 
-The supplied [docker-compose](https://docs.docker.com/compose/overview/) file defines and runs a multi-container Docker application that comprises this example and the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2), configured to talk to each other.
+The supplied [example/docker-compose.yml](example/docker-compose.yml) file defines and runs a multi-container Docker application that comprises this example and the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2), configured to talk to each other.
 
-To use it:
+To use it, in the `example` directory:
 
-1. Copy the `.env.example` file as `.env` and edit to your needs
+1. Copy the `.env.example` file to `.env` and (optionally) edit it if you wish; the default value `localhost` for the hostnames of the SP and IdP is OK for local tests; if you change that, check that the FQDNs resolve. This can be achieved by adding a directive in `/etc/hosts` or equivalent.
 
 2. Run `make` (this creates the needed certificates and configurations)
 
 3. Run `docker-compose up --build`
 
-4. Run `make post` (this transfers the metadata between SP and IdP)
+4. Run `make post` (this transfers the metadata between SP and test IdP)
 
 5. Visit: http://localhost:8099/ and click `login`.
-
-The default value `localhost` for the FQDNs is OK for local tests.
-If you change that, check that the FQDNs resolve. This can be achieved by adding a directive in `/etc/hosts` or equivalent.
 
 ## Troubleshooting
 

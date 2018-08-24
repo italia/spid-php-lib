@@ -1,6 +1,2 @@
-1. have the `make post` command wait for successful IdP start (else you may have to repeat the command)
-2. SP container is not configured correctly ATM, visiting http://localhost:8099/ yields:
-```
-Warning: Unknown: failed to open stream: Permission denied in Unknown on line 0
-Fatal error: Unknown: Failed opening required '/var/www/html/index.php' (include_path='.:/usr/local/lib/php') in Unknown on line 0
-```
+1. have the `make post` command wait for successful IdP start (else you may have to repeat the command until the IdP is up and responds with a valid metadata !)
+2. to prevent backchannel communication, configure the docker compose so that the nwteork between the two containers is not bridged
