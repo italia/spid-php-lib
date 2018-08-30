@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 $base = "https://sp.example.com";
 $settings = [
-    'sp_entityid' => $base,
+    //'sp_entityid' => $base,
     'sp_key_file' => './sp.key',
     'sp_cert_file' => './sp.crt',
     'sp_assertionconsumerservice' => [
@@ -20,11 +20,10 @@ $settings = [
     'sp_attributeconsumingservice' => [
         ["name", "familyName", "fiscalNumber", "email"],
         ["name", "familyName", "fiscalNumber", "email", "spidCode"]
-        ]
-    ];
+    ]
+];
 $sp = new Italia\Spid\Sp($settings);
 
-//$spid->loadIdpMetadata("");
 $request_uri = explode('?', $_SERVER['REQUEST_URI'], 2);
 
 switch ($request_uri[0]) {
@@ -43,6 +42,14 @@ switch ($request_uri[0]) {
     // Acs page
     case '/acs':
         require './views/acs.php';
+        break;
+    // Logout page
+    case '/logout':
+        require './views/logout.php';
+        break;
+    // Slo page
+    case '/slo':
+        require './views/slo.php';
         break;
     // Everything else
     default:

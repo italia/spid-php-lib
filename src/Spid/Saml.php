@@ -4,6 +4,7 @@ namespace Italia\Spid\Spid;
 
 use Italia\Spid\Spid\Saml\Idp;
 use Italia\Spid\Spid\Saml\In\Base;
+use Italia\Spid\Spid\Saml\In\LogoutResponse;
 use Italia\Spid\Spid\Saml\In\Response;
 use Italia\Spid\Spid\Saml\Settings;
 
@@ -12,9 +13,9 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
 
 class Saml implements Interfaces\SpInterface
 {
-    private $settings;
-    private $idps = [];
-    private $session;
+    var $settings;
+    var $idps = [];
+    var $session;
 
     public function __construct(array $settings)
     {
@@ -27,12 +28,11 @@ class Saml implements Interfaces\SpInterface
         if (array_key_exists($filename, $this->idps)) {
             return;
         }
-        $idp = new Idp($this->settings);
-        $idp = $idp->loadFromXml($filename);
-        $this->idps[$filename] = $idp;
+        $idp = new Idp($this);
+        $this->idps[$filename] = $idp->loadFromXml($filename);;
     }
 
-    public function getSPMetadata() : string
+    public function getSPMetadata(): string
     {
         $entityID = $this->settings['sp_entityid'];
         $id = preg_replace('/[^a-z0-9_-]/', '_', $entityID);
@@ -113,9 +113,9 @@ XML;
         $objXMLSecDSig->sign($objKey);
         $objXMLSecDSig->add509Cert($cert, true);
         $insertBefore = $rootNode->firstChild;
-        $messageTypes = array('AuthnRequest', 'Response', 'LogoutRequest','LogoutResponse');
+        $messageTypes = array('AuthnRequest', 'Response', 'LogoutRequest', 'LogoutResponse');
         if (in_array($rootNode->localName, $messageTypes)) {
-            $issuerNodes = self::query($dom, '/'.$rootNode->tagName.'/saml:Issuer');
+            $issuerNodes = self::query($dom, '/' . $rootNode->tagName . '/saml:Issuer');
             if ($issuerNodes->length == 1) {
                 $insertBefore = $issuerNodes->item(0)->nextSibling;
             }
@@ -125,12 +125,12 @@ XML;
         return $signedxml;
     }
 
-    public function getIdp($idpName)
+    public function getIdp($idpName) : Idp
     {
-        return key_exists($idpName, $this->idps) ? $this->idps[$idpName] : false;
+        return key_exists($idpName, $this->idps) ? $this->idps[$idpName] : null;
     }
 
-    public function login($idpName, $assertId, $attrId, $redirectTo = null, $level = 1)
+    public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
     {
         if ($this->isAuthenticated()) {
             return false;
@@ -148,37 +148,41 @@ XML;
 
         $this->loadIdpFromFile($idpName);
         $idp = $this->idps[$idpName];
-        $idp->authnRequest($assertId, $attrId, $redirectTo, $level);
+        return $idp->authnRequest($assertId, $attrId, $redirectTo, $level, $shouldRedirect);
     }
 
-    public function isAuthenticated()
+    public function isAuthenticated() : bool
     {
-        if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
-            $this->session = $_SESSION['spidSession'];
+        $response = new Response();
+        if (($validated = $response->validate()) instanceof Session) {
+            $_SESSION['spidSession'] = $validated;
+            $this->session = $validated;
             return true;
         }
 
-        $response = new Response();
-        $validated = $response->validate();
-        if ($validated instanceof Session) {
-            $_SESSION['spidSession'] = $validated;
-            $this->session = $validated;
+        $logoutResponse = new LogoutResponse();
+        if ($logoutResponse->validate() === true) {
+            return false;
+        }
+
+        if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
+            $this->session = $_SESSION['spidSession'];
             return true;
         }
         return false;
     }
 
-    public function logout($redirectTo = null)
+    public function logout($redirectTo = null, $shouldRedirect = true) : string
     {
-        if ($this->isAuthenticated() !== false) {
-            return false;
+        if ($this->isAuthenticated() === false) {
+            return "";
         }
         $this->loadIdpFromFile($this->session->idp);
         $idp = $this->idps[$this->session->idp];
-        $idp->logoutRequest($this->session, $redirectTo);
+        return $idp->logoutRequest($this->session, $redirectTo, $shouldRedirect);
     }
 
-    public function getAttributes()
+    public function getAttributes() : array
     {
         return $this->session->attributes;
     }

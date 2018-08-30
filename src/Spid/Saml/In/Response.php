@@ -17,8 +17,12 @@ class Response extends Base
         $xml->loadXML($xmlString);
 
         $root = $xml->getElementsByTagName('Response')->item(0);
+        
+        if (is_null($root)) {
+            return false;
+        }
         if ($root->getAttribute('Version') == "") {
-            throw new \Exception("missing Version attribute");
+            throw new \Exception("Missing Version attribute");
         } elseif ($root->getAttribute('Version') != '2.0') {
             throw new \Exception("Invalid Version attribute");
         }
@@ -56,16 +60,16 @@ class Response extends Base
 
     public function spidSession(\DOMDocument $xml)
     {
-
         $session = new Session();
 
         $attributes = array();
-        if ($xml->getElementsByTagName('AttributeStatement')->length >0) {
+        if ($xml->getElementsByTagName('AttributeStatement')->length > 0) {
             foreach ($xml->getElementsByTagName('AttributeStatement')->item(0)->childNodes as $attr) {
                 $attributes[$attr->getAttribute('Name')] = $attr->nodeValue;
             }
         }
 
+        $session->sessionID = $_SESSION['RequestID'];
         $session->idp = $_SESSION['idpName'];
         $session->attributes = $attributes;
         $session->level = substr($xml->getElementsByTagName('AuthnContextClassRef')->item(0)->nodeValue, -1);

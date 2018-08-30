@@ -3,6 +3,8 @@
 namespace Italia\Spid\Spid\Interfaces;
 
 // service provider class
+use Italia\Spid\Spid\Saml\Idp;
+
 interface SpInterface
 {
     // $settings = [
@@ -34,7 +36,7 @@ interface SpInterface
     public function loadIdpFromFile($filename);
 
     // returns SP XML metadata as a string
-    public function getSPMetadata();
+    public function getSPMetadata() : string;
 
     // LOW-LEVEL FUNCTION:
 
@@ -44,7 +46,7 @@ interface SpInterface
     //   $authnRequest = idp->$authnRequest(0, 1, 2, 'https://example.com/return_to_url');
     //   $url = $authnRequest->redirect_url();
     // $idpName: shortname of IdP, same as the name of corresponding IdP metadata file, without .xml
-    public function getIdp($idpName);
+    public function getIdp($idpName) : Idp;
 
     // HIGH-LEVEL FUNCTIONS:
 
@@ -54,17 +56,22 @@ interface SpInterface
     // $attr: index of attribute consuming service as per the SP metadata
     // $level: SPID level (1, 2 or 3)
     // $returnTo: return url
-    public function login($idpName, $ass, $attr, $redirectTo = null, $level = 1);
+    // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
+    // returns and empty string if $shouldRedirect = true, the login URL otherwhise
+    public function login($idpName, $ass, $attr, $level = 1, $redirectTo = null, $shouldRedirect = true) : string;
 
     // returns false if no response from IdP is found
     // else processes the response, reports errors if any
     // and finally returns true if login was successful
-    public function isAuthenticated();
+    public function isAuthenticated() : bool;
 
     // performs logout
-    public function logout();
+    // $returnTo: return url
+    // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
+    // returns and empty string if $shouldRedirect = true, the logout URL otherwhise
+    public function logout($redirectTo = null, $shouldRedirect = true) : string;
 
     // returns attributes as an array or null if not authenticated
     // example: array('name' => 'Franco', 'familyName' => 'Rossi', 'fiscalNumber' => 'FFFRRR88A12T4441R',)
-    public function getAttributes();
+    public function getAttributes() : array;
 }

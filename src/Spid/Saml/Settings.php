@@ -5,21 +5,22 @@ namespace Italia\Spid\Spid\Saml;
 class Settings
 {
     private static $validSettings = [
-    'sp_entityid' => 1,
-    'sp_key_file' => 1,
-    'sp_cert_file' => 1,
-    'sp_assertionconsumerservice' => 1,
-    'sp_singlelogoutservice' => 1,
-    'sp_attributeconsumingservice' => 0,
-    'sp_org_name' => 0,
-    'sp_org_display_name' => 0,
-    'idp_metadata_folder' => 1
+        'sp_entityid' => 1,
+        'sp_key_file' => 1,
+        'sp_cert_file' => 1,
+        'sp_assertionconsumerservice' => 1,
+        'sp_singlelogoutservice' => 1,
+        'sp_attributeconsumingservice' => 0,
+        'sp_org_name' => 0,
+        'sp_org_display_name' => 0,
+        'idp_metadata_folder' => 1
     ];
+
     public static function validateSettings(array $settings)
     {
         $missingSettings = array();
         $msg = 'Missing settings fields: ';
-        array_walk(self::$validSettings, function ($v, $k) use ($missingSettings, $settings) {
+        array_walk(self::$validSettings, function ($v, $k) use (&$missingSettings, &$settings) {
             if (self::$validSettings[$k] == 1 && !array_key_exists($k, $settings)) {
                 $missingSettings[$k] = 1;
             }
