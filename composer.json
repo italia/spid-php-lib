@@ -22,5 +22,8 @@
         "psr-4": {
             "Italia\\Spid\\": "src/"
         }
+    },
+    "archive": {
+        "exclude": ["/example", "/tests"]
     }
 }
