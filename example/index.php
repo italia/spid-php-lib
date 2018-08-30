@@ -20,8 +20,8 @@ $settings = [
     'sp_attributeconsumingservice' => [
         ["name", "familyName", "fiscalNumber", "email"],
         ["name", "familyName", "fiscalNumber", "email", "spidCode"]
-        ]
-    ];
+    ]
+];
 $sp = new Italia\Spid\Sp($settings);
 
 $request_uri = explode('?', $_SERVER['REQUEST_URI'], 2);

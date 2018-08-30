@@ -63,7 +63,9 @@ interface SpInterface
     public function isAuthenticated();
 
     // performs logout
-    public function logout();
+    // $returnTo: return url
+    // $shouldRedirect: tells if the function shoudl emit headers and redirect to login URL or return the URL as string
+    public function logout($redirectTo = null, $shouldRedirect = true);
 
     // returns attributes as an array or null if not authenticated
     // example: array('name' => 'Franco', 'familyName' => 'Rossi', 'fiscalNumber' => 'FFFRRR88A12T4441R',)

@@ -59,7 +59,7 @@ class Response extends Base
         $session = new Session();
 
         $attributes = array();
-        if ($xml->getElementsByTagName('AttributeStatement')->length >0) {
+        if ($xml->getElementsByTagName('AttributeStatement')->length > 0) {
             foreach ($xml->getElementsByTagName('AttributeStatement')->item(0)->childNodes as $attr) {
                 $attributes[$attr->getAttribute('Name')] = $attr->nodeValue;
             }

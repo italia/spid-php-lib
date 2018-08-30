@@ -46,8 +46,10 @@ XML;
 
         $this->xml = $xml->asXML();
 
-/*        header('Content-type: text/xml');
-        echo $this->xml;*/
+        /*
+        header('Content-type: text/xml');
+                echo $this->xml;
+        */
     }
 
     public function redirectUrl($redirectTo = null)

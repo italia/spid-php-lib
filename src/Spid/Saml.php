@@ -31,7 +31,7 @@ class Saml implements Interfaces\SpInterface
         $this->idps[$filename] = $idp->loadFromXml($filename);;
     }
 
-    public function getSPMetadata() : string
+    public function getSPMetadata(): string
     {
         $entityID = $this->settings['sp_entityid'];
         $id = preg_replace('/[^a-z0-9_-]/', '_', $entityID);
@@ -112,9 +112,9 @@ XML;
         $objXMLSecDSig->sign($objKey);
         $objXMLSecDSig->add509Cert($cert, true);
         $insertBefore = $rootNode->firstChild;
-        $messageTypes = array('AuthnRequest', 'Response', 'LogoutRequest','LogoutResponse');
+        $messageTypes = array('AuthnRequest', 'Response', 'LogoutRequest', 'LogoutResponse');
         if (in_array($rootNode->localName, $messageTypes)) {
-            $issuerNodes = self::query($dom, '/'.$rootNode->tagName.'/saml:Issuer');
+            $issuerNodes = self::query($dom, '/' . $rootNode->tagName . '/saml:Issuer');
             if ($issuerNodes->length == 1) {
                 $insertBefore = $issuerNodes->item(0)->nextSibling;
             }

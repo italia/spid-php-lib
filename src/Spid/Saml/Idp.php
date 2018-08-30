@@ -56,8 +56,7 @@ class Idp implements IdpInterface
         $_SESSION['RequestID'] = $authn->id;
         $_SESSION['idpName'] = $this->idpFileName;
 
-        if (!$shouldRedirect)
-        {
+        if (!$shouldRedirect) {
             return $url;
         }
 
@@ -67,12 +66,18 @@ class Idp implements IdpInterface
         exit(1);
     }
 
-    public function logoutRequest(Session $session, $redirectTo = null)
+    public function logoutRequest(Session $session, $redirectTo = null, $shouldRedirect = true)
     {
         $this->session = $session;
-        $request = new LogoutRequest($this);
-        $url = $request->redirectUrl($redirectTo);
+        $logoutRequest = new LogoutRequest($this);
+        $url = $logoutRequest->redirectUrl($redirectTo);
 
+        $_SESSION['RequestID'] = $logoutRequest->id;
+        $_SESSION['idpName'] = $logoutRequest->idpFileName;
+
+        if (!$shouldRedirect) {
+            return $url;
+        }
         header('Pragma: no-cache');
         header('Cache-Control: no-cache, must-revalidate');
         header('Location: ' . $url);
