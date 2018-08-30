@@ -47,6 +47,10 @@ switch ($request_uri[0]) {
     case '/logout':
         require './views/logout.php';
         break;
+    // Slo page
+    case '/slo':
+        require './views/slo.php';
+        break;
     // Everything else
     default:
         echo "404 not found";

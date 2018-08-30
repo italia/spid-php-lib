@@ -13,11 +13,13 @@ class LogoutRequest extends Base
         $idpSLO = $this->idp->metadata['idpSLO'];
         $index = $this->idp->session->sessionID;
         $xml = <<<XML
-<LogoutRequest ID="$id" IssueInstant="$issueInstant" Version="2.0" Destination="$idpSLO">
-    <Issuer NameQualifier="$entityId" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">$entityId</Issuer>
-    <NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient" NameQualifier="$idpEntityId" />
-    <SessionIndex>$index</SessionIndex>
-</LogoutRequest>
+<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+    xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+ID="$id" IssueInstant="$issueInstant" Version="2.0" Destination="$idpSLO">
+    <saml:Issuer NameQualifier="$entityId" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">$entityId</saml:Issuer>
+    <saml:NameID NameQualifier="$idpEntityId" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">$idpEntityId</saml:NameID>
+    <samlp:SessionIndex>$index</samlp:SessionIndex>
+</samlp:LogoutRequest>
 XML;
         $this->xml = $xml;
     }
