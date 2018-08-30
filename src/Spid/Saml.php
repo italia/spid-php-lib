@@ -129,7 +129,7 @@ XML;
         return key_exists($idpName, $this->idps) ? $this->idps[$idpName] : false;
     }
 
-    public function login($idpName, $assertId, $attrId, $redirectTo = null, $level = 1)
+    public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
     {
         if ($this->isAuthenticated()) {
             return false;
@@ -147,7 +147,7 @@ XML;
 
         $this->loadIdpFromFile($idpName);
         $idp = $this->idps[$idpName];
-        $idp->authnRequest($assertId, $attrId, $redirectTo, $level);
+        return $idp->authnRequest($assertId, $attrId, $redirectTo, $level, $shouldRedirect);
     }
 
     public function isAuthenticated()
