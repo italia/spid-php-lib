@@ -29,7 +29,7 @@ class Base
         return $this->issueInstant;
     }
 
-    public function redirectUrl($url, $redirectTo = null)
+    public function redirect($url, $redirectTo = null)
     {
         $compressed = gzdeflate($this->xml);
         $parameters['SAMLRequest'] = base64_encode($compressed);

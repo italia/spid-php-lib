@@ -21,6 +21,6 @@ XML;
             $this->generateXml();
         }
         $url = $this->idp->metadata['idpSSO'];
-        return parent::redirectUrl($url, $redirectTo);
+        return parent::redirect($url, $redirectTo);
     }
 }
