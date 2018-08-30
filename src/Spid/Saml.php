@@ -12,9 +12,9 @@ use RobRichards\XMLSecLibs\XMLSecurityKey;
 
 class Saml implements Interfaces\SpInterface
 {
-    private $settings;
-    private $idps = [];
-    private $session;
+    var $settings;
+    var $idps = [];
+    var $session;
 
     public function __construct(array $settings)
     {
@@ -169,7 +169,7 @@ XML;
 
     public function logout($redirectTo = null)
     {
-        if ($this->isAuthenticated() !== false) {
+        if ($this->isAuthenticated() === false) {
             return false;
         }
         $this->loadIdpFromFile($this->session->idp);

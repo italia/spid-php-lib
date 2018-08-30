@@ -5,6 +5,7 @@ namespace Italia\Spid\Spid\Saml;
 use Italia\Spid\Spid\Interfaces\IdpInterface;
 use Italia\Spid\Spid\Saml\Out\AuthnRequest;
 use Italia\Spid\Spid\Saml\Out\LogoutRequest;
+use Italia\Spid\Spid\Session;
 
 class Idp implements IdpInterface
 {

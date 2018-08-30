@@ -43,6 +43,10 @@ switch ($request_uri[0]) {
     case '/acs':
         require './views/acs.php';
         break;
+    // Logout page
+    case '/logout':
+        require './views/logout.php';
+        break;
     // Everything else
     default:
         echo "404 not found";
