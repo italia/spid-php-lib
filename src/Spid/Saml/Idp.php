@@ -10,20 +10,20 @@ class Idp implements IdpInterface
 {
     public $idpFileName;
     public $metadata;
-    public $settings;
+    public $sp;
     public $assertID;
     public $attrID;
     public $level = 1;
     public $session;
 
-    public function __construct($settings)
+    public function __construct($sp)
     {
-        $this->settings = $settings;
+        $this->sp = $sp;
     }
 
     public function loadFromXml($xmlFile)
     {
-        $fileName = $this->settings['idp_metadata_folder'] . $xmlFile . ".xml";
+        $fileName = $this->sp->settings['idp_metadata_folder'] . $xmlFile . ".xml";
         if (!file_exists($fileName)) {
             throw new \Exception("Metadata file $fileName not found", 1);
         }

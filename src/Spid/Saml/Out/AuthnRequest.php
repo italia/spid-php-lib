@@ -12,7 +12,7 @@ class AuthnRequest extends Base implements AuthnRequestInterface
         $signature = $this->buildXmlSignature($id);
         $issueInstant = $this->generateIssueInstant();
         $idpUrl = $this->idp->metadata['idpSSO'];
-        $entityId = $this->idp->settings['sp_entityid'];
+        $entityId = $this->idp->sp->settings['sp_entityid'];
 
         $assertID = $this->idp->assertID;
         $attrID = $this->idp->attrID;

@@ -27,9 +27,8 @@ class Saml implements Interfaces\SpInterface
         if (array_key_exists($filename, $this->idps)) {
             return;
         }
-        $idp = new Idp($this->settings);
-        $idp = $idp->loadFromXml($filename);
-        $this->idps[$filename] = $idp;
+        $idp = new Idp($this);
+        $this->idps[$filename] = $idp->loadFromXml($filename);;
     }
 
     public function getSPMetadata() : string

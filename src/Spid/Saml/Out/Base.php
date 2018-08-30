@@ -43,7 +43,7 @@ class Base
 
     public function buildXmlSignature($ref)
     {
-        $cert = Settings::cleanOpenSsl($this->idp->settings['sp_cert_file']);
+        $cert = Settings::cleanOpenSsl($this->idp->sp->settings['sp_cert_file']);
 
         $signatureXml = <<<XML
 <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
@@ -72,7 +72,7 @@ XML;
 
     public function buildUrlSignature($samlRequest, $relayState, $signatureAlgo)
     {
-        $key = file_get_contents($this->idp->settings['sp_key_file']);
+        $key = file_get_contents($this->idp->sp->settings['sp_key_file']);
 
         //$key = Settings::cleanOpenSsl($this->idp->settings['sp_key_file']);
         $key = openssl_get_privatekey($key, "");
