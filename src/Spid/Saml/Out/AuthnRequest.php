@@ -2,9 +2,9 @@
 
 namespace Italia\Spid\Spid\Saml\Out;
 
-use Italia\Spid\Spid\Interfaces\AuthnRequestInterface;
+use Italia\Spid\Spid\Interfaces\RequestInterface;
 
-class AuthnRequest extends Base implements AuthnRequestInterface
+class AuthnRequest extends Base implements RequestInterface
 {
     public function generateXml()
     {
@@ -12,7 +12,7 @@ class AuthnRequest extends Base implements AuthnRequestInterface
         $signature = $this->buildXmlSignature($id);
         $issueInstant = $this->generateIssueInstant();
         $idpUrl = $this->idp->metadata['idpSSO'];
-        $entityId = $this->idp->settings['sp_entityid'];
+        $entityId = $this->idp->sp->settings['sp_entityid'];
 
         $assertID = $this->idp->assertID;
         $attrID = $this->idp->attrID;
@@ -46,11 +46,13 @@ XML;
 
         $this->xml = $xml->asXML();
 
-/*        header('Content-type: text/xml');
-        echo $this->xml;*/
+        /*
+        header('Content-type: text/xml');
+                echo $this->xml;
+        */
     }
 
-    public function redirectUrl($redirectTo = null)
+    public function redirectUrl($redirectTo = null) : string
     {
         if (is_null($this->xml)) {
             $this->generateXml();
