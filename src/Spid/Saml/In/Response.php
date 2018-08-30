@@ -17,8 +17,12 @@ class Response extends Base
         $xml->loadXML($xmlString);
 
         $root = $xml->getElementsByTagName('Response')->item(0);
+        
+        if (is_null($root)) {
+            return false;
+        }
         if ($root->getAttribute('Version') == "") {
-            throw new \Exception("missing Version attribute");
+            throw new \Exception("Missing Version attribute");
         } elseif ($root->getAttribute('Version') != '2.0') {
             throw new \Exception("Invalid Version attribute");
         }

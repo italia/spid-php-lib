@@ -2,6 +2,8 @@
 
 namespace Italia\Spid\Spid\Interfaces;
 
+use Italia\Spid\Spid\Session;
+
 interface IdpInterface
 {
     // Loads an IDP metadata from its XML file
@@ -14,5 +16,12 @@ interface IdpInterface
     // $attr: index of attribute consuming service as per the SP metadata
     // $level: SPID level (1, 2 or 3)
     // $returnTo: return url
-    public function authnRequest($ass, $attr, $level, $returnTo);
+    // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
+    public function authnRequest($ass, $attr, $level, $returnTo = null, $shouldRedirect = true);
+
+    // generate a LogoutRequest
+    // $session: the currently active login session
+    // $returnTo: return url
+    // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
+    public function logoutRequest(Session $session, $returnTo = null, $shouldRedirect = true);
 }

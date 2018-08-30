@@ -15,7 +15,10 @@ class LogoutResponse extends Base
         $xml->loadXML($xmlString);
 
         $root = $xml->getElementsByTagName('LogoutResponse')->item(0);
-
+        
+        if (is_null($root)) {
+            return false;
+        }
         if ($root->getAttribute('ID') == "") {
             throw new \Exception("missing ID attribute");
         }
@@ -31,6 +34,16 @@ class LogoutResponse extends Base
             throw new \Exception("Missing InResponseTo attribute, or request ID was not saved correctly for comparison");
         } elseif ($root->getAttribute('InResponseTo') != $_SESSION['RequestID']) {
             throw new \Exception("Invalid InResponseTo attribute, expected " . $_SESSION['RequestID']);
+        }
+        if ($root->getAttribute('Destination') == "") {
+            throw new \Exception("Missing Destination attribute");
+        }
+
+        if ($xml->getElementsByTagName('Status')->length <= 0) {
+            throw new \Exception("Missing Status element");
+        } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') != 'urn:oasis:names:tc:SAML:2.0:status:Success') {
+            // Status code != success
+            return false;
         }
 
         session_unset();

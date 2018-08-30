@@ -63,24 +63,25 @@ class Idp implements IdpInterface
         header('Pragma: no-cache');
         header('Cache-Control: no-cache, must-revalidate');
         header('Location: ' . $url);
-        exit(1);
+        exit("");
     }
 
     public function logoutRequest(Session $session, $redirectTo = null, $shouldRedirect = true)
     {
         $this->session = $session;
+
         $logoutRequest = new LogoutRequest($this);
         $url = $logoutRequest->redirectUrl($redirectTo);
-
         $_SESSION['RequestID'] = $logoutRequest->id;
         $_SESSION['idpName'] = $logoutRequest->idpFileName;
 
         if (!$shouldRedirect) {
             return $url;
         }
+
         header('Pragma: no-cache');
         header('Cache-Control: no-cache, must-revalidate');
         header('Location: ' . $url);
-        exit();
+        exit("");
     }
 }

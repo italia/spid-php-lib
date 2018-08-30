@@ -4,6 +4,7 @@ namespace Italia\Spid\Spid;
 
 use Italia\Spid\Spid\Saml\Idp;
 use Italia\Spid\Spid\Saml\In\Base;
+use Italia\Spid\Spid\Saml\In\LogoutResponse;
 use Italia\Spid\Spid\Saml\In\Response;
 use Italia\Spid\Spid\Saml\Settings;
 
@@ -126,10 +127,10 @@ XML;
 
     public function getIdp($idpName)
     {
-        return key_exists($idpName, $this->idps) ? $this->idps[$idpName] : false;
+        return key_exists($idpName, $this->idps) ? $this->idps[$idpName] : null;
     }
 
-    public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
+    public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
     {
         if ($this->isAuthenticated()) {
             return false;
@@ -150,34 +151,38 @@ XML;
         return $idp->authnRequest($assertId, $attrId, $redirectTo, $level, $shouldRedirect);
     }
 
-    public function isAuthenticated()
+    public function isAuthenticated() : bool
     {
-        if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
-            $this->session = $_SESSION['spidSession'];
+        $response = new Response();
+        if (($validated = $response->validate()) instanceof Session) {
+            $_SESSION['spidSession'] = $validated;
+            $this->session = $validated;
             return true;
         }
 
-        $response = new Response();
-        $validated = $response->validate();
-        if ($validated instanceof Session) {
-            $_SESSION['spidSession'] = $validated;
-            $this->session = $validated;
+        $logoutResponse = new LogoutResponse();
+        if ($logoutResponse->validate() === true) {
+            return false;
+        }
+
+        if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
+            $this->session = $_SESSION['spidSession'];
             return true;
         }
         return false;
     }
 
-    public function logout($redirectTo = null)
+    public function logout($redirectTo = null, $shouldRedirect = true) : string
     {
         if ($this->isAuthenticated() === false) {
-            return false;
+            return "";
         }
         $this->loadIdpFromFile($this->session->idp);
         $idp = $this->idps[$this->session->idp];
-        $idp->logoutRequest($this->session, $redirectTo);
+        return $idp->logoutRequest($this->session, $redirectTo, $shouldRedirect);
     }
 
-    public function getAttributes()
+    public function getAttributes() : array
     {
         return $this->session->attributes;
     }
