@@ -44,7 +44,7 @@ class Idp implements IdpInterface
         return $this;
     }
 
-    public function authnRequest($ass, $attr, $redirectTo = null, $level = 1)
+    public function authnRequest($ass, $attr, $redirectTo = null, $level = 1, $shouldRedirect = true)
     {
         $this->assertID = $ass;
         $this->attrID = $attr;
@@ -55,10 +55,15 @@ class Idp implements IdpInterface
         $_SESSION['RequestID'] = $authn->id;
         $_SESSION['idpName'] = $this->idpFileName;
 
+        if (!$shouldRedirect)
+        {
+            return $url;
+        }
+
         header('Pragma: no-cache');
         header('Cache-Control: no-cache, must-revalidate');
         header('Location: ' . $url);
-        exit();
+        exit(1);
     }
 
     public function logoutRequest(Session $session, $redirectTo = null)
