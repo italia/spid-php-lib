@@ -24,7 +24,6 @@ $settings = [
     ];
 $sp = new Italia\Spid\Sp($settings);
 
-//$spid->loadIdpMetadata("");
 $request_uri = explode('?', $_SERVER['REQUEST_URI'], 2);
 
 switch ($request_uri[0]) {

@@ -1,4 +1,4 @@
-<?php
+s<?php
 
 namespace Italia\Spid\Spid\Saml\Out;
 
@@ -6,6 +6,7 @@ class LogoutRequest extends Base
 {
     public function generateXml()
     {
+        $idp = $this->idp->session->idp;
         $xml = <<<XML
 <LogoutRequest ID="" IssueInstant="" Version="2.0" Destination="">
     <Issuer NameQualifier="$entityId" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">$entityId</Issuer>

@@ -56,7 +56,6 @@ class Response extends Base
 
     public function spidSession(\DOMDocument $xml)
     {
-
         $session = new Session();
 
         $attributes = array();
@@ -66,6 +65,7 @@ class Response extends Base
             }
         }
 
+        $session->sessionID = $_SESSION['RequestID'];
         $session->idp = $_SESSION['idpName'];
         $session->attributes = $attributes;
         $session->level = substr($xml->getElementsByTagName('AuthnContextClassRef')->item(0)->nodeValue, -1);
