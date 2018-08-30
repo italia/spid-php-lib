@@ -8,7 +8,6 @@ class BaseResponse
 {
     var $response;
     var $xml;
-    var $msg = '';
 
     public function __construct()
     {
@@ -30,7 +29,7 @@ class BaseResponse
                 $this->response = new LogoutResponse();
                 break;
             default:
-                $this->msg = 'No valid response found';
+                throw new \Exception('No valid response found');
                 break;
         }
     }
