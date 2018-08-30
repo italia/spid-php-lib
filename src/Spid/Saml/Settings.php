@@ -20,7 +20,7 @@ class Settings
     {
         $missingSettings = array();
         $msg = 'Missing settings fields: ';
-        array_walk(self::$validSettings, function ($v, $k) use ($missingSettings, $settings) {
+        array_walk(self::$validSettings, function ($v, $k) use (&$missingSettings, &$settings) {
             if (self::$validSettings[$k] == 1 && !array_key_exists($k, $settings)) {
                 $missingSettings[$k] = 1;
             }

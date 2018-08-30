@@ -125,7 +125,7 @@ XML;
         return $signedxml;
     }
 
-    public function getIdp($idpName)
+    public function getIdp($idpName) : Idp
     {
         return key_exists($idpName, $this->idps) ? $this->idps[$idpName] : null;
     }

@@ -17,11 +17,13 @@ interface IdpInterface
     // $level: SPID level (1, 2 or 3)
     // $returnTo: return url
     // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
-    public function authnRequest($ass, $attr, $level, $returnTo = null, $shouldRedirect = true);
+    // returns and empty string if $shouldRedirect = true, the login URL otherwhise
+    public function authnRequest($ass, $attr, $level, $returnTo = null, $shouldRedirect = true) : string;
 
     // generate a LogoutRequest
     // $session: the currently active login session
     // $returnTo: return url
     // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
-    public function logoutRequest(Session $session, $returnTo = null, $shouldRedirect = true);
+    // returns and empty string if $shouldRedirect = true, the logout URL otherwhise
+    public function logoutRequest(Session $session, $returnTo = null, $shouldRedirect = true) : string;
 }

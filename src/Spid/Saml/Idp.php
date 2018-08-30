@@ -45,7 +45,7 @@ class Idp implements IdpInterface
         return $this;
     }
 
-    public function authnRequest($ass, $attr, $redirectTo = null, $level = 1, $shouldRedirect = true)
+    public function authnRequest($ass, $attr, $redirectTo = null, $level = 1, $shouldRedirect = true) : string
     {
         $this->assertID = $ass;
         $this->attrID = $attr;
@@ -66,7 +66,7 @@ class Idp implements IdpInterface
         exit("");
     }
 
-    public function logoutRequest(Session $session, $redirectTo = null, $shouldRedirect = true)
+    public function logoutRequest(Session $session, $redirectTo = null, $shouldRedirect = true) : string
     {
         $this->session = $session;
 
