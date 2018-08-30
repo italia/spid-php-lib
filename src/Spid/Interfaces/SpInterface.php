@@ -54,7 +54,8 @@ interface SpInterface
     // $attr: index of attribute consuming service as per the SP metadata
     // $level: SPID level (1, 2 or 3)
     // $returnTo: return url
-    public function login($idpName, $ass, $attr, $redirectTo = null, $level = 1);
+    // $shouldRedirect: tells if the function shoudl emit headers and redirect to login URL or return the URL as string
+    public function login($idpName, $ass, $attr, $level = 1, $redirectTo = null, $shouldRedirect = true);
 
     // returns false if no response from IdP is found
     // else processes the response, reports errors if any
