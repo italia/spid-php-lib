@@ -130,7 +130,7 @@ XML;
         return key_exists($idpName, $this->idps) ? $this->idps[$idpName] : false;
     }
 
-    public function login($idpName, $assertId, $attrId, $redirectTo = null, $level = 1, $shouldRedirect = true)
+    public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
     {
         if ($this->isAuthenticated()) {
             return false;
