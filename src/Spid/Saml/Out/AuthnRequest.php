@@ -17,6 +17,7 @@ class AuthnRequest extends Base implements AuthnRequestInterface
         $assertID = $this->idp->assertID;
         $attrID = $this->idp->attrID;
         $level = $this->idp->level;
+        $force = $level > 1 ? "true" : "false";
         // example ID _4d38c302617b5bf98951e65b4cf304711e2166df20
         $authnRequestXml = <<<XML
 <samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
@@ -25,6 +26,7 @@ class AuthnRequest extends Base implements AuthnRequestInterface
     Version="2.0"
     IssueInstant="$issueInstant"
     Destination="$idpUrl"
+    ForceAuthn="$force"
     AssertionConsumerServiceIndex="$assertID">
     <saml:Issuer
         NameQualifier="$entityId"
