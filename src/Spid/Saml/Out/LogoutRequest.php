@@ -26,7 +26,7 @@ XML;
         $this->xml = $xml;
     }
 
-    public function redirectUrl($redirectTo = null)
+    public function redirectUrl($redirectTo = null) : string
     {
         if (is_null($this->xml)) {
             $this->generateXml();
