@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 $base = "https://sp.example.com";
 $settings = [
-    //'sp_entityid' => $base,
+    'sp_entityid' => $base,
     'sp_key_file' => './sp.key',
     'sp_cert_file' => './sp.crt',
     'sp_assertionconsumerservice' => [

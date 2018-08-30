@@ -2,7 +2,7 @@
 
 namespace Italia\Spid\Spid\Interfaces;
 
-interface AuthnRequestInterface
+interface RequestInterface
 {
     public function generateXml();
     // prepare a HTTP-Redirect binding and return it as a string

@@ -3,7 +3,7 @@
 namespace Italia\Spid\Spid;
 
 use Italia\Spid\Spid\Saml\Idp;
-use Italia\Spid\Spid\Saml\In\Base;
+use Italia\Spid\Spid\Saml\In\BaseResponse;
 use Italia\Spid\Spid\Saml\In\LogoutResponse;
 use Italia\Spid\Spid\Saml\In\Response;
 use Italia\Spid\Spid\Saml\Settings;
@@ -153,15 +153,8 @@ XML;
 
     public function isAuthenticated() : bool
     {
-        $response = new Response();
-        if (($validated = $response->validate()) instanceof Session) {
-            $_SESSION['spidSession'] = $validated;
-            $this->session = $validated;
-            return true;
-        }
-
-        $logoutResponse = new LogoutResponse();
-        if ($logoutResponse->validate() === true) {
+        $response = new BaseResponse();
+        if (!$response->validate()) {
             return false;
         }
 

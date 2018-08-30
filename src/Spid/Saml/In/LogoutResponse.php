@@ -2,23 +2,12 @@
 
 namespace Italia\Spid\Spid\Saml\In;
 
-class LogoutResponse extends Base
+class LogoutResponse extends BaseResponse implements ResponseInterface
 {
-    public function validate()
+    public function validate($xml) : bool
     {
-        if (!isset($_POST) || !isset($_POST['SAMLResponse'])) {
-            return false;
-        }
-
-        $xmlString = base64_decode($_POST['SAMLResponse']);
-        $xml = new \DOMDocument();
-        $xml->loadXML($xmlString);
-
         $root = $xml->getElementsByTagName('LogoutResponse')->item(0);
-        
-        if (is_null($root)) {
-            return false;
-        }
+
         if ($root->getAttribute('ID') == "") {
             throw new \Exception("missing ID attribute");
         }

@@ -2,25 +2,15 @@
 
 namespace Italia\Spid\Spid\Saml\In;
 
+use Italia\Spid\Spid\Interfaces\ResponseInterface;
 use Italia\Spid\Spid\Session;
 
-class Response extends Base
+class Response extends BaseResponse implements ResponseInterface
 {
-    public function validate()
+    public function validate($xml): bool
     {
-        if (!isset($_POST) || !isset($_POST['SAMLResponse'])) {
-            return false;
-        }
-
-        $xmlString = base64_decode($_POST['SAMLResponse']);
-        $xml = new \DOMDocument();
-        $xml->loadXML($xmlString);
-
         $root = $xml->getElementsByTagName('Response')->item(0);
-        
-        if (is_null($root)) {
-            return false;
-        }
+
         if ($root->getAttribute('Version') == "") {
             throw new \Exception("Missing Version attribute");
         } elseif ($root->getAttribute('Version') != '2.0') {
@@ -52,10 +42,10 @@ class Response extends Base
         }
 
         // Response OK
-        $session = $this->spidSession($xml);
+        $_SESSION['spidSession'] = $this->spidSession($xml);
         unset($_SESSION['RequestID']);
         unset($_SESSION['idpName']);
-        return $session;
+        return true;
     }
 
     public function spidSession(\DOMDocument $xml)

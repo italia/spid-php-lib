@@ -2,7 +2,9 @@
 
 namespace Italia\Spid\Spid\Saml\Out;
 
-class LogoutRequest extends Base
+use Italia\Spid\Spid\Interfaces\RequestInterface;
+
+class LogoutRequest extends Base implements RequestInterface
 {
     public function generateXml()
     {

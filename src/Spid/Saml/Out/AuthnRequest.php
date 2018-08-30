@@ -2,9 +2,9 @@
 
 namespace Italia\Spid\Spid\Saml\Out;
 
-use Italia\Spid\Spid\Interfaces\AuthnRequestInterface;
+use Italia\Spid\Spid\Interfaces\RequestInterface;
 
-class AuthnRequest extends Base implements AuthnRequestInterface
+class AuthnRequest extends Base implements RequestInterface
 {
     public function generateXml()
     {
