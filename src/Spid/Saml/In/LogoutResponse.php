@@ -2,7 +2,9 @@
 
 namespace Italia\Spid\Spid\Saml\In;
 
-class LogoutResponse extends BaseResponse implements ResponseInterface
+use Italia\Spid\Spid\Interfaces\ResponseInterface;
+
+class LogoutResponse implements ResponseInterface
 {
     public function validate($xml) : bool
     {

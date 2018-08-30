@@ -2,8 +2,6 @@
 
 namespace Italia\Spid\Spid\Saml\In;
 
-use Italia\Spid\Spid\Interfaces\ResponseInterface;
-
 class BaseResponse
 {
     var $response;
@@ -18,14 +16,13 @@ class BaseResponse
         $this->xml = new \DOMDocument();
         $this->xml->loadXML($xmlString);
 
-        $root = $this->xml->getDocumentElement();
-        $root = $root->tagname;
+        $root = $this->xml->documentElement->tagName;
 
         switch ($root) {
-            case 'Response':
+            case 'samlp:Response':
                 $this->response = new Response();
                 break;
-            case 'LogoutResponse':
+            case 'samlp:LogoutResponse':
                 $this->response = new LogoutResponse();
                 break;
             default:
@@ -34,10 +31,10 @@ class BaseResponse
         }
     }
 
-    public function validate()
+    public function validate() : bool
     {
         if (is_null($this->response)) {
-            return false;
+            return true;
         }
         return $this->response->validate($this->xml);
     }

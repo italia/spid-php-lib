@@ -5,7 +5,7 @@ namespace Italia\Spid\Spid\Saml\In;
 use Italia\Spid\Spid\Interfaces\ResponseInterface;
 use Italia\Spid\Spid\Session;
 
-class Response extends BaseResponse implements ResponseInterface
+class Response implements ResponseInterface
 {
     public function validate($xml): bool
     {

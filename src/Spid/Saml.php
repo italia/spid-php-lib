@@ -130,7 +130,7 @@ XML;
         return key_exists($idpName, $this->idps) ? $this->idps[$idpName] : null;
     }
 
-    public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
+    public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
     {
         if ($this->isAuthenticated()) {
             return false;
@@ -157,7 +157,6 @@ XML;
         if (!$response->validate()) {
             return false;
         }
-
         if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
             $this->session = $_SESSION['spidSession'];
             return true;
@@ -165,10 +164,10 @@ XML;
         return false;
     }
 
-    public function logout($redirectTo = null, $shouldRedirect = true) : string
+    public function logout($redirectTo = null, $shouldRedirect = true)
     {
-        if ($this->isAuthenticated() === false) {
-            return "";
+        if (!$this->isAuthenticated()) {
+            return false;
         }
         $this->loadIdpFromFile($this->session->idp);
         $idp = $this->idps[$this->session->idp];

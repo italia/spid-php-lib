@@ -57,8 +57,9 @@ interface SpInterface
     // $level: SPID level (1, 2 or 3)
     // $returnTo: return url
     // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
-    // returns and empty string if $shouldRedirect = true, the login URL otherwhise
-    public function login($idpName, $ass, $attr, $level = 1, $redirectTo = null, $shouldRedirect = true) : string;
+    // returns false is already logged in
+    // returns an empty string if $shouldRedirect = true, the login URL otherwhise
+    public function login($idpName, $ass, $attr, $level = 1, $redirectTo = null, $shouldRedirect = true);
 
     // returns false if no response from IdP is found
     // else processes the response, reports errors if any
@@ -68,8 +69,9 @@ interface SpInterface
     // performs logout
     // $returnTo: return url
     // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
-    // returns and empty string if $shouldRedirect = true, the logout URL otherwhise
-    public function logout($redirectTo = null, $shouldRedirect = true) : string;
+    // returns false if not logged in
+    // returns an empty string if $shouldRedirect = true, the logout URL otherwhise
+    public function logout($redirectTo = null, $shouldRedirect = true);
 
     // returns attributes as an array or null if not authenticated
     // example: array('name' => 'Franco', 'familyName' => 'Rossi', 'fiscalNumber' => 'FFFRRR88A12T4441R',)
