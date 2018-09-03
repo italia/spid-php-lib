@@ -20,7 +20,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
             ]
         ];
     
-    public function testCanBeCreatedFromValidSettings(): void
+    public function testCanBeCreatedFromValidSettings()
     {
         $this->assertInstanceOf(
             Italia\Spid\Sp::class,
@@ -28,14 +28,14 @@ final class SpTest extends PHPUnit\Framework\TestCase
         );
     }
 
-    private function validateXml($xmlString, $schemaFile, $valid = true): void
+    private function validateXml($xmlString, $schemaFile, $valid = true)
     {
         $xml = new DOMDocument();
         $xml->loadXML($xmlString, LIBXML_NOBLANKS);
         $this->assertEquals($xml->schemaValidate($schemaFile), $valid);
     }
 
-    public function testMetatadaValid(): void
+    public function testMetatadaValid()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $metadata = $sp->getSPMetadata();

@@ -36,6 +36,8 @@ Alternatives for other languages:
 
 Tested on: amd64 Debian 9.5 (stretch, current stable) with PHP 7.0.
 
+Supports PHP 7.0, 7.1 and 7.2.
+
 ### Prerequisites
 
 ```sh
