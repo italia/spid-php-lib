@@ -41,4 +41,52 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $metadata = $sp->getSPMetadata();
         $this->validateXml($metadata, "./tests/schemas/saml-schema-metadata-SPID-SP.xsd");
     }
+
+    public function testSettingsWithoutEntityId()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_entityid']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutSpKeyFile()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_key_file']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutSpCertFile()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_cert_file']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutAssertionConsumerService()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_assertionconsumerservice']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutSingleLogoutService()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_singlelogoutservice']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutIdpMetadataFolder()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['idp_metadata_folder']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
 }
