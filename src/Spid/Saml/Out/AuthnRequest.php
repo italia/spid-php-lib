@@ -54,4 +54,9 @@ XML;
         $url = $this->idp->metadata['idpSSO'];
         return parent::redirect($url, $redirectTo);
     }
+
+    public function httpPost()
+    {
+
+    }
 }

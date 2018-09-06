@@ -35,9 +35,21 @@ class Idp implements IdpInterface
         $xml->registerXPathNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
 
         $metadata = array();
+        $idpSSO = array();
+        foreach ($xml->xpath('//md:SingleSignOnService') as $index => $item) {
+            $idpSSO[$index]['location'] = $item->attributes()->Location->__toString();
+            $idpSSO[$index]['binding'] = $item->attributes()->Binding->__toString();
+        }
+
+        $idpSLO = array();
+        foreach ($xml->xpath('//md:SingleSignOnService') as $item) {
+            $idpSLO[$index]['location'] = $item->attributes()->Location->__toString();
+            $idpSLO[$index]['binding'] = $item->attributes()->Binding->__toString();
+        }
+
         $metadata['idpEntityId'] = $xml->attributes()->entityID->__toString();
-        $metadata['idpSSO'] = $xml->xpath('//md:SingleSignOnService')[0]->attributes()->Location->__toString();
-        $metadata['idpSLO'] = $xml->xpath('//md:SingleLogoutService')[0]->attributes()->Location->__toString();
+        $metadata['idpSSO'] = $idpSSO;
+        $metadata['idpSLO'] = $idpSLO;
         $metadata['idpCertValue'] = $xml->xpath('//ds:X509Certificate')[0]->__toString();
 
         $this->idpFileName = $xmlFile;

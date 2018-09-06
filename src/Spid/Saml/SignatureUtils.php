@@ -4,7 +4,7 @@ namespace Italia\Spid\Spid\Saml;
 
 class SignatureUtils
 {
-    public static function signXml($xml, $settings) : stirng
+    public static function signXml($xml, $settings) : string
     {
         $key = file_get_contents($settings['sp_key_file']);
         $key = openssl_get_privatekey($key, "");

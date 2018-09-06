@@ -2,9 +2,7 @@
 
 namespace Italia\Spid\Spid\Saml\Out;
 
-use Italia\Spid\Spid\Interfaces\RequestInterface;
 use Italia\Spid\Spid\Saml\Idp;
-use Italia\Spid\Spid\Saml\Settings;
 use Italia\Spid\Spid\Saml\SignatureUtils;
 
 class Base
@@ -41,5 +39,23 @@ class Base
         $query = http_build_query($parameters);
         $url .= '?' . $query;
         return $url;
+    }
+
+    public function postForm()
+    {
+        $url = '';
+        $payload = null;
+        $relayState = null;
+
+        return <<<HTML
+<html>
+    <body onload="javascript:document.forms[0].submit()">
+        <form method="post" action="$url">
+            <input type="hidden" name="SAMLRequest" value="$payload">
+            <input type="hidden" name="RelayState" value="$relayState">
+        </form>
+    </body>
+</html>
+HTML;
     }
 }
