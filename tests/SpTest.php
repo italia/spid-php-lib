@@ -20,7 +20,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
             ]
         ];
     
-    public function testCanBeCreatedFromValidSettings(): void
+    public function testCanBeCreatedFromValidSettings()
     {
         $this->assertInstanceOf(
             Italia\Spid\Sp::class,
@@ -28,17 +28,65 @@ final class SpTest extends PHPUnit\Framework\TestCase
         );
     }
 
-    private function validateXml($xmlString, $schemaFile, $valid = true): void
+    private function validateXml($xmlString, $schemaFile, $valid = true)
     {
         $xml = new DOMDocument();
         $xml->loadXML($xmlString, LIBXML_NOBLANKS);
         $this->assertEquals($xml->schemaValidate($schemaFile), $valid);
     }
 
-    public function testMetatadaValid(): void
+    public function testMetatadaValid()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $metadata = $sp->getSPMetadata();
         $this->validateXml($metadata, "./tests/schemas/saml-schema-metadata-SPID-SP.xsd");
+    }
+
+    public function testSettingsWithoutEntityId()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_entityid']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutSpKeyFile()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_key_file']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutSpCertFile()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_cert_file']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutAssertionConsumerService()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_assertionconsumerservice']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutSingleLogoutService()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_singlelogoutservice']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutIdpMetadataFolder()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['idp_metadata_folder']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
     }
 }

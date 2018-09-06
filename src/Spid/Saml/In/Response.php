@@ -2,23 +2,17 @@
 
 namespace Italia\Spid\Spid\Saml\In;
 
+use Italia\Spid\Spid\Interfaces\ResponseInterface;
 use Italia\Spid\Spid\Session;
 
-class Response extends Base
+class Response implements ResponseInterface
 {
-    public function validate()
+    public function validate($xml): bool
     {
-        if (!isset($_POST) || !isset($_POST['SAMLResponse'])) {
-            return false;
-        }
-
-        $xmlString = base64_decode($_POST['SAMLResponse']);
-        $xml = new \DOMDocument();
-        $xml->loadXML($xmlString);
-
         $root = $xml->getElementsByTagName('Response')->item(0);
+
         if ($root->getAttribute('Version') == "") {
-            throw new \Exception("missing Version attribute");
+            throw new \Exception("Missing Version attribute");
         } elseif ($root->getAttribute('Version') != '2.0') {
             throw new \Exception("Invalid Version attribute");
         }
@@ -48,24 +42,24 @@ class Response extends Base
         }
 
         // Response OK
-        $session = $this->spidSession($xml);
+        $_SESSION['spidSession'] = $this->spidSession($xml);
         unset($_SESSION['RequestID']);
         unset($_SESSION['idpName']);
-        return $session;
+        return true;
     }
 
     public function spidSession(\DOMDocument $xml)
     {
-
         $session = new Session();
 
         $attributes = array();
-        if ($xml->getElementsByTagName('AttributeStatement')->length >0) {
+        if ($xml->getElementsByTagName('AttributeStatement')->length > 0) {
             foreach ($xml->getElementsByTagName('AttributeStatement')->item(0)->childNodes as $attr) {
                 $attributes[$attr->getAttribute('Name')] = $attr->nodeValue;
             }
         }
 
+        $session->sessionID = $_SESSION['RequestID'];
         $session->idp = $_SESSION['idpName'];
         $session->attributes = $attributes;
         $session->level = substr($xml->getElementsByTagName('AuthnContextClassRef')->item(0)->nodeValue, -1);

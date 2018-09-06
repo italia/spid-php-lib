@@ -8,4 +8,3 @@ example/sp.key
 example/config.php
 example/spid-testenv2/*
 .idea
-.env

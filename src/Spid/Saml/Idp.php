@@ -5,25 +5,26 @@ namespace Italia\Spid\Spid\Saml;
 use Italia\Spid\Spid\Interfaces\IdpInterface;
 use Italia\Spid\Spid\Saml\Out\AuthnRequest;
 use Italia\Spid\Spid\Saml\Out\LogoutRequest;
+use Italia\Spid\Spid\Session;
 
 class Idp implements IdpInterface
 {
     public $idpFileName;
     public $metadata;
-    public $settings;
+    public $sp;
     public $assertID;
     public $attrID;
     public $level = 1;
     public $session;
 
-    public function __construct($settings)
+    public function __construct($sp)
     {
-        $this->settings = $settings;
+        $this->sp = $sp;
     }
 
     public function loadFromXml($xmlFile)
     {
-        $fileName = $this->settings['idp_metadata_folder'] . $xmlFile . ".xml";
+        $fileName = $this->sp->settings['idp_metadata_folder'] . $xmlFile . ".xml";
         if (!file_exists($fileName)) {
             throw new \Exception("Metadata file $fileName not found", 1);
         }
@@ -44,7 +45,7 @@ class Idp implements IdpInterface
         return $this;
     }
 
-    public function authnRequest($ass, $attr, $redirectTo = null, $level = 1)
+    public function authnRequest($ass, $attr, $redirectTo = null, $level = 1, $shouldRedirect = true) : string
     {
         $this->assertID = $ass;
         $this->attrID = $attr;
@@ -55,21 +56,32 @@ class Idp implements IdpInterface
         $_SESSION['RequestID'] = $authn->id;
         $_SESSION['idpName'] = $this->idpFileName;
 
+        if (!$shouldRedirect) {
+            return $url;
+        }
+
         header('Pragma: no-cache');
         header('Cache-Control: no-cache, must-revalidate');
         header('Location: ' . $url);
-        exit();
+        exit("");
     }
 
-    public function logoutRequest(Session $session, $redirectTo = null)
+    public function logoutRequest(Session $session, $redirectTo = null, $shouldRedirect = true) : string
     {
         $this->session = $session;
-        $request = new LogoutRequest($this);
-        $url = $request->redirectUrl($redirectTo);
+
+        $logoutRequest = new LogoutRequest($this);
+        $url = $logoutRequest->redirectUrl($redirectTo);
+        $_SESSION['RequestID'] = $logoutRequest->id;
+        $_SESSION['idpName'] = $logoutRequest->idpFileName;
+
+        if (!$shouldRedirect) {
+            return $url;
+        }
 
         header('Pragma: no-cache');
         header('Cache-Control: no-cache, must-revalidate');
         header('Location: ' . $url);
-        exit();
+        exit("");
     }
 }

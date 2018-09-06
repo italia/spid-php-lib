@@ -3,8 +3,9 @@
 [![Join the #spid-perl channel](https://img.shields.io/badge/Slack%20channel-%23spid--perl-blue.svg?logo=slack)](https://developersitalia.slack.com/messages/C7ESTMQDQ)
 [![Get invited](https://slack.developers.italia.it/badge.svg)](https://slack.developers.italia.it/)
 [![SPID on forum.italia.it](https://img.shields.io/badge/Forum-SPID-blue.svg)](https://forum.italia.it/c/spid)
+[![Build Status](https://travis-ci.com/simevo/spid-php-lib.svg?branch=master)](https://travis-ci.com/simevo/spid-php-lib)
 
-> ⚠️ **WORK IN PROGRESS** ⚠️
+> ⚠️ **WORK IN PROGRESS (but should be useable)** ⚠️
 
 # spid-php-lib
 PHP package for SPID authentication.
@@ -36,6 +37,8 @@ Alternatives for other languages:
 
 Tested on: amd64 Debian 9.5 (stretch, current stable) with PHP 7.0.
 
+Supports PHP 7.0, 7.1 and 7.2.
+
 ### Prerequisites
 
 ```sh
@@ -46,20 +49,23 @@ sudo apt install composer make openssl php-curl php-zip php-xml phpunit
 
 Before using this package, you must:
 
-1. Install required PHP packages with composer:
+1. Install prerequisites with composer:
 ```sh
 composer install --no-dev
 ```
 
-2. Download and verify the Identity Provider (IdP) metadata files; it is advised to place them in a separate `idp_metadata` directory. A [convenience tool](bin/download_idp_metadata.php) is provided to automatically do that for the production IdP, for example:
+2. (Optionally) edit the `example/.env` file; the default value `localhost` for the hostnames of the SP and IdP is OK for local tests; if you change that, check that the FQDNs resolve. This can be achieved by adding a directive in `/etc/hosts` or equivalent.
+
+3. Download and verify the Identity Provider (IdP) metadata files; it is advised to place them in a separate [idp_metadata/](example/idp_metadata/) directory. A convenience tool is provided for this purpose: [bin/download_idp_metadata.php](bin/download_idp_metadata.php), example usage:
 ```sh
 bin/download_idp_metadata.php ./example/idp_metadata
 ```
-**NOTE**: During testing, it is highly adviced to use the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2).
 
-3. Generate key and certificate for the Service Provider (SP)
+4. Generate key and certificate for the Service Provider (SP).
 
-4. Visit https://sp.example.com/metadata.php to get the SP metadata, then copy these over to the IdPs and register the SP.
+5. Reciprocally configure the SP and the IdPs to talk to each other by exchanging their metadata.
+
+**NOTE**: during testing, it is highly adviced to use the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2).
 
 ### Usage
 
@@ -113,31 +119,31 @@ In either case, this screencast shows what you should see if all goes well:
 
 #### Manual install
 
-1. Configure and install this package
+1. Configure and install this package (see above)
 
 2. Configure and install the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2)
 
-2. In `example/index.php` adapt the base url (`$base`) to your needs
+3. Serve the `example` dir from your preferred webserver
 
-3. In `example/login.php` change the IdP shortname that will be used to login
+4. Visit https://sp.example.com/metadata.php to get the SP metadata, then copy these over to the IdP and register the SP
 
-4. Serve the `example` dir from your preferred webserver
+5. Visit https://idp.example.com/metadata to get the IdP metadata, then save it as `example/idp_metadata/idp_testenv2.xml` to register the IdP with the SP
 
-5. Visit: https://sp.example.com and click `login`.
+6. Visit: https://sp.example.com and click `login`.
 
 #### Using docker-compose
 
 The supplied [example/docker-compose.yml](example/docker-compose.yml) file defines and runs a multi-container Docker application that comprises this example and the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2), configured to talk to each other.
-
+ 
 To use it, in the `example` directory:
 
-1. Copy the `.env.example` file to `.env` and (optionally) edit it if you wish; the default value `localhost` for the hostnames of the SP and IdP is OK for local tests; if you change that, check that the FQDNs resolve. This can be achieved by adding a directive in `/etc/hosts` or equivalent.
+1. (Optionally) edit the `.env` file
 
 2. Run `make` (this creates the needed certificates and configurations)
 
 3. Run `docker-compose up --build`
 
-4. Run `make post` (this transfers the metadata between SP and test IdP)
+4. Run `make post` (this exchanges the metadata between SP and test IdP)
 
 5. Visit: http://localhost:8099/ and click `login`.
 
@@ -164,7 +170,7 @@ In addition, you can use the [SAML Developer Tools](https://www.samltool.com/onl
 
 Launch unit tests with PHPunit:
 ```
-phpunit --stderr --testdox tests
+./vendor/bin/phpunit --stderr --testdox tests
 ```
 
 ### Linting
