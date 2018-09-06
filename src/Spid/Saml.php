@@ -119,7 +119,7 @@ XML;
 
         $this->loadIdpFromFile($idpName);
         $idp = $this->idps[$idpName];
-        return $idp->authnRequest($assertId, $attrId, $redirectTo, $level, $shouldRedirect);
+        return $idp->authnRequest($assertId, $attrId, $level, $redirectTo, $shouldRedirect);
     }
 
     public function isAuthenticated() : bool

@@ -41,17 +41,16 @@ class Base
         return $url;
     }
 
-    public function postForm()
+    public function postForm($url, $redirectTo = null)
     {
-        $url = '';
-        $payload = null;
+        $SAMLRequest = base64_encode($this->xml);
         $relayState = null;
-
+        $relayState = is_null($redirectTo) ? (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" : $redirectTo;
         return <<<HTML
 <html>
     <body onload="javascript:document.forms[0].submit()">
         <form method="post" action="$url">
-            <input type="hidden" name="SAMLRequest" value="$payload">
+            <input type="hidden" name="SAMLRequest" value="$SAMLRequest">
             <input type="hidden" name="RelayState" value="$relayState">
         </form>
     </body>

@@ -57,7 +57,7 @@ class Idp implements IdpInterface
         return $this;
     }
 
-    public function authnRequest($ass, $attr, $redirectTo = null, $level = 1, $shouldRedirect = true) : string
+    public function authnRequest($ass, $attr, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
     {
         $this->assertID = $ass;
         $this->attrID = $attr;

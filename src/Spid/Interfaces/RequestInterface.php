@@ -11,5 +11,5 @@ interface RequestInterface
     public function redirectUrl($redirectTo = null) : string;
 
     // prepare a HTTP-POST binding and return the html form as a string
-    public function httpPost() : string;
+    public function httpPost($redirectTo = null) : string;
 }

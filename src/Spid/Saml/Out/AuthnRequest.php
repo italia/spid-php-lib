@@ -55,12 +55,12 @@ XML;
         return parent::redirect($location, $redirectTo);
     }
 
-    public function httpPost() : string
+    public function httpPost($redirectTo = null) : string
     {
         $location = parent::getBindingLocation('urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST');
         if (is_null($this->xml)) {
             $this->generateXml();
         }
-        return parent::postForm($location);
+        return parent::postForm($location, $redirectTo);
     }
 }
