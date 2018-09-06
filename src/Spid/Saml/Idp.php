@@ -57,18 +57,18 @@ class Idp implements IdpInterface
         return $this;
     }
 
-    public function authnRequest($ass, $attr, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
+    public function authnRequest($ass, $attr, $binding, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
     {
         $this->assertID = $ass;
         $this->attrID = $attr;
         $this->level = $level;
 
         $authn = new AuthnRequest($this);
-        $url = $authn->redirectUrl($redirectTo);
+        $url = $binding == Settings::BINDING_REDIRECT ? $authn->redirectUrl($redirectTo) : $authn->httpPost($redirectTo);
         $_SESSION['RequestID'] = $authn->id;
         $_SESSION['idpName'] = $this->idpFileName;
 
-        if (!$shouldRedirect) {
+        if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
         }
 

@@ -4,12 +4,7 @@ namespace Italia\Spid\Spid;
 
 use Italia\Spid\Spid\Saml\Idp;
 use Italia\Spid\Spid\Saml\In\BaseResponse;
-use Italia\Spid\Spid\Saml\In\LogoutResponse;
-use Italia\Spid\Spid\Saml\In\Response;
 use Italia\Spid\Spid\Saml\Settings;
-
-use RobRichards\XMLSecLibs\XMLSecurityDSig;
-use RobRichards\XMLSecLibs\XMLSecurityKey;
 use Italia\Spid\Spid\Saml\SignatureUtils;
 
 class Saml implements Interfaces\SpInterface
@@ -18,8 +13,7 @@ class Saml implements Interfaces\SpInterface
     var $idps = [];
     var $session;
 
-    const BINDING_REDIRECT = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect';
-    const BINDING_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST';
+    private $binding;
 
     public function __construct(array $settings)
     {
@@ -103,6 +97,18 @@ XML;
 
     public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
     {
+        $args = func_get_args();
+        return $this->baseLogin(Settings::BINDING_REDIRECT, ...$args);
+    }
+
+    public function loginPost($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
+    {
+        $args = func_get_args();
+        return $this->baseLogin(Settings::BINDING_POST, ...$args);
+    }
+
+    private function baseLogin($binding = Settings::BINDING_REDIRECT, $idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
+    {
         if ($this->isAuthenticated()) {
             return false;
         }
@@ -119,8 +125,10 @@ XML;
 
         $this->loadIdpFromFile($idpName);
         $idp = $this->idps[$idpName];
-        return $idp->authnRequest($assertId, $attrId, $level, $redirectTo, $shouldRedirect);
+        return $idp->authnRequest($assertId, $attrId, $binding, $level, $redirectTo, $shouldRedirect);
     }
+
+
 
     public function isAuthenticated() : bool
     {

@@ -3,14 +3,14 @@
 namespace Italia\Spid\Spid\Saml\Out;
 
 use Italia\Spid\Spid\Interfaces\RequestInterface;
+use Italia\Spid\Spid\Saml\Settings;
 
 class AuthnRequest extends Base implements RequestInterface
 {
-    public function generateXml()
+    public function generateXml($idpUrl)
     {
         $id = $this->generateID();
         $issueInstant = $this->generateIssueInstant();
-        $idpUrl = $this->idp->metadata['idpSSO'];
         $entityId = $this->idp->sp->settings['sp_entityid'];
 
         $assertID = $this->idp->assertID;
@@ -48,18 +48,18 @@ XML;
 
     public function redirectUrl($redirectTo = null) : string
     {
-        $location = parent::getBindingLocation('urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect');
+        $location = parent::getBindingLocation(Settings::BINDING_REDIRECT);
         if (is_null($this->xml)) {
-            $this->generateXml();
+            $this->generateXml($location);
         }
         return parent::redirect($location, $redirectTo);
     }
 
     public function httpPost($redirectTo = null) : string
     {
-        $location = parent::getBindingLocation('urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST');
+        $location = parent::getBindingLocation(Settings::BINDING_POST);
         if (is_null($this->xml)) {
-            $this->generateXml();
+            $this->generateXml($location);
         }
         return parent::postForm($location, $redirectTo);
     }
