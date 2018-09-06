@@ -42,7 +42,7 @@ class SignatureUtils
             }
         }
         $objXMLSecDSig->insertSignature($rootNode, $insertBefore);
-        
+
         return $dom->saveXML();
     }
 
@@ -61,16 +61,17 @@ class SignatureUtils
         return base64_encode($signature);
     }
 
-    public static function query(\DOMDocument $dom, $query, \DOMElement $context = null)
+    private static function query(\DOMDocument $dom, $query, \DOMElement $context = null)
     {
         $xpath = new \DOMXPath($dom);
-/*        $xpath->registerNamespace('samlp', Constants::NS_SAMLP);
-        $xpath->registerNamespace('saml', Constants::NS_SAML);
-        $xpath->registerNamespace('ds', Constants::NS_DS);
-        $xpath->registerNamespace('xenc', Constants::NS_XENC);
-        $xpath->registerNamespace('xsi', Constants::NS_XSI);
-        $xpath->registerNamespace('xs', Constants::NS_XS);
-        $xpath->registerNamespace('md', Constants::NS_MD);*/
+
+        $xpath->registerNamespace('samlp', 'urn:oasis:names:tc:SAML:2.0:protocol');
+        $xpath->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
+        $xpath->registerNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
+        $xpath->registerNamespace('xenc', 'http://www.w3.org/2001/04/xmlenc#');
+        $xpath->registerNamespace('xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+        $xpath->registerNamespace('xs', 'http://www.w3.org/2001/XMLSchema');
+        $xpath->registerNamespace('md', 'urn:oasis:names:tc:SAML:2.0:metadata');
 
         if (isset($context)) {
             $res = $xpath->query($query, $context);
