@@ -4,6 +4,7 @@ namespace Italia\Spid\Spid\Saml\Out;
 
 use Italia\Spid\Spid\Interfaces\RequestInterface;
 use Italia\Spid\Spid\Saml\Settings;
+use Italia\Spid\Spid\Saml\SignatureUtils;
 
 class AuthnRequest extends Base implements RequestInterface
 {
@@ -42,7 +43,6 @@ XML;
         if (!is_null($attrID)) {
             $xml->addAttribute('AttributeConsumingServiceIndex', $attrID);
         }
-
         $this->xml = $xml->asXML();
     }
 
@@ -61,6 +61,7 @@ XML;
         if (is_null($this->xml)) {
             $this->generateXml($location);
         }
+        $this->xml = SignatureUtils::signXml($this->xml, $this->idp->sp->settings);
         return parent::postForm($location, $redirectTo);
     }
 }

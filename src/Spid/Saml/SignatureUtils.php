@@ -2,6 +2,9 @@
 
 namespace Italia\Spid\Spid\Saml;
 
+use RobRichards\XMLSecLibs\XMLSecurityDSig;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
+
 class SignatureUtils
 {
     public static function signXml($xml, $settings) : string
@@ -56,5 +59,24 @@ class SignatureUtils
 
         openssl_sign($msg, $signature, $key, "SHA256");
         return base64_encode($signature);
+    }
+
+    public static function query(\DOMDocument $dom, $query, \DOMElement $context = null)
+    {
+        $xpath = new \DOMXPath($dom);
+/*        $xpath->registerNamespace('samlp', Constants::NS_SAMLP);
+        $xpath->registerNamespace('saml', Constants::NS_SAML);
+        $xpath->registerNamespace('ds', Constants::NS_DS);
+        $xpath->registerNamespace('xenc', Constants::NS_XENC);
+        $xpath->registerNamespace('xsi', Constants::NS_XSI);
+        $xpath->registerNamespace('xs', Constants::NS_XS);
+        $xpath->registerNamespace('md', Constants::NS_MD);*/
+
+        if (isset($context)) {
+            $res = $xpath->query($query, $context);
+        } else {
+            $res = $xpath->query($query);
+        }
+        return $res;
     }
 }

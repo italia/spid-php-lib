@@ -148,6 +148,7 @@ XML;
         if (!$this->isAuthenticated()) {
             return false;
         }
+
         $this->loadIdpFromFile($this->session->idp);
         $idp = $this->idps[$this->session->idp];
         return $idp->logoutRequest($this->session, $redirectTo, $shouldRedirect);
