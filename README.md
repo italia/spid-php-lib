@@ -3,8 +3,9 @@
 [![Join the #spid-perl channel](https://img.shields.io/badge/Slack%20channel-%23spid--perl-blue.svg?logo=slack)](https://developersitalia.slack.com/messages/C7ESTMQDQ)
 [![Get invited](https://slack.developers.italia.it/badge.svg)](https://slack.developers.italia.it/)
 [![SPID on forum.italia.it](https://img.shields.io/badge/Forum-SPID-blue.svg)](https://forum.italia.it/c/spid)
+[![Build Status](https://travis-ci.com/simevo/spid-php-lib.svg?branch=master)](https://travis-ci.com/simevo/spid-php-lib)
 
-> ⚠️ **WORK IN PROGRESS** ⚠️
+> ⚠️ **WORK IN PROGRESS (but should be useable)** ⚠️
 
 # spid-php-lib
 PHP package for SPID authentication.
@@ -35,6 +36,8 @@ Alternatives for other languages:
 ## Getting Started
 
 Tested on: amd64 Debian 9.5 (stretch, current stable) with PHP 7.0.
+
+Supports PHP 7.0, 7.1 and 7.2.
 
 ### Prerequisites
 
@@ -146,7 +149,7 @@ In addition, you can use the [SAML Developer Tools](https://www.samltool.com/onl
 
 Launch unit tests with PHPunit:
 ```
-phpunit --stderr --testdox tests
+./vendor/bin/phpunit --stderr --testdox tests
 ```
 
 ### Linting
