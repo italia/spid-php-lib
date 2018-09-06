@@ -48,15 +48,19 @@ XML;
 
     public function redirectUrl($redirectTo = null) : string
     {
+        $location = parent::getBindingLocation('urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect');
         if (is_null($this->xml)) {
             $this->generateXml();
         }
-        $url = $this->idp->metadata['idpSSO'];
-        return parent::redirect($url, $redirectTo);
+        return parent::redirect($location, $redirectTo);
     }
 
-    public function httpPost()
+    public function httpPost() : string
     {
-
+        $location = parent::getBindingLocation('urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST');
+        if (is_null($this->xml)) {
+            $this->generateXml();
+        }
+        return parent::postForm($location);
     }
 }

@@ -58,4 +58,14 @@ class Base
 </html>
 HTML;
     }
+
+    protected function getBindingLocation($binding)
+    {
+        $location = null;
+        array_walk_recursive($this->idp->metadata['idpSSO'], function ($val) use ($binding, &$location) {
+            if ($binding == $val['binding']) $location = $val['location'];
+        });
+        if (is_null($location)) throw new \Exception("No location found for binding " . $binding);
+        return $location;
+    }
 }
