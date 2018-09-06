@@ -49,18 +49,21 @@ sudo apt install composer make openssl php-curl php-zip php-xml phpunit
 
 Before using this package, you must:
 
-1. Install prerequisites with composer
-
-2. Download and verify the Identity Provider (IdP) metadata files; it is advised to place them in a separate [idp_metadata/](example/idp_metadata/) directory. A convenience tool is provided for this purpose: [bin/download_idp_metadata.php](bin/download_idp_metadata.php).
-
-3. Generate key and certificate for the Service Provider (SP).
-
-All steps can be performed in an unattended fashion with:
+1. Install prerequisites with composer:
 ```sh
 composer install --no-dev
-make
+```
+
+2. (Optionally) edit the `example/.env` file; the default value `localhost` for the hostnames of the SP and IdP is OK for local tests; if you change that, check that the FQDNs resolve. This can be achieved by adding a directive in `/etc/hosts` or equivalent.
+
+3. Download and verify the Identity Provider (IdP) metadata files; it is advised to place them in a separate [idp_metadata/](example/idp_metadata/) directory. A convenience tool is provided for this purpose: [bin/download_idp_metadata.php](bin/download_idp_metadata.php), example usage:
+```sh
 bin/download_idp_metadata.php ./example/idp_metadata
 ```
+
+4. Generate key and certificate for the Service Provider (SP).
+
+5. Reciprocally configure the SP and the IdPs to talk to each other by exchanging their metadata.
 
 **NOTE**: during testing, it is highly adviced to use the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2).
 
@@ -108,23 +111,41 @@ $sp->logout();
 
 A basic demo application is provided in the [example/](example/) directory.
 
-To use:
+To try it out you have two options: either manually or with the supplied [docker-compose](https://docs.docker.com/compose/overview/) file.
 
-1. in `example/index.php`:
+In either case, this screencast shows what you should see if all goes well:
 
-  - adapt the base url (`$base`) to your needs (use am IP address or a FQDN that is visible to the IdP)
+![img](images/screencast.gif)
 
-2. in `example/login.php` change the IdP that will be used to login
+#### Manual install
+
+1. Configure and install this package (see above)
+
+2. Configure and install the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2)
 
 3. Serve the `example` dir from your preferred webserver
 
-4. visit https://sp.example.com/metadata.php to get the SP (Service Provider) metadata, then copy these over to the IdP and register the SP
+4. Visit https://sp.example.com/metadata.php to get the SP metadata, then copy these over to the IdP and register the SP
 
-5. visit: https://sp.example.com and click `login`.
+5. Visit https://idp.example.com/metadata to get the IdP metadata, then save it as `example/idp_metadata/idp_testenv2.xml` to register the IdP with the SP
 
-This screencast shows what you should see if all goes well:
+6. Visit: https://sp.example.com and click `login`.
 
-![img](images/screencast.gif)
+#### Using docker-compose
+
+The supplied [example/docker-compose.yml](example/docker-compose.yml) file defines and runs a multi-container Docker application that comprises this example and the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2), configured to talk to each other.
+ 
+To use it, in the `example` directory:
+
+1. (Optionally) edit the `.env` file
+
+2. Run `make` (this creates the needed certificates and configurations)
+
+3. Run `docker-compose up --build`
+
+4. Run `make post` (this exchanges the metadata between SP and test IdP)
+
+5. Visit: http://localhost:8099/ and click `login`.
 
 ## Troubleshooting
 
