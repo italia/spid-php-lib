@@ -145,13 +145,6 @@ XML;
     {
         $args = func_get_args();
         $this->baseLogout(Settings::BINDING_REDIRECT, ...$args);
-        if (!$this->isAuthenticated()) {
-            return false;
-        }
-
-        $this->loadIdpFromFile($this->session->idp);
-        $idp = $this->idps[$this->session->idp];
-        return $idp->logoutRequest($this->session, $redirectTo, $shouldRedirect);
     }
 
     public function logoutPost($redirectTo = null, $shouldRedirect = true)

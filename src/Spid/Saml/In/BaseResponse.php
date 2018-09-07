@@ -33,7 +33,7 @@ class BaseResponse
         }
     }
 
-    public function validate() : bool
+    public function validate($cert) : bool
     {
         if (is_null($this->response)) {
             return true;
@@ -49,8 +49,8 @@ class BaseResponse
             if ($item->parentNode->nodeName == $this->xml->firstChild->nodeName) $responseSignature = $item;
         }
         if ($hasAssertion && is_null($assertionSignature)) throw new \Exception("Invalid Response. Assertion must be signed");
-
-        if (!SignatureUtils::validateXmlSignature($responseSignature) || !SignatureUtils::validateXmlSignature($assertionSignature))
+        $cert = $this->idp;
+        if (!SignatureUtils::validateXmlSignature($responseSignature, $cert) || !SignatureUtils::validateXmlSignature($assertionSignature, $cert))
             throw new \Exception("Invalid Response. Signature validation failed");
         return $this->response->validate($this->xml);
 /*

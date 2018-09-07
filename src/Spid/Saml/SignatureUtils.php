@@ -65,8 +65,13 @@ class SignatureUtils
     {
         if (is_null($xml)) return true;
         $objXMLSecDSig = new XMLSecurityDSig();
+        $objXMLSecDSig->sigNode = $xml;
+        print_r($xml->ownerDocument); die;
 
-        $objXMLSecDSig->validateReference(); // Throws exception if fails
+
+        $objKey = new XMLSecurityKey('http://www.w3.org/2001/04/xmldsig-more#rsa-sha256', array('type' => 'private'));
+        $objKey->loadKey($key, false);
+        //$objXMLSecDSig->validateReference(); // Throws exception if fails
         if ($objXMLSecDSig->verify() === 1) {
             return true;
         }
