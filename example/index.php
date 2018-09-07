@@ -51,6 +51,10 @@ switch ($request_uri[0]) {
     case '/logout':
         require './views/logout.php';
         break;
+    // Logout POST page
+    case '/logout-post':
+        require './views/logout_post.php';
+        break;
     // Slo page
     case '/slo':
         require './views/slo.php';

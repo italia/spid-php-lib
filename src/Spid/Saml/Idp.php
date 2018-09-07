@@ -78,16 +78,16 @@ class Idp implements IdpInterface
         exit("");
     }
 
-    public function logoutRequest(Session $session, $redirectTo = null, $shouldRedirect = true) : string
+    public function logoutRequest(Session $session, $binding, $redirectTo = null, $shouldRedirect = true) : string
     {
         $this->session = $session;
 
         $logoutRequest = new LogoutRequest($this);
-        $url = $logoutRequest->redirectUrl($redirectTo);
+        $url = $binding == Settings::BINDING_REDIRECT ? $logoutRequest->redirectUrl($redirectTo) : $logoutRequest->httpPost($redirectTo);
         $_SESSION['RequestID'] = $logoutRequest->id;
         $_SESSION['idpName'] = $logoutRequest->idpFileName;
 
-        if (!$shouldRedirect) {
+        if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
         }
 

@@ -128,8 +128,6 @@ XML;
         return $idp->authnRequest($assertId, $attrId, $binding, $level, $redirectTo, $shouldRedirect);
     }
 
-
-
     public function isAuthenticated() : bool
     {
         $response = new BaseResponse();
@@ -145,6 +143,8 @@ XML;
 
     public function logout($redirectTo = null, $shouldRedirect = true)
     {
+        $args = func_get_args();
+        $this->baseLogout(Settings::BINDING_REDIRECT, ...$args);
         if (!$this->isAuthenticated()) {
             return false;
         }
@@ -152,6 +152,23 @@ XML;
         $this->loadIdpFromFile($this->session->idp);
         $idp = $this->idps[$this->session->idp];
         return $idp->logoutRequest($this->session, $redirectTo, $shouldRedirect);
+    }
+
+    public function logoutPost($redirectTo = null, $shouldRedirect = true)
+    {
+        $args = func_get_args();
+        $this->baseLogout(Settings::BINDING_POST, ...$args);
+    }
+
+    private function baseLogout($binding = Settings::BINDING_REDIRECT, $redirectTo = null, $shouldRedirect = true)
+    {
+        if (!$this->isAuthenticated()) {
+            return false;
+        }
+
+        $this->loadIdpFromFile($this->session->idp);
+        $idp = $this->idps[$this->session->idp];
+        return $idp->logoutRequest($this->session, $binding, $redirectTo, $shouldRedirect);
     }
 
     public function getAttributes() : array
