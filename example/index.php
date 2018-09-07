@@ -1,11 +1,12 @@
 <?php
+require_once(__DIR__ . "/config.php");
 require_once(__DIR__ . "/../vendor/autoload.php");
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+error_reporting(E_ERROR);
 
-$base = "https://sp.example.com";
+$base = SP_ENTITYID;
 $settings = [
     'sp_entityid' => $base,
     'sp_key_file' => './sp.key',
