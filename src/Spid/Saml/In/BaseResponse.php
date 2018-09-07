@@ -52,7 +52,7 @@ class BaseResponse
 
         if (!SignatureUtils::validateXmlSignature($responseSignature) || !SignatureUtils::validateXmlSignature($assertionSignature))
             throw new \Exception("Invalid Response. Signature validation failed");
-
+        return $this->response->validate($this->xml);
 /*
             $cert = $idpData['x509cert'];
             $fingerprint = $idpData['certFingerprint'];
