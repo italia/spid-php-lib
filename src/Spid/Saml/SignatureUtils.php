@@ -64,7 +64,13 @@ class SignatureUtils
     public static function validateXmlSignature($xml) : bool
     {
         if (is_null($xml)) return true;
-        return true;
+        $objXMLSecDSig = new XMLSecurityDSig();
+
+        $objXMLSecDSig->validateReference(); // Throws exception if fails
+        if ($objXMLSecDSig->verify() === 1) {
+            return true;
+        }
+        return false;
     }
 
     private static function query(\DOMDocument $dom, $query, \DOMElement $context = null)
