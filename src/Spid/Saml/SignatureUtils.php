@@ -61,6 +61,12 @@ class SignatureUtils
         return base64_encode($signature);
     }
 
+    public static function validateXmlSignature($xml) : bool
+    {
+        if (is_null($xml)) return true;
+        return false;
+    }
+
     private static function query(\DOMDocument $dom, $query, \DOMElement $context = null)
     {
         $xpath = new \DOMXPath($dom);
