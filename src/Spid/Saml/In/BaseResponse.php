@@ -22,6 +22,9 @@ class BaseResponse
 
         switch ($root) {
             case 'samlp:Response':
+                // When reloading the acs page, POST data is sent again even if login is completed
+                // If login session already exists exit without checking the response again
+                if (isset($_SESSION['spidSession'])) return;
                 $this->response = new Response();
                 break;
             case 'samlp:LogoutResponse':
