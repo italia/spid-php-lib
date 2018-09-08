@@ -23,11 +23,13 @@ class Saml implements Interfaces\SpInterface
 
     public function loadIdpFromFile($filename)
     {
+        if (empty($filename)) return;
         if (array_key_exists($filename, $this->idps)) {
-            return;
+            return $this->idps[$filename];
         }
         $idp = new Idp($this);
-        $this->idps[$filename] = $idp->loadFromXml($filename);;
+        $this->idps[$filename] = $idp->loadFromXml($filename);
+        return $idp;
     }
 
     public function getSPMetadata(): string
@@ -123,15 +125,15 @@ XML;
             $attrId = null;
         }
 
-        $this->loadIdpFromFile($idpName);
-        $idp = $this->idps[$idpName];
+        $idp = $this->loadIdpFromFile($idpName);
         return $idp->authnRequest($assertId, $attrId, $binding, $level, $redirectTo, $shouldRedirect);
     }
 
     public function isAuthenticated() : bool
     {
+        $idp = $this->loadIdpFromFile($_SESSION['idpName'] ?? $_SESSION['spidSession']->idp);
         $response = new BaseResponse();
-        if (!$response->validate()) {
+        if (!empty($idp) && !$response->validate($idp->metadata['idpCertValue'])) {
             return false;
         }
         if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
@@ -158,9 +160,7 @@ XML;
         if (!$this->isAuthenticated()) {
             return false;
         }
-
-        $this->loadIdpFromFile($this->session->idp);
-        $idp = $this->idps[$this->session->idp];
+        $idp = $this->loadIdpFromFile($this->session->idp);
         return $idp->logoutRequest($this->session, $binding, $redirectTo, $shouldRedirect);
     }
 

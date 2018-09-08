@@ -50,13 +50,29 @@ class Idp implements IdpInterface
         $metadata['idpEntityId'] = $xml->attributes()->entityID->__toString();
         $metadata['idpSSO'] = $idpSSO;
         $metadata['idpSLO'] = $idpSLO;
-        $metadata['idpCertValue'] = $xml->xpath('//ds:X509Certificate')[0]->__toString();
+        $metadata['idpCertValue'] = self::formatCert($xml->xpath('//ds:X509Certificate')[0]->__toString());
 
         $this->idpFileName = $xmlFile;
         $this->metadata = $metadata;
         return $this;
     }
 
+    public static function formatCert($cert, $heads = true)
+    {
+        //$cert = str_replace(" ", "\n", $cert);
+        $x509cert = str_replace(array("\x0D", "\r", "\n"), "", $cert);
+        if (!empty($x509cert)) {
+            $x509cert = str_replace('-----BEGIN CERTIFICATE-----', "", $x509cert);
+            $x509cert = str_replace('-----END CERTIFICATE-----', "", $x509cert);
+            $x509cert = str_replace(' ', '', $x509cert);
+
+            if ($heads) {
+                $x509cert = "-----BEGIN CERTIFICATE-----\n".chunk_split($x509cert, 64, "\n")."-----END CERTIFICATE-----\n";
+            }
+
+        }
+        return $x509cert;
+    }
     public function authnRequest($ass, $attr, $binding, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
     {
         $this->assertID = $ass;
