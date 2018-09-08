@@ -4,18 +4,16 @@ namespace Italia\Spid\Spid;
 
 use Italia\Spid\Spid\Saml\Idp;
 use Italia\Spid\Spid\Saml\In\BaseResponse;
-use Italia\Spid\Spid\Saml\In\LogoutResponse;
-use Italia\Spid\Spid\Saml\In\Response;
 use Italia\Spid\Spid\Saml\Settings;
-
-use RobRichards\XMLSecLibs\XMLSecurityDSig;
-use RobRichards\XMLSecLibs\XMLSecurityKey;
+use Italia\Spid\Spid\Saml\SignatureUtils;
 
 class Saml implements Interfaces\SpInterface
 {
     var $settings;
     var $idps = [];
     var $session;
+
+    private $binding;
 
     public function __construct(array $settings)
     {
@@ -25,11 +23,13 @@ class Saml implements Interfaces\SpInterface
 
     public function loadIdpFromFile($filename)
     {
+        if (empty($filename)) return;
         if (array_key_exists($filename, $this->idps)) {
-            return;
+            return $this->idps[$filename];
         }
         $idp = new Idp($this);
-        $this->idps[$filename] = $idp->loadFromXml($filename);;
+        $this->idps[$filename] = $idp->loadFromXml($filename);
+        return $idp;
     }
 
     public function getSPMetadata(): string
@@ -89,40 +89,7 @@ XML;
         }
         $xml .= '</md:EntityDescriptor>';
 
-        $key = file_get_contents($this->settings['sp_key_file']);
-        $key = openssl_get_privatekey($key, "");
-        $cert = file_get_contents($this->settings['sp_cert_file']);
-        $signAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
-        $digestAlgorithm = 'http://www.w3.org/2001/04/xmlenc#sha256';
-        $dom = new \DOMDocument();
-        $dom->loadXML($xml);
-        if (!$dom) {
-            throw new Exception('Error parsing xml string');
-        }
-        $objKey = new XMLSecurityKey($signAlgorithm, array('type' => 'private'));
-        $objKey->loadKey($key, false);
-        $rootNode = $dom->firstChild;
-        $objXMLSecDSig = new XMLSecurityDSig();
-        $objXMLSecDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
-        $objXMLSecDSig->addReferenceList(
-            array($rootNode),
-            $digestAlgorithm,
-            array('http://www.w3.org/2000/09/xmldsig#enveloped-signature', XMLSecurityDSig::EXC_C14N),
-            array('id_name' => 'ID')
-        );
-        $objXMLSecDSig->sign($objKey);
-        $objXMLSecDSig->add509Cert($cert, true);
-        $insertBefore = $rootNode->firstChild;
-        $messageTypes = array('AuthnRequest', 'Response', 'LogoutRequest', 'LogoutResponse');
-        if (in_array($rootNode->localName, $messageTypes)) {
-            $issuerNodes = self::query($dom, '/' . $rootNode->tagName . '/saml:Issuer');
-            if ($issuerNodes->length == 1) {
-                $insertBefore = $issuerNodes->item(0)->nextSibling;
-            }
-        }
-        $objXMLSecDSig->insertSignature($rootNode, $insertBefore);
-        $signedxml = $dom->saveXML();
-        return $signedxml;
+        return SignatureUtils::signXml($xml, $this->settings);
     }
 
     public function getIdp($idpName) : Idp
@@ -131,6 +98,18 @@ XML;
     }
 
     public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
+    {
+        $args = func_get_args();
+        return $this->baseLogin(Settings::BINDING_REDIRECT, ...$args);
+    }
+
+    public function loginPost($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
+    {
+        $args = func_get_args();
+        return $this->baseLogin(Settings::BINDING_POST, ...$args);
+    }
+
+    private function baseLogin($binding = Settings::BINDING_REDIRECT, $idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
     {
         if ($this->isAuthenticated()) {
             return false;
@@ -146,15 +125,15 @@ XML;
             $attrId = null;
         }
 
-        $this->loadIdpFromFile($idpName);
-        $idp = $this->idps[$idpName];
-        return $idp->authnRequest($assertId, $attrId, $redirectTo, $level, $shouldRedirect);
+        $idp = $this->loadIdpFromFile($idpName);
+        return $idp->authnRequest($assertId, $attrId, $binding, $level, $redirectTo, $shouldRedirect);
     }
 
     public function isAuthenticated() : bool
     {
+        $idp = $this->loadIdpFromFile($_SESSION['idpName'] ?? $_SESSION['spidSession']->idp);
         $response = new BaseResponse();
-        if (!$response->validate()) {
+        if (!empty($idp) && !$response->validate($idp->metadata['idpCertValue'])) {
             return false;
         }
         if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
@@ -166,12 +145,23 @@ XML;
 
     public function logout($redirectTo = null, $shouldRedirect = true)
     {
+        $args = func_get_args();
+        $this->baseLogout(Settings::BINDING_REDIRECT, ...$args);
+    }
+
+    public function logoutPost($redirectTo = null, $shouldRedirect = true)
+    {
+        $args = func_get_args();
+        $this->baseLogout(Settings::BINDING_POST, ...$args);
+    }
+
+    private function baseLogout($binding = Settings::BINDING_REDIRECT, $redirectTo = null, $shouldRedirect = true)
+    {
         if (!$this->isAuthenticated()) {
             return false;
         }
-        $this->loadIdpFromFile($this->session->idp);
-        $idp = $this->idps[$this->session->idp];
-        return $idp->logoutRequest($this->session, $redirectTo, $shouldRedirect);
+        $idp = $this->loadIdpFromFile($this->session->idp);
+        return $idp->logoutRequest($this->session, $binding, $redirectTo, $shouldRedirect);
     }
 
     public function getAttributes() : array

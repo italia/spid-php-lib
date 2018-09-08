@@ -3,16 +3,16 @@
 namespace Italia\Spid\Spid\Saml\Out;
 
 use Italia\Spid\Spid\Interfaces\RequestInterface;
+use Italia\Spid\Spid\Saml\Settings;
 
 class LogoutRequest extends Base implements RequestInterface
 {
-    public function generateXml()
+    public function generateXml($idpSLO)
     {
         $id = $this->generateID();
         $issueInstant = $this->generateIssueInstant();
         $entityId = $this->idp->sp->settings['sp_entityid'];
         $idpEntityId = $this->idp->metadata['idpEntityId'];
-        $idpSLO = $this->idp->metadata['idpSLO'];
         $index = $this->idp->session->sessionID;
         $xml = <<<XML
 <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
@@ -28,10 +28,20 @@ XML;
 
     public function redirectUrl($redirectTo = null) : string
     {
+        $location = parent::getBindingLocation(Settings::BINDING_POST, 'SLO');
         if (is_null($this->xml)) {
-            $this->generateXml();
+            $this->generateXml($location);
         }
-        $url = $this->idp->metadata['idpSLO'];
-        return parent::redirect($url, $redirectTo);
+        return parent::redirect($location, $redirectTo);
+    }
+
+    public function httpPost($redirectTo = null) : string
+    {
+        $location = parent::getBindingLocation(Settings::BINDING_POST, 'SLO');
+        if (is_null($this->xml)) {
+            $this->generateXml($location);
+        }
+        $this->xml = SignatureUtils::signXml($this->xml, $this->idp->sp->settings);
+        return parent::postForm($location, $redirectTo);
     }
 }
