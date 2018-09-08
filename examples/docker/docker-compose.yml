@@ -12,6 +12,8 @@ services:
       - type: bind
         source: ..
         target: /app
+    networks:
+      - example1
 
   spid-testenv2:
     image: italia/spid-testenv2
@@ -22,3 +24,11 @@ services:
       - type: bind
         source: ./spid-testenv2
         target: /app/conf
+    networks:
+      - example2
+
+networks:
+  example1:
+    driver: bridge
+  example2:
+    driver: bridge
