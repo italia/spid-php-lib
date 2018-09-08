@@ -35,28 +35,56 @@ class Idp implements IdpInterface
         $xml->registerXPathNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
 
         $metadata = array();
+        $idpSSO = array();
+        foreach ($xml->xpath('//md:SingleSignOnService') as $index => $item) {
+            $idpSSO[$index]['location'] = $item->attributes()->Location->__toString();
+            $idpSSO[$index]['binding'] = $item->attributes()->Binding->__toString();
+        }
+
+        $idpSLO = array();
+        foreach ($xml->xpath('//md:SingleLogoutService') as $item) {
+            $idpSLO[$index]['location'] = $item->attributes()->Location->__toString();
+            $idpSLO[$index]['binding'] = $item->attributes()->Binding->__toString();
+        }
+
         $metadata['idpEntityId'] = $xml->attributes()->entityID->__toString();
-        $metadata['idpSSO'] = $xml->xpath('//md:SingleSignOnService')[0]->attributes()->Location->__toString();
-        $metadata['idpSLO'] = $xml->xpath('//md:SingleLogoutService')[0]->attributes()->Location->__toString();
-        $metadata['idpCertValue'] = $xml->xpath('//ds:X509Certificate')[0]->__toString();
+        $metadata['idpSSO'] = $idpSSO;
+        $metadata['idpSLO'] = $idpSLO;
+        $metadata['idpCertValue'] = self::formatCert($xml->xpath('//ds:X509Certificate')[0]->__toString());
 
         $this->idpFileName = $xmlFile;
         $this->metadata = $metadata;
         return $this;
     }
 
-    public function authnRequest($ass, $attr, $redirectTo = null, $level = 1, $shouldRedirect = true) : string
+    public static function formatCert($cert, $heads = true)
+    {
+        //$cert = str_replace(" ", "\n", $cert);
+        $x509cert = str_replace(array("\x0D", "\r", "\n"), "", $cert);
+        if (!empty($x509cert)) {
+            $x509cert = str_replace('-----BEGIN CERTIFICATE-----', "", $x509cert);
+            $x509cert = str_replace('-----END CERTIFICATE-----', "", $x509cert);
+            $x509cert = str_replace(' ', '', $x509cert);
+
+            if ($heads) {
+                $x509cert = "-----BEGIN CERTIFICATE-----\n".chunk_split($x509cert, 64, "\n")."-----END CERTIFICATE-----\n";
+            }
+
+        }
+        return $x509cert;
+    }
+    public function authnRequest($ass, $attr, $binding, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
     {
         $this->assertID = $ass;
         $this->attrID = $attr;
         $this->level = $level;
 
         $authn = new AuthnRequest($this);
-        $url = $authn->redirectUrl($redirectTo);
+        $url = $binding == Settings::BINDING_REDIRECT ? $authn->redirectUrl($redirectTo) : $authn->httpPost($redirectTo);
         $_SESSION['RequestID'] = $authn->id;
         $_SESSION['idpName'] = $this->idpFileName;
 
-        if (!$shouldRedirect) {
+        if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
         }
 
@@ -66,16 +94,16 @@ class Idp implements IdpInterface
         exit("");
     }
 
-    public function logoutRequest(Session $session, $redirectTo = null, $shouldRedirect = true) : string
+    public function logoutRequest(Session $session, $binding, $redirectTo = null, $shouldRedirect = true) : string
     {
         $this->session = $session;
 
         $logoutRequest = new LogoutRequest($this);
-        $url = $logoutRequest->redirectUrl($redirectTo);
+        $url = $binding == Settings::BINDING_REDIRECT ? $logoutRequest->redirectUrl($redirectTo) : $logoutRequest->httpPost($redirectTo);
         $_SESSION['RequestID'] = $logoutRequest->id;
         $_SESSION['idpName'] = $logoutRequest->idpFileName;
 
-        if (!$shouldRedirect) {
+        if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
         }
 

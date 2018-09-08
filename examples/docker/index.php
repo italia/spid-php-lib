@@ -36,6 +36,10 @@ switch ($request_uri[0]) {
     case '/login':
         require './views/login.php';
         break;
+    // Login POST page
+    case '/login-post':
+        require './views/login_post.php';
+        break;
     // Metadata page
     case '/metadata':
         require './views/metadata.php';
@@ -47,6 +51,10 @@ switch ($request_uri[0]) {
     // Logout page
     case '/logout':
         require './views/logout.php';
+        break;
+    // Logout POST page
+    case '/logout-post':
+        require './views/logout_post.php';
         break;
     // Slo page
     case '/slo':
