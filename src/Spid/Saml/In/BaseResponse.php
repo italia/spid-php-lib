@@ -30,6 +30,9 @@ class BaseResponse
             case 'samlp:LogoutResponse':
                 $this->response = new LogoutResponse();
                 break;
+            case 'samlp:LogoutRequest':
+                $this->response = new LogoutRequest();
+                break;
             default:
                 throw new \Exception('No valid response found');
                 break;
