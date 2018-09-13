@@ -19,7 +19,7 @@ class BaseResponse
         $this->xml->loadXML($xmlString);
 
         $root = $this->xml->documentElement->tagName;
-
+        
         switch ($root) {
             case 'samlp:Response':
                 // When reloading the acs page, POST data is sent again even if login is completed
