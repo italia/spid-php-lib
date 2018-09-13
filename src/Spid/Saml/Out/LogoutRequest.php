@@ -7,7 +7,7 @@ use Italia\Spid\Spid\Saml\Settings;
 
 class LogoutRequest extends Base implements RequestInterface
 {
-    public function generateXml($idpSLO)
+    public function generateXml()
     {
         $id = $this->generateID();
         $issueInstant = $this->generateIssueInstant();
@@ -17,7 +17,7 @@ class LogoutRequest extends Base implements RequestInterface
         $xml = <<<XML
 <samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
     xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
-ID="$id" IssueInstant="$issueInstant" Version="2.0" Destination="$idpSLO">
+ID="$id" IssueInstant="$issueInstant" Version="2.0" Destination="$idpEntityId">
     <saml:Issuer NameQualifier="$entityId" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">$entityId</saml:Issuer>
     <saml:NameID NameQualifier="$idpEntityId" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">$idpEntityId</saml:NameID>
     <samlp:SessionIndex>$index</samlp:SessionIndex>
@@ -30,7 +30,7 @@ XML;
     {
         $location = parent::getBindingLocation(Settings::BINDING_POST, 'SLO');
         if (is_null($this->xml)) {
-            $this->generateXml($location);
+            $this->generateXml();
         }
         return parent::redirect($location, $redirectTo);
     }
@@ -39,7 +39,7 @@ XML;
     {
         $location = parent::getBindingLocation(Settings::BINDING_POST, 'SLO');
         if (is_null($this->xml)) {
-            $this->generateXml($location);
+            $this->generateXml();
         }
         $this->xml = SignatureUtils::signXml($this->xml, $this->idp->sp->settings);
         return parent::postForm($location, $redirectTo);
