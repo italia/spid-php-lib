@@ -8,7 +8,6 @@ class LogoutResponse implements ResponseInterface
 {
     public function validate($xml) : bool
     {
-        print_r($_SESSION); die;
         $root = $xml->getElementsByTagName('LogoutResponse')->item(0);
 
         if ($root->getAttribute('ID') == "") {

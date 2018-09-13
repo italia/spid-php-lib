@@ -99,12 +99,13 @@ class Idp implements IdpInterface
         $this->session = $session;
 
         $logoutRequest = new LogoutRequest($this);
-        $url = $binding == Settings::BINDING_REDIRECT ? $logoutRequest->redirectUrl($redirectTo) : $logoutRequest->httpPost($redirectTo);
+        $url = ($binding == Settings::BINDING_REDIRECT) ? $logoutRequest->redirectUrl($redirectTo) : $logoutRequest->httpPost($redirectTo);
         $_SESSION['RequestID'] = $logoutRequest->id;
-        $_SESSION['idpName'] = $logoutRequest->idpFileName;
+        $_SESSION['idpName'] = $this->idpFileName;
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
+            exit;
         }
 
         header('Pragma: no-cache');

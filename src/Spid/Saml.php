@@ -146,13 +146,13 @@ XML;
     public function logout($redirectTo = null, $shouldRedirect = true)
     {
         $args = func_get_args();
-        $this->baseLogout(Settings::BINDING_REDIRECT, ...$args);
+        return $this->baseLogout(Settings::BINDING_REDIRECT, ...$args);
     }
 
     public function logoutPost($redirectTo = null, $shouldRedirect = true)
     {
         $args = func_get_args();
-        $this->baseLogout(Settings::BINDING_POST, ...$args);
+        return $this->baseLogout(Settings::BINDING_POST, ...$args);
     }
 
     private function baseLogout($binding = Settings::BINDING_REDIRECT, $redirectTo = null, $shouldRedirect = true)
