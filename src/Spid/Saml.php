@@ -138,6 +138,7 @@ XML;
         }
         if (isset($_SESSION) && isset($_SESSION['inResponseTo'])) {
             $idp->logoutResponse();
+            return false;
         }
         if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
             $this->session = $_SESSION['spidSession'];

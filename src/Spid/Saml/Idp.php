@@ -82,7 +82,7 @@ class Idp implements IdpInterface
 
         $authn = new AuthnRequest($this);
         $url = $binding == Settings::BINDING_REDIRECT ? $authn->redirectUrl($redirectTo) : $authn->httpPost($redirectTo);
-        $_SESSION['RequestID'] = $authn->id;
+        $   ['RequestID'] = $authn->id;
         $_SESSION['idpName'] = $this->idpFileName;
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
@@ -121,9 +121,8 @@ class Idp implements IdpInterface
 
         $logoutResponse = new LogoutResponse($this);
         $url = ($binding == Settings::BINDING_REDIRECT) ? $logoutResponse->redirectUrl($redirectTo) : $logoutResponse->httpPost($redirectTo);
-        $_SESSION['RequestID'] = $logoutRequest->id;
-        $_SESSION['idpName'] = $this->idpFileName;
-
+        unset($_SESSION);
+        
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
             exit;
