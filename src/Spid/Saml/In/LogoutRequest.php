@@ -26,6 +26,6 @@ class LogoutRequest implements ResponseInterface
             throw new \Exception("Invalid NameQualifier attribute");
         }
 
-        //geerate logoutResponse??
+        return true;
     }
 }

@@ -4,9 +4,18 @@ namespace Italia\Spid\Spid\Saml\Out;
 
 use Italia\Spid\Spid\Interfaces\RequestInterface;
 use Italia\Spid\Spid\Saml\Settings;
+use Italia\Spid\Spid\Saml\Idp;
+use Italia\Spid\Spid\Saml\In\LogoutRequest;
 
 class LogoutResponse extends Base implements RequestInterface
 {
+    private $logoutRequest;
+
+    public function __construct(Idp $idp, LogoutRequest $logoutRequest)
+    {
+        parent::__construct($idp);
+        $this->logoutRequest = $logoutRequest;
+    }
     public function generateXml()
     {
         $id = $this->generateID();
