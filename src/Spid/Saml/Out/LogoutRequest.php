@@ -4,6 +4,7 @@ namespace Italia\Spid\Spid\Saml\Out;
 
 use Italia\Spid\Spid\Interfaces\RequestInterface;
 use Italia\Spid\Spid\Saml\Settings;
+use Italia\Spid\Spid\Saml\SignatureUtils;
 
 class LogoutRequest extends Base implements RequestInterface
 {
@@ -41,6 +42,7 @@ XML;
         if (is_null($this->xml)) {
             $this->generateXml();
         }
+        
         $this->xml = SignatureUtils::signXml($this->xml, $this->idp->sp->settings);
         return parent::postForm($location, $redirectTo);
     }
