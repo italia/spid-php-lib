@@ -136,6 +136,9 @@ XML;
         if (!empty($idp) && !$response->validate($idp->metadata['idpCertValue'])) {
             return false;
         }
+        if (isset($_SESSION) && isset($_SESSION['inResponseTo'])) {
+            $idp->logoutResponse();
+        }
         if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
             $this->session = $_SESSION['spidSession'];
             return true;

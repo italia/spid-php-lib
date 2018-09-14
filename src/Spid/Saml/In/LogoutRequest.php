@@ -26,6 +26,7 @@ class LogoutRequest implements ResponseInterface
             throw new \Exception("Invalid NameQualifier attribute");
         }
 
+        $_SESSION['inResponseTo'] = $root->getAttribute('ID');
         return true;
     }
 }
