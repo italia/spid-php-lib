@@ -29,7 +29,7 @@ class SignatureUtils
             array($rootNode),
             'http://www.w3.org/2001/04/xmlenc#sha256',
             array('http://www.w3.org/2000/09/xmldsig#enveloped-signature', XMLSecurityDSig::EXC_C14N),
-            array('id_name' => 'ID')
+            array('id_name' => 'ID', 'overwrite' => false)
         );
         $objXMLSecDSig->sign($objKey);
         $objXMLSecDSig->add509Cert($cert, true);
