@@ -19,7 +19,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
             ["name", "familyName", "fiscalNumber", "email", "spidCode"]
             ]
         ];
-    
+
     public function testCanBeCreatedFromValidSettings()
     {
         $this->assertInstanceOf(
@@ -88,5 +88,25 @@ final class SpTest extends PHPUnit\Framework\TestCase
         unset($settings1['idp_metadata_folder']);
         $this->expectException(\Exception::class);
         $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testCanLoadAllIdpMetadata(): void
+    {
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $idps = ['idp_1', 'idp_2', 'idp_3', 'idp_4', 'idp_5', 'idp_6', 'idp_7', 'idp_8', 'testenv'];
+        foreach ($idps as $idp) {
+            $retrievedIdp = $sp->loadIdpFromFile($idp);
+            $this->assertEquals($retrievedIdp->idpFileName, $idp);
+            $idpEntityId = $retrievedIdp->metadata['idpEntityId'];
+            $host = parse_url($idpEntityId, PHP_URL_HOST);
+            $idpSSOArray = $retrievedIdp->metadata['idpSSO'];
+            foreach ($idpSSOArray as $key => $idpSSO) {
+                $this->assertContains($host, $idpSSO['location']);
+            }
+            $idpSLOArray = $retrievedIdp->metadata['idpSLO'];
+            foreach ($idpSLOArray as $key => $idpSLO) {
+                $this->assertContains($host, $idpSLO['location']);
+            }
+        }
     }
 }
