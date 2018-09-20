@@ -90,7 +90,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $sp = new Italia\Spid\Sp($settings1);
     }
 
-    public function testCanLoadAllIdpMetadata(): void
+    public function testCanLoadAllIdpMetadata()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $idps = ['idp_1', 'idp_2', 'idp_3', 'idp_4', 'idp_5', 'idp_6', 'idp_7', 'idp_8', 'testenv'];
