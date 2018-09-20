@@ -12,7 +12,7 @@ cache:
 install:
   - composer install --no-interaction
   - mkdir -p examples/simple/idp_metadata
-  - make
+  - make -C examples/simple/
   - php bin/download_idp_metadata.php ./examples/simple/idp_metadata
   
 script:
