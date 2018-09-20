@@ -16,4 +16,4 @@ install:
   - php bin/download_idp_metadata.php ./examples/simple/idp_metadata
   
 script:
-  - vendor/bin/phpunit --stderr --testdox tests
+  - vendor/bin/phpunit --stderr tests
