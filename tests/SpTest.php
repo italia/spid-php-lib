@@ -7,19 +7,19 @@ final class SpTest extends PHPUnit\Framework\TestCase
 {
     private static $settings = [
         'sp_entityid' => 'http://sp3.simevo.com/',
-        'sp_key_file' => './example/sp.key',
-        'sp_cert_file' => './example/sp.crt',
+        'sp_key_file' => './examples/simple/sp.key',
+        'sp_cert_file' => './examples/simple/sp.crt',
         'sp_assertionconsumerservice' => ['http://sp3.simevo.com/acs'],
         'sp_singlelogoutservice' => 'http://sp3.simevo.com/slo',
         'sp_org_name' => 'test_simevo',
         'sp_org_display_name' => 'Test Simevo',
-        'idp_metadata_folder' => './example/idp_metadata/',
+        'idp_metadata_folder' => './examples/simple/idp_metadata/',
         'sp_attributeconsumingservice' => [
             ["name", "familyName", "fiscalNumber", "email"],
             ["name", "familyName", "fiscalNumber", "email", "spidCode"]
             ]
         ];
-    
+
     public function testCanBeCreatedFromValidSettings()
     {
         $this->assertInstanceOf(
@@ -88,5 +88,25 @@ final class SpTest extends PHPUnit\Framework\TestCase
         unset($settings1['idp_metadata_folder']);
         $this->expectException(\Exception::class);
         $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testCanLoadAllIdpMetadata()
+    {
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $idps = ['idp_1', 'idp_2', 'idp_3', 'idp_4', 'idp_5', 'idp_6', 'idp_7', 'idp_8', 'testenv'];
+        foreach ($idps as $idp) {
+            $retrievedIdp = $sp->loadIdpFromFile($idp);
+            $this->assertEquals($retrievedIdp->idpFileName, $idp);
+            $idpEntityId = $retrievedIdp->metadata['idpEntityId'];
+            $host = parse_url($idpEntityId, PHP_URL_HOST);
+            $idpSSOArray = $retrievedIdp->metadata['idpSSO'];
+            foreach ($idpSSOArray as $key => $idpSSO) {
+                $this->assertContains($host, $idpSSO['location']);
+            }
+            $idpSLOArray = $retrievedIdp->metadata['idpSLO'];
+            foreach ($idpSLOArray as $key => $idpSLO) {
+                $this->assertContains($host, $idpSLO['location']);
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ use Italia\Spid\Spid\Interfaces\IdpInterface;
 use Italia\Spid\Spid\Saml\Out\AuthnRequest;
 use Italia\Spid\Spid\Saml\Out\LogoutRequest;
 use Italia\Spid\Spid\Session;
+use Italia\Spid\Spid\Saml\Out\LogoutResponse;
 
 class Idp implements IdpInterface
 {
@@ -99,12 +100,32 @@ class Idp implements IdpInterface
         $this->session = $session;
 
         $logoutRequest = new LogoutRequest($this);
-        $url = $binding == Settings::BINDING_REDIRECT ? $logoutRequest->redirectUrl($redirectTo) : $logoutRequest->httpPost($redirectTo);
+        $url = ($binding == Settings::BINDING_REDIRECT) ? $logoutRequest->redirectUrl($redirectTo) : $logoutRequest->httpPost($redirectTo);
         $_SESSION['RequestID'] = $logoutRequest->id;
-        $_SESSION['idpName'] = $logoutRequest->idpFileName;
+        $_SESSION['idpName'] = $this->idpFileName;
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
+            exit;
+        }
+
+        header('Pragma: no-cache');
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Location: ' . $url);
+        exit("");
+    }
+
+    public function logoutResponse() : string
+    {
+        $this->session = $session;
+
+        $logoutResponse = new LogoutResponse($this);
+        $url = ($binding == Settings::BINDING_REDIRECT) ? $logoutResponse->redirectUrl($redirectTo) : $logoutResponse->httpPost($redirectTo);
+        unset($_SESSION);
+        
+        if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
+            return $url;
+            exit;
         }
 
         header('Pragma: no-cache');

@@ -61,6 +61,7 @@ class Response implements ResponseInterface
 
         $session->sessionID = $_SESSION['RequestID'];
         $session->idp = $_SESSION['idpName'];
+        $session->idpEntityID = $xml->getElementsByTagName('Issuer')->item(0)->nodeValue;
         $session->attributes = $attributes;
         $session->level = substr($xml->getElementsByTagName('AuthnContextClassRef')->item(0)->nodeValue, -1);
         return $session;
