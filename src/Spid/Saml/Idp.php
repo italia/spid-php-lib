@@ -58,7 +58,7 @@ class Idp implements IdpInterface
         return $this;
     }
 
-    public static function formatCert($cert, $heads = true)
+    private static function formatCert($cert, $heads = true)
     {
         //$cert = str_replace(" ", "\n", $cert);
         $x509cert = str_replace(array("\x0D", "\r", "\n"), "", $cert);
@@ -123,7 +123,7 @@ class Idp implements IdpInterface
         $url = ($binding == Settings::BINDING_REDIRECT) ? $logoutResponse->redirectUrl($redirectTo) : $logoutResponse->httpPost($redirectTo);
         unset($_SESSION);
         
-        if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
+        if ($binding == Settings::BINDING_POST) {
             return $url;
             exit;
         }

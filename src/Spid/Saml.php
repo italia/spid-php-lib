@@ -7,13 +7,11 @@ use Italia\Spid\Spid\Saml\In\BaseResponse;
 use Italia\Spid\Spid\Saml\Settings;
 use Italia\Spid\Spid\Saml\SignatureUtils;
 
-class Saml implements Interfaces\SpInterface
+class Saml implements Interfaces\SAMLInterface
 {
     var $settings;
-    var $idps = [];
-    var $session;
-
-    private $binding;
+    var $idps = []; // contains filename -> Idp object array
+    var $session; // Session object
 
     public function __construct(array $settings)
     {
@@ -23,13 +21,18 @@ class Saml implements Interfaces\SpInterface
 
     public function loadIdpFromFile($filename)
     {
-        if (empty($filename)) return;
+        if (empty($filename)) return null;
         if (array_key_exists($filename, $this->idps)) {
             return $this->idps[$filename];
         }
         $idp = new Idp($this);
         $this->idps[$filename] = $idp->loadFromXml($filename);
         return $idp;
+    }
+
+    public function getIdp($filename)
+    {
+        return $this->loadIdpFromFile($filename);
     }
 
     public function getSPMetadata(): string
@@ -90,11 +93,6 @@ XML;
         $xml .= '</md:EntityDescriptor>';
 
         return SignatureUtils::signXml($xml, $this->settings);
-    }
-
-    public function getIdp($idpName) : Idp
-    {
-        return key_exists($idpName, $this->idps) ? $this->idps[$idpName] : null;
     }
 
     public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
@@ -171,10 +169,5 @@ XML;
     public function getAttributes() : array
     {
         return $this->session->attributes;
-    }
-
-    public function loadIdpMetadata($path)
-    {
-        // TODO: Implement loadIdpMetadata() method.
     }
 }

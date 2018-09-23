@@ -6,10 +6,10 @@ interface RequestInterface
 {
     public function generateXml();
 
-    // prepare a HTTP-Redirect binding and return it as a string
+    // prepare HTTP-Redirect binding and return it as a string
     // https://github.com/italia/spid-perl/blob/master/lib/Net/SPID/SAML/Out/AuthnRequest.pm#L61
     public function redirectUrl($redirectTo = null) : string;
 
-    // prepare a HTTP-POST binding and return the html form as a string
+    // prepare HTTP-POST binding and return the html form as a string
     public function httpPost($redirectTo = null) : string;
 }

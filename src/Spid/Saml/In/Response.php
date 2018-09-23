@@ -48,7 +48,7 @@ class Response implements ResponseInterface
         return true;
     }
 
-    public function spidSession(\DOMDocument $xml)
+    private function spidSession(\DOMDocument $xml)
     {
         $session = new Session();
 

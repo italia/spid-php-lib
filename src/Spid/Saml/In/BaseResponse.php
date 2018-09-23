@@ -4,6 +4,17 @@ namespace Italia\Spid\Spid\Saml\In;
 
 use Italia\Spid\Spid\Saml\SignatureUtils;
 
+/*
+* Generates the proper response object at runtime by reading the input XML.
+* Validates the response and the signature
+* Specific response may complete other tasks upon succesful validation
+* such as creating a login session for Response, or destroying the session 
+* for Logout resposnes.
+
+* The only case in which a Request is validated instead of a response is
+* for Idp Initiated Logout. In this case the input is not a response to a requese
+* to a request sent by the SP, but rather a request started by the Idp
+*/
 class BaseResponse
 {
     var $response;

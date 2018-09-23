@@ -4,6 +4,13 @@ namespace Italia\Spid;
 
 class Sp
 {
+    /*
+    * Strategy pattern: initialize the requested protocol based on name provided.
+    * Currently only SAML solution is implemented
+
+    * Method calls on Sp call the equivalent method in the chosen strategy implementation
+    * Please check SAMLInterface for available methods for SAML Strategy
+    */
     private $protocol;
 
     public function __construct(array $settings, String $protocol = null)
