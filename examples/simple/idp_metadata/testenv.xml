@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:EntityDescriptor xmlns:ns0="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ns1="http://www.w3.org/2000/09/xmldsig#" entityID="http://0.0.0.0:8088"><ns0:IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><ns0:KeyDescriptor use="signing"><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIICljCCAX4CCQCkyqGH2OveTTANBgkqhkiG9w0BAQsFADANMQswCQYDVQQGEwJJ
+VDAeFw0xODA4MTExNTUzMTFaFw0xODA5MTAxNTUzMTFaMA0xCzAJBgNVBAYTAklU
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw6mCn10sFClIAEb2rPUH
+pGlMAxcVgqaYDBhDSU5xxscuz50uih0d/cidGyblL2rCLNLfLd0VjkJCLD3yCsw1
+DOoEI5FcVtJ+no5fIrGwdC4CGnUawuZS5oh7/gwMZR6DEg5pRnWyXhEDeEtP4Bw5
+9R+vd9kqWzj+ou1QgduB64yURixPee65Xn8qVJLaBs9U1yF/u0HuWR1hJlYuKbd+
+ynrXhXRVPBB6MP2ZSjaxlocZ0nzRUNKZoqsa0KKS19GE08kiuInp951FtvKdBlRQ
+K59UV50Dgffc8bQXHuXSlJbo3JDYypP0osAbkcGYQv5hylG6Q/Id6bel1J1RWE4z
+UwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQB77F2lRhjRlxX3YrWJBMYUwS0Vrkca
+X1pjRIX+B5mBB47/logGqoumkDKYOUOlN5pAC7mXEkbluk8Ku5DNGGlbF/czLSZR
+Of8yVK5L5ZTl0Tyl3hpcrjF8kMAJdBAd8LsVH3tAs0eTQrL3I5JlOU/mDu7rPvM8
+eKiLtdGh6xLLrc/A54pubug6ZKXGv+X8juSXUod7DXnHsR11pXRlH5nTzYneKUm4
+IwDD7yCyc71RzwM+KZoBBk6QDkvTvlsFbyD6geyDzOop8vBrnlVotZ+F1LkGAYS5
+/KYKEux2d0LQd/nEmTXSN7KDF/LduK9faIwcWWQRyz1CeH/QB8LNXzXq
+</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://0.0.0.0:8088/slo" /><ns0:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://0.0.0.0:8088/slo" /><ns0:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</ns0:NameIDFormat><ns0:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://0.0.0.0:8088/sso" /><ns0:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://0.0.0.0:8088/sso" /></ns0:IDPSSODescriptor></ns0:EntityDescriptor>
