@@ -42,11 +42,11 @@ foreach ($idps->data as $idp) {
     curl_setopt($ch, CURLOPT_TIMEOUT, 60);
     echo "Contacting $metadata_url" . PHP_EOL;
     $xml = curl_exec($ch);
-    $info = curl_getinfo($ch);
-    echo ('curl info = ');
-    var_dump($info);
+    // $info = curl_getinfo($ch);
+    // echo ('curl info = ');
+    // var_dump($info);
     if ($xml === false) {
-        echo 'Operation failed with error: ' . curl_error($ch);
+        echo 'Operation failed with error: ' . curl_error($ch) . PHP_EOL;
     } else {
         // operation completed successfully
         $file = "$dir/$ipa_entity_code.xml";
