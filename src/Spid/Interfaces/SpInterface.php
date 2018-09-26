@@ -34,6 +34,12 @@ interface SAMLInterface
     // returns null or the Idp object. 
     public function loadIdpFromFile($filename);
 
+    // loads all Idps found in the idp metadata folder provided in settings
+    // files are loaded with loadIdpFromFile($filename)
+    // returns an array mapping entityID => filename (used for spid-smart-button)
+    // if no idps are found returns an empty array
+    public function getIdpList() : array;
+
     // alias of loadIdpFromFile
     public function getIdp($filename);
 

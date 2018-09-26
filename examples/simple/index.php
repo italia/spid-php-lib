@@ -40,6 +40,10 @@ switch ($request_uri[0]) {
     case '/login-post':
         require './views/login_post.php';
         break;
+    // Login Smart Button page
+    case '/smart-button':
+        require './views/smart_button.php';
+        break;
     // Metadata page
     case '/metadata':
         require './views/metadata.php';

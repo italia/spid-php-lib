@@ -30,6 +30,21 @@ class Saml implements Interfaces\SAMLInterface
         return $idp;
     }
 
+    public function getIdpList() : array
+    {
+        $files = glob($this->settings['idp_metadata_folder'] . "/*xml");
+
+        if (is_array($files)) {
+            $mapping = array();
+            foreach($files as $filename) {
+                $idp = $this->loadIdpFromFile($filename);
+                $mapping[$idp->metadata['idpEntityId']] = $filename;
+            }
+            return $mapping;
+        }
+        return array();
+    }
+
     public function getIdp($filename)
     {
         return $this->loadIdpFromFile($filename);
