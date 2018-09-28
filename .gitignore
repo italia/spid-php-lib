@@ -2,9 +2,12 @@
 .directory
 .vscode
 .DS_Store
-/example/idp_metadata/*.xml
-example/sp.crt
-example/sp.key
-example/config.php
-example/spid-testenv2/*
+/examples/simple/idp_metadata/*.xml
+/examples/simple/sp.crt
+/examples/simple/sp.key
+/examples/docker/idp_metadata/*.xml
+/examples/docker/sp.crt
+/examples/docker/sp.key
+/examples/docker/config.php
+/examples/docker/spid-testenv2/*
 .idea

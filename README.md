@@ -29,9 +29,9 @@ Alternatives for other languages:
 ## Repository layout
 
 * [bin/](bin/) auxiliary scripts
-* [example/](example/) will contain a demo application
-* [src/](src/) will contain the implementation
-* [test/](test/) will contain the unit tests
+* [examples/](examples/) contains a demo application
+* [src/](src/) contains the library implementation
+* [test/](test/) contains the unit tests
 
 ## Getting Started
 
@@ -54,16 +54,14 @@ Before using this package, you must:
 composer install --no-dev
 ```
 
-2. (Optionally) edit the `example/.env` file; the default value `localhost` for the hostnames of the SP and IdP is OK for local tests; if you change that, check that the FQDNs resolve. This can be achieved by adding a directive in `/etc/hosts` or equivalent.
+2. Generate key and certificate for the Service Provider (SP)
 
-3. Download and verify the Identity Provider (IdP) metadata files; it is advised to place them in a separate [idp_metadata/](example/idp_metadata/) directory. A convenience tool is provided for this purpose: [bin/download_idp_metadata.php](bin/download_idp_metadata.php), example usage:
+3. Download and verify the Identity Provider (IdP) metadata files; it is advised to place them in a separate `idp_metadata` directory. A convenience tool is provided to download those of the production IdPs: [bin/download_idp_metadata.php](bin/download_idp_metadata.php), example usage:
 ```sh
-bin/download_idp_metadata.php ./example/idp_metadata
+bin/download_idp_metadata.php ./examples/simple/idp_metadata
 ```
 
-4. Generate key and certificate for the Service Provider (SP).
-
-5. Reciprocally configure the SP and the IdPs to talk to each other by exchanging their metadata.
+4. Reciprocally configure the SP and the IdPs to talk to each other by exchanging their metadata.
 
 **NOTE**: during testing, it is highly adviced to use the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2).
 
@@ -109,7 +107,7 @@ $sp->logout();
 
 ### Example
 
-A basic demo application is provided in the [example/](example/) directory.
+A basic demo application is provided in the [examples/](examples/) directory.
 
 To try it out you have two options: either manually or with the supplied [docker-compose](https://docs.docker.com/compose/overview/) file.
 
@@ -119,23 +117,25 @@ In either case, this screencast shows what you should see if all goes well:
 
 #### Manual install
 
-1. Configure and install this package (see above)
+1. Configure and install this package (see above steps 1 to 3)
 
-2. Configure and install the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2)
+2. Adapt the hostname of the SP changing the `$base` variable in the `examples/simple/index.php` file; the browser you'll be testing from must be able to resolve the FQDN (the default is `sp.example.com`)
 
-3. Serve the `example` dir from your preferred webserver
+3. Configure and install the test IsP [spid-testenv2](https://github.com/italia/spid-testenv2)
 
-4. Visit https://sp.example.com/metadata.php to get the SP metadata, then copy these over to the IdP and register the SP
+4. Serve the `examples/simple` dir from your preferred webserver
 
-5. Visit https://idp.example.com/metadata to get the IdP metadata, then save it as `example/idp_metadata/idp_testenv2.xml` to register the IdP with the SP
+5. Visit https://sp.example.com/metadata to get the SP metadata, then copy these over to the IdP and register the SP with the IdP
 
-6. Visit: https://sp.example.com and click `login`.
+6. Visit https://idp.example.com/metadata to get the IdP metadata, then save it as `example/idp_metadata/testenv.xml` to register the IdP with the SP
+
+7. Visit: https://sp.example.com and click `login`.
 
 #### Using docker-compose
 
-The supplied [example/docker-compose.yml](example/docker-compose.yml) file defines and runs a multi-container Docker application that comprises this example and the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2), configured to talk to each other.
+The supplied [docker-compose.yml](examples/docker/docker-compose.yml) file defines and runs a multi-container Docker application that comprises this example and the test Identity Provider [spid-testenv2](https://github.com/italia/spid-testenv2), configured to talk to each other.
  
-To use it, in the `example` directory:
+To use it, in the `examples/docker` directory:
 
 1. (Optionally) edit the `.env` file
 
@@ -168,8 +168,14 @@ In addition, you can use the [SAML Developer Tools](https://www.samltool.com/onl
 
 ### Unit tests
 
-Launch unit tests with PHPunit:
+Install prerequisites with composer and generate key and certificate for the SP with:
+```sh
+composer install --no-dev
+make -C examples/simple/
 ```
+
+then launch the unit tests with PHPunit:
+```sh
 ./vendor/bin/phpunit --stderr --testdox tests
 ```
 
