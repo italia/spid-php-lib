@@ -29,7 +29,11 @@ class LogoutResponse implements ResponseInterface
         if ($root->getAttribute('Destination') == "") {
             throw new \Exception("Missing Destination attribute");
         }
-
+        if ($xml->getElementsByTagName('Issuer')->length == 0) {
+            throw new \Exception("Missing Issuer attribute");
+        } elseif ($xml->getElementsByTagName('Issuer')->item(0) != $_SESSION['idpEntityId']) {
+            throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] . " but received " . $xml->getElementsByTagName('Response')->item(0));
+        }
         if ($xml->getElementsByTagName('Status')->length <= 0) {
             throw new \Exception("Missing Status element");
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') != 'urn:oasis:names:tc:SAML:2.0:status:Success') {
