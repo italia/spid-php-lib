@@ -28,6 +28,8 @@ class LogoutResponse implements ResponseInterface
         }
         if ($root->getAttribute('Destination') == "") {
             throw new \Exception("Missing Destination attribute");
+        } elseif ($root->getAttribute('Destination') != $_SESSION['sloUrl']) {
+            throw new \Exception("Invalid Destination attribute, expected " . $_SESSION['sloUrl'] . " but received " . $root->getAttribute('Destination'));
         }
         if ($xml->getElementsByTagName('Issuer')->length == 0) {
             throw new \Exception("Missing Issuer attribute");

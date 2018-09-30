@@ -107,6 +107,7 @@ class Idp implements IdpInterface
         $_SESSION['RequestID'] = $logoutRequest->id;
         $_SESSION['idpName'] = $this->idpFileName;
         $_SESSION['idpEntityId'] = $this->metadata['idpEntityId'];
+        $_SESSION['sloUrl'] = $this->sp->settings['sp_singlelogoutservice'];
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
