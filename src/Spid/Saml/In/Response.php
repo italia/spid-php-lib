@@ -26,8 +26,8 @@ class Response implements ResponseInterface
         }
         if ($root->getAttribute('Destination') == "") {
             throw new \Exception("Missing Destination attribute");
-        } elseif ($root->getAttribute('Destination') != "SP ACS URL") {
-            throw new \Exception("Invalid Destination attribute, expected " . "SP ACS URL" . " but received " . $root->getAttribute('Destination'));
+        } elseif ($root->getAttribute('Destination') != $_SESSION['acsUrl']) {
+            throw new \Exception("Invalid Destination attribute, expected " . $_SESSION['acsUrl'] . " but received " . $root->getAttribute('Destination'));
         }
         if ($xml->getElementsByTagName('Issuer')->length == 0) {
             throw new \Exception("Missing Issuer attribute");
@@ -52,6 +52,7 @@ class Response implements ResponseInterface
         unset($_SESSION['RequestID']);
         unset($_SESSION['idpName']);
         unset($_SESSION['idpEntityId']);
+        unset($_SESSION['acsUrl']);
         return true;
     }
 
