@@ -183,6 +183,7 @@ XML;
 
     public function getAttributes() : array
     {
+        if ($this->isAuthenticated() === false) return array();
         return $this->session->attributes;
     }
 }
