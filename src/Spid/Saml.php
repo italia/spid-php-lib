@@ -6,8 +6,9 @@ use Italia\Spid\Spid\Saml\Idp;
 use Italia\Spid\Spid\Saml\In\BaseResponse;
 use Italia\Spid\Spid\Saml\Settings;
 use Italia\Spid\Spid\Saml\SignatureUtils;
+use Italia\Spid\Spid\Interfaces\SAMLInterface;
 
-class Saml implements Interfaces\SAMLInterface
+class Saml implements SAMLInterface
 {
     var $settings;
     var $idps = []; // contains filename -> Idp object array

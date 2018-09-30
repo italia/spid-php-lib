@@ -22,12 +22,19 @@ class Response implements ResponseInterface
         if ($root->getAttribute('InResponseTo') == "" || !isset($_SESSION['RequestID'])) {
             throw new \Exception("Missing InResponseTo attribute, or request ID was not saved correctly for comparison");
         } elseif ($root->getAttribute('InResponseTo') != $_SESSION['RequestID']) {
-            throw new \Exception("Invalid InResponseTo attribute, expected " . $_SESSION['RequestID']);
+            throw new \Exception("Invalid InResponseTo attribute, expected " . $_SESSION['RequestID'] . " but received " . $root->getAttribute('InResponseTo'));
         }
         if ($root->getAttribute('Destination') == "") {
             throw new \Exception("Missing Destination attribute");
+        } elseif ($root->getAttribute('Destination') != "SP ACS URL") {
+            throw new \Exception("Invalid Destination attribute, expected " . "SP ACS URL" . " but received " . $root->getAttribute('Destination'));
         }
-
+        // fix todo : issuer is not an attribute but an element
+        // if ($root->getAttribute('Issuer') == "") {
+        //     throw new \Exception("Missing Issuer attribute");
+        // } elseif ($root->getAttribute('Issuer') != "IDP URL") {
+        //     throw new \Exception("Invalid Issuer attribute, expected " . "IDP URL" . " but received " . $root->getAttribute('Issuer'));
+        // }
         if ($xml->getElementsByTagName('Status')->length <= 0) {
             throw new \Exception("Missing Status element");
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') == 'urn:oasis:names:tc:SAML:2.0:status:Success') {
