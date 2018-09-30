@@ -29,12 +29,11 @@ class Response implements ResponseInterface
         } elseif ($root->getAttribute('Destination') != "SP ACS URL") {
             throw new \Exception("Invalid Destination attribute, expected " . "SP ACS URL" . " but received " . $root->getAttribute('Destination'));
         }
-        // fix todo : issuer is not an attribute but an element
-        // if ($root->getAttribute('Issuer') == "") {
-        //     throw new \Exception("Missing Issuer attribute");
-        // } elseif ($root->getAttribute('Issuer') != "IDP URL") {
-        //     throw new \Exception("Invalid Issuer attribute, expected " . "IDP URL" . " but received " . $root->getAttribute('Issuer'));
-        // }
+        if ($xml->getElementsByTagName('Issuer')->length == 0) {
+            throw new \Exception("Missing Issuer attribute");
+        } elseif ($xml->getElementsByTagName('Issuer')->item(0) != $_SESSION['idpEntityId']) {
+            throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] . " but received " . $xml->getElementsByTagName('Response')->item(0));
+        }
         if ($xml->getElementsByTagName('Status')->length <= 0) {
             throw new \Exception("Missing Status element");
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') == 'urn:oasis:names:tc:SAML:2.0:status:Success') {
@@ -52,6 +51,7 @@ class Response implements ResponseInterface
         $_SESSION['spidSession'] = $this->spidSession($xml);
         unset($_SESSION['RequestID']);
         unset($_SESSION['idpName']);
+        unset($_SESSION['idpEntityId']);
         return true;
     }
 

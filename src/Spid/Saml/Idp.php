@@ -84,6 +84,7 @@ class Idp implements IdpInterface
         $url = $binding == Settings::BINDING_REDIRECT ? $authn->redirectUrl($redirectTo) : $authn->httpPost($redirectTo);
         $_SESSION['RequestID'] = $authn->id;
         $_SESSION['idpName'] = $this->idpFileName;
+        $_SESSION['idpEntityId'] = $this->metadata['idpEntityId'];
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
