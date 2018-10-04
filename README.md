@@ -80,7 +80,7 @@ Alternatives for other languages:
 |parsing of LogoutRequest XML|✓|
 |verification of `Response/Signature` value (if any)|✓|
 |verification of `Response/Signature` certificate (if any) against IdP metadata|✓|
-|verification of `Issuer`|pending, see: [✓|
+|verification of `Issuer`|✓|
 |verification of `Destination`|✓|
 |parsing of `NameID`|✓|
 |**LogoutResponse generation (for third-party-initiated logout):**||
