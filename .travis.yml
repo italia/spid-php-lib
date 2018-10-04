@@ -11,9 +11,9 @@ cache:
     
 install:
   - composer install --no-interaction
-  - mkdir -p examples/simple/idp_metadata
-  - make -C examples/simple/
-  - php bin/download_idp_metadata.php ./examples/simple/idp_metadata
+  - mkdir -p example/idp_metadata
+  - make -C example
+  - php bin/download_idp_metadata.php ./example/idp_metadata
   
 script:
   - vendor/bin/phpunit --stderr tests

@@ -7,4 +7,4 @@ all:
 clean:
 	rm -f sp.key
 	rm -f sp.crt
-	rm -f idp_metadata/*.xml
+	rm -f idp_metadata/idp_*.xml

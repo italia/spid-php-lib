@@ -7,13 +7,13 @@ final class SpTest extends PHPUnit\Framework\TestCase
 {
     private static $settings = [
         'sp_entityid' => 'http://sp3.simevo.com/',
-        'sp_key_file' => './examples/simple/sp.key',
-        'sp_cert_file' => './examples/simple/sp.crt',
+        'sp_key_file' => './example/sp.key',
+        'sp_cert_file' => './example/sp.crt',
         'sp_assertionconsumerservice' => ['http://sp3.simevo.com/acs'],
         'sp_singlelogoutservice' => 'http://sp3.simevo.com/slo',
         'sp_org_name' => 'test_simevo',
         'sp_org_display_name' => 'Test Simevo',
-        'idp_metadata_folder' => './examples/simple/idp_metadata/',
+        'idp_metadata_folder' => './example/idp_metadata/',
         'sp_attributeconsumingservice' => [
             ["name", "familyName", "fiscalNumber", "email"],
             ["name", "familyName", "fiscalNumber", "email", "spidCode"]
