@@ -51,9 +51,9 @@ Alternatives for other languages:
 |verification of `SubjectConfirmationData/@Recipient`|✓|
 |verification of `SubjectConfirmationData/@NotOnOrAfter`|✓|
 |verification of `SubjectConfirmationData/@InResponseTo`|✓|
-|verification of `Issuer`|pending, see: [#43](https://github.com/italia/spid-php-lib/issues/43)|
+|verification of `Issuer`|✓|
 |verification of `Assertion/Issuer`|✓|
-|verification of `Destination`|pending, see: [#43](https://github.com/italia/spid-php-lib/issues/43)|
+|verification of `Destination`|✓|
 |verification of `Conditions/@NotBefore`|✓|
 |verification of `Conditions/@NotOnOrAfter`|✓|
 |verification of `Audience`|✓|
