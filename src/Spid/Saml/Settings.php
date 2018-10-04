@@ -46,9 +46,13 @@ class Settings
         }
     }
 
-    public static function cleanOpenSsl($file)
+    public static function cleanOpenSsl($file, $isCert = false)
     {
-        $k = file_get_contents($file);
+        if ($isCert) {
+            $k = $file;
+        } else {
+            $k = file_get_contents($file);
+        }
         $ck = '';
         foreach (preg_split("/((\r?\n)|(\r\n?))/", $k) as $l) {
             if (strpos($l, '-----') === false) {

@@ -26,7 +26,7 @@ class LogoutRequest implements ResponseInterface
         if ($issuer->getAttribute('Destination') == "") {
             throw new \Exception("Missing Destination attribute");
         } elseif ($issuer->getAttribute('Destination') != $this->saml->settings['sp_entityid']) {
-            throw new \Exception("Invalid Format attribute");
+            throw new \Exception("Invalid ForDestinationmat attribute");
         }
 
         $issuer = $xml->getElementsByTagName('Issuer')->item(0);

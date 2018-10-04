@@ -47,7 +47,7 @@ Alternatives for other languages:
 |verification of `Signature` value (if any)|✓|
 |verification of `Signature` certificate (if any) against IdP/AA metadata|✓|
 |verification of `Assertion/Signature` value|✓|
-|verification of `Assertion/Signature` certificate against IdP/AA metadata|pending, see: [#40](https://github.com/italia/spid-php-lib/issues/40)|
+|verification of `Assertion/Signature` certificate against IdP/AA metadata|✓|
 |verification of `SubjectConfirmationData/@Recipient`|✓|
 |verification of `SubjectConfirmationData/@NotOnOrAfter`|✓|
 |verification of `SubjectConfirmationData/@InResponseTo`|✓|
@@ -81,7 +81,7 @@ Alternatives for other languages:
 |verification of `Response/Signature` value (if any)|✓|
 |verification of `Response/Signature` certificate (if any) against IdP metadata|✓|
 |verification of `Issuer`|pending, see: [✓|
-|verification of `Destination`|pending, see: [#47](https://github.com/italia/spid-php-lib/issues/47)|
+|verification of `Destination`|✓|
 |parsing of `NameID`|✓|
 |**LogoutResponse generation (for third-party-initiated logout):**||
 |generation of LogoutResponse XML|✓|
