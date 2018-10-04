@@ -31,9 +31,19 @@ class Response implements ResponseInterface
         }
         if ($xml->getElementsByTagName('Issuer')->length == 0) {
             throw new \Exception("Missing Issuer attribute");
-        } elseif ($xml->getElementsByTagName('Issuer')->item(0)->nodeValue!= $_SESSION['idpEntityId']) {
+        } elseif ($xml->getElementsByTagName('Issuer')->item(0)->nodeValue != $_SESSION['idpEntityId']) {
             throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] . " but received " . $xml->getElementsByTagName('Issuer')->item(0)->nodeValue);
         }
+        if ($xml->getElementsByTagName('SubjectConfirmationData')->length == 0) {
+            throw new \Exception("Missing SubjectConfirmationData attribute");
+        } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('InResponseTo') != $_SESSION['RequestID']) {
+            throw new \Exception("Invalid SubjectConfirmationData attribute, expected " . $_SESSION['RequestID'] . " but received " . $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('InResponseTo'));
+        } elseif (strtotime($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('NotOnOrAfter')) < strtotime('now')) {
+            throw new \Exception("Invalid NotOnOrAfter attribute");
+        } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient') != $_SESSION['acsUrl']) {
+            throw new \Exception("Invalid Recipient attribute, expected " . $_SESSION['acsUrl'] . " but received " . $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient'));
+        }
+    
         if ($xml->getElementsByTagName('Status')->length <= 0) {
             throw new \Exception("Missing Status element");
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') == 'urn:oasis:names:tc:SAML:2.0:status:Success') {
