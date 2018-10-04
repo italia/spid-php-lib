@@ -80,9 +80,9 @@ Alternatives for other languages:
 |parsing of LogoutRequest XML|✓|
 |verification of `Response/Signature` value (if any)|✓|
 |verification of `Response/Signature` certificate (if any) against IdP metadata|✓|
-|verification of `Issuer`|pending, see: [#47](https://github.com/italia/spid-php-lib/issues/47)|
+|verification of `Issuer`|pending, see: [✓|
 |verification of `Destination`|pending, see: [#47](https://github.com/italia/spid-php-lib/issues/47)|
-|parsing of `NameID`|pending, see: [#47](https://github.com/italia/spid-php-lib/issues/47)|
+|parsing of `NameID`|✓|
 |**LogoutResponse generation (for third-party-initiated logout):**||
 |generation of LogoutResponse XML|✓|
 |HTTP-Redirect binding|✓|

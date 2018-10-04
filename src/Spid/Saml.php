@@ -145,8 +145,10 @@ XML;
 
     public function isAuthenticated() : bool
     {
+        $selectedIdp = $_SESSION['idpName'] ?? $_SESSION['spidSession']->idp ?? null;
+        if (is_null($selectedIdp)) return false;
         $idp = $this->loadIdpFromFile($_SESSION['idpName'] ?? $_SESSION['spidSession']->idp);
-        $response = new BaseResponse();
+        $response = new BaseResponse($this);
         if (!empty($idp) && !$response->validate($idp->metadata['idpCertValue'])) {
             return false;
         }

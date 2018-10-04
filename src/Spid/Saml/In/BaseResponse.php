@@ -3,6 +3,7 @@
 namespace Italia\Spid\Spid\Saml\In;
 
 use Italia\Spid\Spid\Saml\SignatureUtils;
+use Italia\Spid\Spid\Saml;
 
 /*
 * Generates the proper response object at runtime by reading the input XML.
@@ -20,7 +21,7 @@ class BaseResponse
     var $response;
     var $xml;
 
-    public function __construct()
+    public function __construct(Saml $saml = null)
     {
         if (!isset($_POST) || !isset($_POST['SAMLResponse'])) {
             return;
@@ -36,13 +37,15 @@ class BaseResponse
                 // When reloading the acs page, POST data is sent again even if login is completed
                 // If login session already exists exit without checking the response again
                 if (isset($_SESSION['spidSession'])) return;
-                $this->response = new Response();
+                if (is_null($saml)) return;
+                $this->response = new Response($saml);
                 break;
             case 'samlp:LogoutResponse':
                 $this->response = new LogoutResponse();
                 break;
             case 'samlp:LogoutRequest':
-                $this->response = new LogoutRequest();
+                if (is_null($saml)) return;
+                $this->response = new LogoutRequest($saml);
                 break;
             default:
                 throw new \Exception('No valid response found');

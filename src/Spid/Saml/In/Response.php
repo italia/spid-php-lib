@@ -4,9 +4,18 @@ namespace Italia\Spid\Spid\Saml\In;
 
 use Italia\Spid\Spid\Interfaces\ResponseInterface;
 use Italia\Spid\Spid\Session;
+use Italia\Spid\Spid\Saml;
 
 class Response implements ResponseInterface
 {
+
+    private $saml;
+
+    public function __construct(Saml $saml) 
+    {
+        $this->saml = $saml;
+    }
+
     public function validate($xml): bool
     {
         $root = $xml->getElementsByTagName('Response')->item(0);
@@ -40,9 +49,9 @@ class Response implements ResponseInterface
         }
         if ($xml->getElementsByTagName('Conditions')->length == 0) {
             throw new \Exception("Missing Conditions attribute");
-        } elseif ($xml->getElementsByTagName('Conditions')->getAttribute('NotBefore') == "" || strtotime($xml->getElementsByTagName('Conditions')->getAttribute('NotBefore')) > strtotime('now')) {
+        } elseif ($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore') == "" || strtotime($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore')) > strtotime('now')) {
             throw new \Exception("Invalid NotBefore attribute");
-        } elseif ($xml->getElementsByTagName('Conditions')->getAttribute('NotOnOrAfter') == "" || strtotime($xml->getElementsByTagName('Conditions')->getAttribute('NotOnOrAfter')) < strtotime('now')) {
+        } elseif ($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter') == "" || strtotime($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter')) < strtotime('now')) {
             throw new \Exception("Invalid NotOnOrAfter attribute");
         }
         if ($xml->getElementsByTagName('AudienceRestriction')->length == 0) {
@@ -50,13 +59,13 @@ class Response implements ResponseInterface
         }
         if ($xml->getElementsByTagName('Audience')->length == 0) {
             throw new \Exception("Missing Audience attribute");
-        } elseif ($xml->getElementsByTagName('Audience')->item(0)->nodeValue != $_SESSION['spEntityId']) {
-            throw new \Exception("Invalid Audience attribute, expected " . $_SESSION['spEntityId'] . " but received " . $xml->getElementsByTagName('Audience')->item(0)->nodeValue);
+        } elseif ($xml->getElementsByTagName('Audience')->item(0)->nodeValue != $this->saml->settings['sp_entityid']) {
+            throw new \Exception("Invalid Audience attribute, expected " . $this->saml->settings['sp_entityid'] . " but received " . $xml->getElementsByTagName('Audience')->item(0)->nodeValue);
         }
         if ($xml->getElementsByTagName('NameID')->length == 0) {
             throw new \Exception("Missing NameID attribute");
-        } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format') != 'urn:oasis:names:tc:SAML:2.0:nameidformat:transient') {
-            throw new \Exception("Invalid NameID attribute, expected 'urn:oasis:names:tc:SAML:2.0:nameidformat:transient'" . " but received " . $xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format'));
+        } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format') != 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient') {
+            throw new \Exception("Invalid NameID attribute, expected 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'" . " but received " . $xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format'));
         } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier') != $_SESSION['idpEntityId']) {
             throw new \Exception("Invalid NameQualifier attribute, expected " . $_SESSION['idpEntityId'] . " but received " . $xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier'));
         }
@@ -89,7 +98,6 @@ class Response implements ResponseInterface
         unset($_SESSION['idpName']);
         unset($_SESSION['idpEntityId']);
         unset($_SESSION['acsUrl']);
-        unset($_SESSION['spEntityId']);
         return true;
     }
 
