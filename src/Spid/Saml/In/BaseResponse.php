@@ -3,13 +3,25 @@
 namespace Italia\Spid\Spid\Saml\In;
 
 use Italia\Spid\Spid\Saml\SignatureUtils;
+use Italia\Spid\Spid\Saml;
 
+/*
+* Generates the proper response object at runtime by reading the input XML.
+* Validates the response and the signature
+* Specific response may complete other tasks upon succesful validation
+* such as creating a login session for Response, or destroying the session 
+* for Logout resposnes.
+
+* The only case in which a Request is validated instead of a response is
+* for Idp Initiated Logout. In this case the input is not a response to a requese
+* to a request sent by the SP, but rather a request started by the Idp
+*/
 class BaseResponse
 {
     var $response;
     var $xml;
 
-    public function __construct()
+    public function __construct(Saml $saml = null)
     {
         if (!isset($_POST) || !isset($_POST['SAMLResponse'])) {
             return;
@@ -25,13 +37,15 @@ class BaseResponse
                 // When reloading the acs page, POST data is sent again even if login is completed
                 // If login session already exists exit without checking the response again
                 if (isset($_SESSION['spidSession'])) return;
-                $this->response = new Response();
+                if (is_null($saml)) return;
+                $this->response = new Response($saml);
                 break;
             case 'samlp:LogoutResponse':
                 $this->response = new LogoutResponse();
                 break;
             case 'samlp:LogoutRequest':
-                $this->response = new LogoutRequest();
+                if (is_null($saml)) return;
+                $this->response = new LogoutRequest($saml);
                 break;
             default:
                 throw new \Exception('No valid response found');

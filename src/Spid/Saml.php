@@ -6,14 +6,13 @@ use Italia\Spid\Spid\Saml\Idp;
 use Italia\Spid\Spid\Saml\In\BaseResponse;
 use Italia\Spid\Spid\Saml\Settings;
 use Italia\Spid\Spid\Saml\SignatureUtils;
+use Italia\Spid\Spid\Interfaces\SAMLInterface;
 
-class Saml implements Interfaces\SpInterface
+class Saml implements SAMLInterface
 {
     var $settings;
-    var $idps = [];
-    var $session;
-
-    private $binding;
+    var $idps = []; // contains filename -> Idp object array
+    var $session; // Session object
 
     public function __construct(array $settings)
     {
@@ -23,13 +22,33 @@ class Saml implements Interfaces\SpInterface
 
     public function loadIdpFromFile($filename)
     {
-        if (empty($filename)) return;
+        if (empty($filename)) return null;
         if (array_key_exists($filename, $this->idps)) {
             return $this->idps[$filename];
         }
         $idp = new Idp($this);
         $this->idps[$filename] = $idp->loadFromXml($filename);
         return $idp;
+    }
+
+    public function getIdpList() : array
+    {
+        $files = glob($this->settings['idp_metadata_folder'] . "/*xml");
+
+        if (is_array($files)) {
+            $mapping = array();
+            foreach($files as $filename) {
+                $idp = $this->loadIdpFromFile($filename);
+                $mapping[$idp->metadata['idpEntityId']] = $filename;
+            }
+            return $mapping;
+        }
+        return array();
+    }
+
+    public function getIdp($filename)
+    {
+        return $this->loadIdpFromFile($filename);
     }
 
     public function getSPMetadata(): string
@@ -92,11 +111,6 @@ XML;
         return SignatureUtils::signXml($xml, $this->settings);
     }
 
-    public function getIdp($idpName) : Idp
-    {
-        return key_exists($idpName, $this->idps) ? $this->idps[$idpName] : null;
-    }
-
     public function login($idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
     {
         $args = func_get_args();
@@ -131,8 +145,10 @@ XML;
 
     public function isAuthenticated() : bool
     {
+        $selectedIdp = $_SESSION['idpName'] ?? $_SESSION['spidSession']->idp ?? null;
+        if (is_null($selectedIdp)) return false;
         $idp = $this->loadIdpFromFile($_SESSION['idpName'] ?? $_SESSION['spidSession']->idp);
-        $response = new BaseResponse();
+        $response = new BaseResponse($this);
         if (!empty($idp) && !$response->validate($idp->metadata['idpCertValue'])) {
             return false;
         }
@@ -170,11 +186,7 @@ XML;
 
     public function getAttributes() : array
     {
+        if ($this->isAuthenticated() === false) return array();
         return $this->session->attributes;
-    }
-
-    public function loadIdpMetadata($path)
-    {
-        // TODO: Implement loadIdpMetadata() method.
     }
 }

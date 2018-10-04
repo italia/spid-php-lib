@@ -46,21 +46,21 @@ Alternatives for other languages:
 |**Response/Assertion parsing**||
 |verification of `Signature` value (if any)|✓|
 |verification of `Signature` certificate (if any) against IdP/AA metadata|✓|
-|verification of `Assertion/Signature` value|pending, see: [#40](https://github.com/italia/spid-php-lib/issues/40)|
-|verification of `Assertion/Signature` certificate against IdP/AA metadata|pending, see: [#40](https://github.com/italia/spid-php-lib/issues/40)|
-|verification of `SubjectConfirmationData/@Recipient`|pending, see: [#41](https://github.com/italia/spid-php-lib/issues/41)|
-|verification of `SubjectConfirmationData/@NotOnOrAfter`|pending, see: [#41](https://github.com/italia/spid-php-lib/issues/41)|
-|verification of `SubjectConfirmationData/@InResponseTo`|pending, see: [#41](https://github.com/italia/spid-php-lib/issues/41)|
-|verification of `Issuer`|pending, see: [#43](https://github.com/italia/spid-php-lib/issues/43)|
-|verification of `Assertion/Issuer`|pending, see: [#42](https://github.com/italia/spid-php-lib/issues/42)|
-|verification of `Destination`|pending, see: [#43](https://github.com/italia/spid-php-lib/issues/43)|
-|verification of `Conditions/@NotBefore`|pending, see: [#42](https://github.com/italia/spid-php-lib/issues/42)|
-|verification of `Conditions/@NotOnOrAfter`|pending, see: [#42](https://github.com/italia/spid-php-lib/issues/42)|
-|verification of `Audience`|pending, see: [#42](https://github.com/italia/spid-php-lib/issues/42)|
+|verification of `Assertion/Signature` value|✓|
+|verification of `Assertion/Signature` certificate against IdP/AA metadata|✓|
+|verification of `SubjectConfirmationData/@Recipient`|✓|
+|verification of `SubjectConfirmationData/@NotOnOrAfter`|✓|
+|verification of `SubjectConfirmationData/@InResponseTo`|✓|
+|verification of `Issuer`|✓|
+|verification of `Assertion/Issuer`|✓|
+|verification of `Destination`|✓|
+|verification of `Conditions/@NotBefore`|✓|
+|verification of `Conditions/@NotOnOrAfter`|✓|
+|verification of `Audience`|✓|
 |parsing of Response with no `Assertion` (authentication/query failure)|✓|
 |parsing of failure `StatusCode` (Requester/Responder)|✓|
 |**Response/Assertion parsing for SSO (1.2.1, 1.2.2.2, 1.3.1):**||
-|parsing of `NameID`|pending, see: [#44](https://github.com/italia/spid-php-lib/issues/44)|
+|parsing of `NameID`|✓|
 |parsing of `AuthnContextClassRef` (SPID level)|✓|
 |parsing of attributes|✓|
 |**Response/Assertion parsing for attribute query (2.2.2.2, 2.3.1):**||
@@ -73,16 +73,16 @@ Alternatives for other languages:
 |parsing of LogoutResponse XML|✓|
 |verification of `Response/Signature` value (if any)|✓|
 |verification of `Response/Signature` certificate (if any) against IdP metadata|✓|
-|verification of `Issuer`|pending, see: [#45](https://github.com/italia/spid-php-lib/issues/45)|
-|verification of `Destination`|pending, see: [#45](https://github.com/italia/spid-php-lib/issues/45)|
+|verification of `Issuer`|✓|
+|verification of `Destination`|✓|
 |PartialLogout detection|pending, see: [#46](https://github.com/italia/spid-php-lib/issues/46)|
 |**LogoutRequest parsing (for third-party-initiated logout):**||
 |parsing of LogoutRequest XML|✓|
 |verification of `Response/Signature` value (if any)|✓|
 |verification of `Response/Signature` certificate (if any) against IdP metadata|✓|
-|verification of `Issuer`|pending, see: [#47](https://github.com/italia/spid-php-lib/issues/47)|
-|verification of `Destination`|pending, see: [#47](https://github.com/italia/spid-php-lib/issues/47)|
-|parsing of `NameID`|pending, see: [#47](https://github.com/italia/spid-php-lib/issues/47)|
+|verification of `Issuer`|pending, see: [✓|
+|verification of `Destination`|✓|
+|parsing of `NameID`|✓|
 |**LogoutResponse generation (for third-party-initiated logout):**||
 |generation of LogoutResponse XML|✓|
 |HTTP-Redirect binding|✓|
@@ -235,6 +235,73 @@ Lint the code with:
 ```
 ./vendor/bin/phpcs --standard=PSR2 xxx.php
 ```
+
+## SPID Compliance Assessment
+
+|<img src="https://github.com/italia/spid-graphics/blob/master/spid-logos/spid-logo-c-lb.png?raw=true" width="100" /><br />_Compliance with [SPID regulations](http://www.agid.gov.it/sites/default/files/circolari/spid-regole_tecniche_v1.pdf) (for Service Providers)_||
+|:---|:---|
+|**Metadata:**||
+|parsing of IdP XML metadata (1.2.2.4)|✓|
+|parsing of AA XML metadata (2.2.4)||
+|SP XML metadata generation (1.3.2)|✓|
+|**AuthnRequest generation (1.2.2.1):**||
+|generation of AuthnRequest XML|✓|
+|HTTP-Redirect binding|✓|
+|HTTP-POST binding|✓|
+|`AssertionConsumerServiceURL` customization|✓|
+|`AssertionConsumerServiceIndex` customization|✓|
+|`AttributeConsumingServiceIndex` customization|✓|
+|`AuthnContextClassRef` (SPID level) customization|✓|
+|`RequestedAuthnContext/@Comparison` customization||
+|`RelayState` customization (1.2.2)|?|
+|**Response/Assertion parsing**||
+|verification of `Response/Signature` value (if any)|?|
+|verification of `Response/Signature` certificate (if any) against IdP/AA metadata|?|
+|verification of `Assertion/Signature` value|✓|
+|verification of `Assertion/Signature` certificate against IdP/AA metadata|✓|
+|verification of `SubjectConfirmationData/@Recipient`|?|
+|verification of `SubjectConfirmationData/@NotOnOrAfter`|?|
+|verification of `SubjectConfirmationData/@InResponseTo`|?|
+|verification of `Issuer`|?|
+|verification of `Destination`|?|
+|verification of `Conditions/@NotBefore`|?|
+|verification of `Conditions/@NotOnOrAfter`|?|
+|verification of `Audience`|?|
+|parsing of Response with no `Assertion` (authentication/query failure)|?|
+|parsing of failure `StatusCode` (Requester/Responder)|?|
+|verification of `RelayState` (saml-bindings-2.0-os 3.5.3)|?|
+|**Response/Assertion parsing for SSO (1.2.1, 1.2.2.2, 1.3.1):**||
+|parsing of `NameID`|✓|
+|parsing of `AuthnContextClassRef` (SPID level)|✓|
+|parsing of attributes|✓|
+|**Response/Assertion parsing for attribute query (2.2.2.2, 2.3.1):**||
+|parsing of attributes|✓|
+|**LogoutRequest generation (for SP-initiated logout):**|✓|
+|generation of LogoutRequest XML|✓|
+|HTTP-Redirect binding|✓|
+|HTTP-POST binding|✓|
+|**LogoutResponse parsing (for SP-initiated logout):**||
+|parsing of LogoutResponse XML|✓|
+|verification of `Response/Signature` value (if any)|✓|
+|verification of `Response/Signature` certificate (if any) against IdP metadata|✓|
+|verification of `Issuer`|✓|
+|verification of `Destination`|✓|
+|PartialLogout detection|?|
+|**LogoutRequest parsing (for third-party-initiated logout):**||
+|parsing of LogoutRequest XML|?|
+|verification of `Response/Signature` value (if any)|?|
+|verification of `Response/Signature` certificate (if any) against IdP metadata|?|
+|verification of `Issuer`|?|
+|verification of `Destination`|?|
+|parsing of `NameID`|?|
+|**LogoutResponse generation (for third-party-initiated logout):**||
+|generation of LogoutResponse XML|?|
+|HTTP-Redirect binding|?|
+|HTTP-POST binding|?|
+|PartialLogout customization|?|
+|**AttributeQuery generation (2.2.2.1):**||
+|generation of AttributeQuery XML|?|
+|SOAP binding (client)|?|
 
 ## Contributing
 

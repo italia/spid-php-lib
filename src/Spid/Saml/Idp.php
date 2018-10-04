@@ -58,7 +58,7 @@ class Idp implements IdpInterface
         return $this;
     }
 
-    public static function formatCert($cert, $heads = true)
+    private static function formatCert($cert, $heads = true)
     {
         //$cert = str_replace(" ", "\n", $cert);
         $x509cert = str_replace(array("\x0D", "\r", "\n"), "", $cert);
@@ -84,6 +84,8 @@ class Idp implements IdpInterface
         $url = $binding == Settings::BINDING_REDIRECT ? $authn->redirectUrl($redirectTo) : $authn->httpPost($redirectTo);
         $_SESSION['RequestID'] = $authn->id;
         $_SESSION['idpName'] = $this->idpFileName;
+        $_SESSION['idpEntityId'] = $this->metadata['idpEntityId'];
+        $_SESSION['acsUrl'] = $this->sp->settings['sp_assertionconsumerservice'][$ass];
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
@@ -103,6 +105,8 @@ class Idp implements IdpInterface
         $url = ($binding == Settings::BINDING_REDIRECT) ? $logoutRequest->redirectUrl($redirectTo) : $logoutRequest->httpPost($redirectTo);
         $_SESSION['RequestID'] = $logoutRequest->id;
         $_SESSION['idpName'] = $this->idpFileName;
+        $_SESSION['idpEntityId'] = $this->metadata['idpEntityId'];
+        $_SESSION['sloUrl'] = $this->sp->settings['sp_singlelogoutservice'];
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
@@ -123,7 +127,7 @@ class Idp implements IdpInterface
         $url = ($binding == Settings::BINDING_REDIRECT) ? $logoutResponse->redirectUrl($redirectTo) : $logoutResponse->httpPost($redirectTo);
         unset($_SESSION);
         
-        if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
+        if ($binding == Settings::BINDING_POST) {
             return $url;
             exit;
         }

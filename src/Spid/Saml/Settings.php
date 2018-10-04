@@ -7,6 +7,7 @@ class Settings
     const BINDING_REDIRECT = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect';
     const BINDING_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST';
 
+    // Settings with value 1 are mandatory
     private static $validSettings = [
         'sp_entityid' => 1,
         'sp_key_file' => 1,
@@ -45,9 +46,13 @@ class Settings
         }
     }
 
-    public static function cleanOpenSsl($file)
+    public static function cleanOpenSsl($file, $isCert = false)
     {
-        $k = file_get_contents($file);
+        if ($isCert) {
+            $k = $file;
+        } else {
+            $k = file_get_contents($file);
+        }
         $ck = '';
         foreach (preg_split("/((\r?\n)|(\r\n?))/", $k) as $l) {
             if (strpos($l, '-----') === false) {

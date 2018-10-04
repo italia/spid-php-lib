@@ -15,10 +15,7 @@ class SignatureUtils
         $cert = file_get_contents($settings['sp_cert_file']);
         $dom = new \DOMDocument();
         $dom->loadXML($xml);
-        if (!$dom) {
-            throw new Exception('Error parsing xml string');
-        }
-
+    
         $objKey = new XMLSecurityKey('http://www.w3.org/2001/04/xmldsig-more#rsa-sha256', array('type' => 'private'));
         $objKey->loadKey($key, false);
 
@@ -66,6 +63,12 @@ class SignatureUtils
     {
         if (is_null($xml)) return true;
         $dom = clone $xml->ownerDocument;
+
+        $certFingerprint = Settings::cleanOpenSsl($cert, true);
+        $signCertFingerprint = Settings::cleanOpenSsl($dom->getElementsByTagName('X509Certificate')->item(0)->nodeValue, true); 
+        if ($signCertFingerprint != $certFingerprint) {
+            return false;
+        }
 
         $objXMLSecDSig = new XMLSecurityDSig();
         $objXMLSecDSig->idKeys = array('ID');
