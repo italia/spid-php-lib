@@ -53,6 +53,13 @@ class Response implements ResponseInterface
         } elseif ($xml->getElementsByTagName('Audience')->item(0)->nodeValue != $_SESSION['spEntityId']) {
             throw new \Exception("Invalid Audience attribute, expected " . $_SESSION['spEntityId'] . " but received " . $xml->getElementsByTagName('Audience')->item(0)->nodeValue);
         }
+        if ($xml->getElementsByTagName('NameID')->length == 0) {
+            throw new \Exception("Missing NameID attribute");
+        } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format') != 'urn:oasis:names:tc:SAML:2.0:nameidformat:transient') {
+            throw new \Exception("Invalid NameID attribute, expected 'urn:oasis:names:tc:SAML:2.0:nameidformat:transient'" . " but received " . $xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format'));
+        } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier') != $_SESSION['idpEntityId']) {
+            throw new \Exception("Invalid NameQualifier attribute, expected " . $_SESSION['idpEntityId'] . " but received " . $xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier'));
+        }
         if ($xml->getElementsByTagName('SubjectConfirmationData')->length == 0) {
             throw new \Exception("Missing SubjectConfirmationData attribute");
         } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('InResponseTo') != $_SESSION['RequestID']) {

@@ -60,7 +60,7 @@ Alternatives for other languages:
 |parsing of Response with no `Assertion` (authentication/query failure)|✓|
 |parsing of failure `StatusCode` (Requester/Responder)|✓|
 |**Response/Assertion parsing for SSO (1.2.1, 1.2.2.2, 1.3.1):**||
-|parsing of `NameID`|pending, see: [#44](https://github.com/italia/spid-php-lib/issues/44)|
+|parsing of `NameID`|✓|
 |parsing of `AuthnContextClassRef` (SPID level)|✓|
 |parsing of attributes|✓|
 |**Response/Assertion parsing for attribute query (2.2.2.2, 2.3.1):**||
