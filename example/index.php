@@ -1,10 +1,10 @@
 <?php
-require_once(__DIR__ . "/../../vendor/autoload.php");
+require_once(__DIR__ . "/../vendor/autoload.php");
 if (file_exists(__DIR__ . "/config.php")) require_once(__DIR__ . "/config.php");
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(E_ERROR);
+error_reporting(E_ALL);
 
 $base = 'https://sp.example.com';
 $settings = [

@@ -46,7 +46,7 @@ Alternatives for other languages:
 |**Response/Assertion parsing**||
 |verification of `Signature` value (if any)|✓|
 |verification of `Signature` certificate (if any) against IdP/AA metadata|✓|
-|verification of `Assertion/Signature` value|pending, see: [#40](https://github.com/italia/spid-php-lib/issues/40)|
+|verification of `Assertion/Signature` value|✓|
 |verification of `Assertion/Signature` certificate against IdP/AA metadata|pending, see: [#40](https://github.com/italia/spid-php-lib/issues/40)|
 |verification of `SubjectConfirmationData/@Recipient`|pending, see: [#41](https://github.com/italia/spid-php-lib/issues/41)|
 |verification of `SubjectConfirmationData/@NotOnOrAfter`|pending, see: [#41](https://github.com/italia/spid-php-lib/issues/41)|

@@ -31,8 +31,8 @@ class Response implements ResponseInterface
         }
         if ($xml->getElementsByTagName('Issuer')->length == 0) {
             throw new \Exception("Missing Issuer attribute");
-        } elseif ($xml->getElementsByTagName('Issuer')->item(0) != $_SESSION['idpEntityId']) {
-            throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] . " but received " . $xml->getElementsByTagName('Response')->item(0));
+        } elseif ($xml->getElementsByTagName('Issuer')->item(0)->nodeValue!= $_SESSION['idpEntityId']) {
+            throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] . " but received " . $xml->getElementsByTagName('Issuer')->item(0)->nodeValue);
         }
         if ($xml->getElementsByTagName('Status')->length <= 0) {
             throw new \Exception("Missing Status element");
