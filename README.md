@@ -48,15 +48,15 @@ Alternatives for other languages:
 |verification of `Signature` certificate (if any) against IdP/AA metadata|✓|
 |verification of `Assertion/Signature` value|✓|
 |verification of `Assertion/Signature` certificate against IdP/AA metadata|pending, see: [#40](https://github.com/italia/spid-php-lib/issues/40)|
-|verification of `SubjectConfirmationData/@Recipient`|pending, see: [#41](https://github.com/italia/spid-php-lib/issues/41)|
-|verification of `SubjectConfirmationData/@NotOnOrAfter`|pending, see: [#41](https://github.com/italia/spid-php-lib/issues/41)|
-|verification of `SubjectConfirmationData/@InResponseTo`|pending, see: [#41](https://github.com/italia/spid-php-lib/issues/41)|
+|verification of `SubjectConfirmationData/@Recipient`|✓|
+|verification of `SubjectConfirmationData/@NotOnOrAfter`|✓|
+|verification of `SubjectConfirmationData/@InResponseTo`|✓|
 |verification of `Issuer`|pending, see: [#43](https://github.com/italia/spid-php-lib/issues/43)|
-|verification of `Assertion/Issuer`|pending, see: [#42](https://github.com/italia/spid-php-lib/issues/42)|
+|verification of `Assertion/Issuer`|✓|
 |verification of `Destination`|pending, see: [#43](https://github.com/italia/spid-php-lib/issues/43)|
-|verification of `Conditions/@NotBefore`|pending, see: [#42](https://github.com/italia/spid-php-lib/issues/42)|
-|verification of `Conditions/@NotOnOrAfter`|pending, see: [#42](https://github.com/italia/spid-php-lib/issues/42)|
-|verification of `Audience`|pending, see: [#42](https://github.com/italia/spid-php-lib/issues/42)|
+|verification of `Conditions/@NotBefore`|✓|
+|verification of `Conditions/@NotOnOrAfter`|✓|
+|verification of `Audience`|✓|
 |parsing of Response with no `Assertion` (authentication/query failure)|✓|
 |parsing of failure `StatusCode` (Requester/Responder)|✓|
 |**Response/Assertion parsing for SSO (1.2.1, 1.2.2.2, 1.3.1):**||
@@ -73,8 +73,8 @@ Alternatives for other languages:
 |parsing of LogoutResponse XML|✓|
 |verification of `Response/Signature` value (if any)|✓|
 |verification of `Response/Signature` certificate (if any) against IdP metadata|✓|
-|verification of `Issuer`|pending, see: [#45](https://github.com/italia/spid-php-lib/issues/45)|
-|verification of `Destination`|pending, see: [#45](https://github.com/italia/spid-php-lib/issues/45)|
+|verification of `Issuer`|✓|
+|verification of `Destination`|✓|
 |PartialLogout detection|pending, see: [#46](https://github.com/italia/spid-php-lib/issues/46)|
 |**LogoutRequest parsing (for third-party-initiated logout):**||
 |parsing of LogoutRequest XML|✓|

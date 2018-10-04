@@ -31,8 +31,27 @@ class Response implements ResponseInterface
         }
         if ($xml->getElementsByTagName('Issuer')->length == 0) {
             throw new \Exception("Missing Issuer attribute");
+            //check item 0, this the Issuer element child of Response
         } elseif ($xml->getElementsByTagName('Issuer')->item(0)->nodeValue != $_SESSION['idpEntityId']) {
             throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] . " but received " . $xml->getElementsByTagName('Issuer')->item(0)->nodeValue);
+            //check item 1, this the Issuer element child of Assertion
+        } elseif ($xml->getElementsByTagName('Issuer')->item(1)->nodeValue != $_SESSION['idpEntityId']) {
+            throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] . " but received " . $xml->getElementsByTagName('Issuer')->item(0)->nodeValue);
+        }
+        if ($xml->getElementsByTagName('Conditions')->length == 0) {
+            throw new \Exception("Missing Conditions attribute");
+        } elseif ($xml->getElementsByTagName('Conditions')->getAttribute('NotBefore') == "" || strtotime($xml->getElementsByTagName('Conditions')->getAttribute('NotBefore')) > strtotime('now')) {
+            throw new \Exception("Invalid NotBefore attribute");
+        } elseif ($xml->getElementsByTagName('Conditions')->getAttribute('NotOnOrAfter') == "" || strtotime($xml->getElementsByTagName('Conditions')->getAttribute('NotOnOrAfter')) < strtotime('now')) {
+            throw new \Exception("Invalid NotOnOrAfter attribute");
+        }
+        if ($xml->getElementsByTagName('AudienceRestriction')->length == 0) {
+            throw new \Exception("Missing AudienceRestriction attribute");
+        }
+        if ($xml->getElementsByTagName('Audience')->length == 0) {
+            throw new \Exception("Missing Audience attribute");
+        } elseif ($xml->getElementsByTagName('Audience')->item(0)->nodeValue != $_SESSION['spEntityId']) {
+            throw new \Exception("Invalid Audience attribute, expected " . $_SESSION['spEntityId'] . " but received " . $xml->getElementsByTagName('Audience')->item(0)->nodeValue);
         }
         if ($xml->getElementsByTagName('SubjectConfirmationData')->length == 0) {
             throw new \Exception("Missing SubjectConfirmationData attribute");
@@ -63,6 +82,7 @@ class Response implements ResponseInterface
         unset($_SESSION['idpName']);
         unset($_SESSION['idpEntityId']);
         unset($_SESSION['acsUrl']);
+        unset($_SESSION['spEntityId']);
         return true;
     }
 
