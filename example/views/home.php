@@ -1,3 +1,4 @@
+<a href="/smart-button">Smart Button Login</a><br>
 <a href="/login">Login</a><br>
 <a href="/login-post">Login POST</a><br>
 <a href="/logout">Logout</a><br>
