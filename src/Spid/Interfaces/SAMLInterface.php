@@ -36,7 +36,7 @@ interface SAMLInterface
 
     // loads all Idps found in the idp metadata folder provided in settings
     // files are loaded with loadIdpFromFile($filename)
-    // returns an array mapping entityID => filename (used for spid-smart-button)
+    // returns an array mapping filename (without extension) => entityID (used for spid-smart-button)
     // if no idps are found returns an empty array
     public function getIdpList() : array;
 
@@ -47,19 +47,19 @@ interface SAMLInterface
     public function getSPMetadata() : string;
     
     // performs login
-    // $idpName: shortname of IdP, same as the name of corresponding IdP metadata file, without .xml
-    // $ass: index of assertion consumer service as per the SP metadata
-    // $attr: index of attribute consuming service as per the SP metadata
+    // $idpFilename: shortname of IdP, same as the name of corresponding IdP metadata file, without .xml
+    // $assertID: index of assertion consumer service as per the SP metadata
+    // $attrID: index of attribute consuming service as per the SP metadata
     // $level: SPID level (1, 2 or 3)
     // $returnTo: return url
     // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
     // returns false is already logged in
     // returns an empty string if $shouldRedirect = true, the login URL otherwhise
-    public function login($idpName, $ass, $attr, $level = 1, $redirectTo = null, $shouldRedirect = true);
+    public function login($idpFilename, $assertID, $attrID, $level = 1, $redirectTo = null, $shouldRedirect = true);
 
     // performs login with POST Binding
     // uses the same parameters and return values as login
-    public function loginPost($idpName, $ass, $attr, $level = 1, $redirectTo = null, $shouldRedirect = true);
+    public function loginPost($idpFilename, $assertID, $attrID, $level = 1, $redirectTo = null, $shouldRedirect = true);
 
     // This method takes the necessary steps to update the user login status, and return a boolean representing the result
     // The method checks for any input response and validates it. The validation itself can create or destroy login sessions.
@@ -82,7 +82,7 @@ interface SAMLInterface
     // uses the same parameters and return values as logout
     public function logoutPost($redirectTo = null, $shouldRedirect = true);
 
-    // returns attributes as an array or null if not authenticated
+    // returns attributes as an array or an empty array if not authenticated
     // example: array('name' => 'Franco', 'familyName' => 'Rossi', 'fiscalNumber' => 'FFFRRR88A12T4441R',)
     public function getAttributes() : array;
 }
