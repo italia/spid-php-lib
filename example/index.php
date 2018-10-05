@@ -17,7 +17,7 @@ $settings = [
     'sp_singlelogoutservice' => $base . '/slo',
     'sp_org_name' => 'test',
     'sp_org_display_name' => 'Test',
-    'idp_metadata_folder' => './idp_metadata/',
+    'idp_metadata_folder' => '/Users/lorenzocattaneo/Projects/spid-php-lib/example/idp_metadata/',
     'sp_attributeconsumingservice' => [
         ["name", "familyName", "fiscalNumber", "email"],
         ["name", "familyName", "fiscalNumber", "email", "spidCode"]
@@ -31,6 +31,10 @@ switch ($request_uri[0]) {
     // Home page
     case '/':
         require './views/home.php';
+        break;
+    // Login page
+    case '/smart-button':
+        require './views/smart-button.php';
         break;
     // Login page
     case '/login':

@@ -25,7 +25,11 @@ class Idp implements IdpInterface
 
     public function loadFromXml($xmlFile)
     {
-        $fileName = $this->sp->settings['idp_metadata_folder'] . $xmlFile . ".xml";
+        if (strpos($xmlFile, $this->sp->settings['idp_metadata_folder']) !== false) {
+            $fileName = $xmlFile;
+        } else {
+            $fileName = $this->sp->settings['idp_metadata_folder'] . $xmlFile . ".xml";
+        } 
         if (!file_exists($fileName)) {
             throw new \Exception("Metadata file $fileName not found", 1);
         }
