@@ -88,7 +88,7 @@ XML;
             foreach ($attrcsArray[$i] as $attr) {
                 $xml .= <<<XML
 
-            <md:RequestedAttribute Name="$attr"/>
+            <md:RequestedAttribute Name="$attr" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic"/>
 XML;
             }
             $xml .= '</md:AttributeConsumingService>';
