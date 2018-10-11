@@ -112,7 +112,7 @@ Supports PHP 7.0, 7.1 and 7.2.
 ### Prerequisites
 
 ```sh
-sudo apt install composer make openssl php-curl php-zip php-xml phpunit
+sudo apt install composer make openssl php-curl php-zip php-xml
 ```
 
 ### Configuring and Installing
