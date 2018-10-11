@@ -20,6 +20,26 @@ class Settings
         'idp_metadata_folder' => 1
     ];
 
+    private static $validAttributeFields = [
+        "gender",
+        "companyName",
+        "registeredOffice",
+        "fiscalNumber",
+        "ivaCode",
+        "idCard",
+        "spidCode",
+        "name",
+        "familyName",
+        "placeOfBirth",
+        "countyOfBirth",
+        "dateOfBirth",
+        "mobilePhone",
+        "email",
+        "address",
+        "expirationDate",
+        "digitalAddress"
+    ];
+
     public static function validateSettings(array $settings)
     {
         $missingSettings = array();
@@ -44,6 +64,8 @@ class Settings
         if (count($invalidFields) > 0) {
             throw new \Exception($msg);
         }
+
+        self::checkSettingsValus($settings);
     }
 
     public static function cleanOpenSsl($file, $isCert = false)
@@ -60,5 +82,22 @@ class Settings
             }
         }
         return $ck;
+    }
+
+    private static function checkSettingsValues($settings)
+    {
+        if (filter_var($settings[''], FILTER_VALIDATE_URL) === false)
+            throw new \Exception('Invalid SP Entity ID provided');
+        if (isset($settings['sp_attributeconsumingservice'])) {
+           if (!is_array($settings['sp_attributeconsumingservice'])) throw new \Exception('sp_attributeconsumingservice should be an array');
+           array_walk($settings['sp_attributeconsumingservice'], function($acs) {
+                if (!is_array($acs)) throw new \Exception('sp_attributeconsumingservice elements should be an arrays');
+                array_walk($acs, function($field) {
+                    if (!in_array($field, self::$validAttributeFields)) throw new \Exception('Invalid Attribute field '. $field .' requested');
+                });
+           });
+        }
+        
+
     }
 }
