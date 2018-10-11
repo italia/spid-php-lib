@@ -39,7 +39,11 @@ $mapping = $sp->getIdpList();
         },
         // At least one supported IDP must be provided
         supported: [
-            "<?php echo $mapping['testenv'] ?>"
+            <?php 
+            foreach ($mapping as $key => $value) {
+                echo "'".$key."',";
+            }
+            ?>
         ],
         // Il campo sarebbe opzionale, ma anche se il mapping contiene testenv, la libreria smart-button sembra 
         // ignorare gli IDP non "ufficiali". extraProviders è quindi obbligatorio se vogliamo usare testenv
@@ -47,7 +51,7 @@ $mapping = $sp->getIdpList();
             {
                 "protocols": ["SAML"],
                 "entityName": "Testenv",
-                "logo": "spid-idp-dummy.svg",
+                "logo": "spid-idp-testenv2.svg",
                 "entityID": "<?php echo $mapping['testenv'] ?>",
                 "active": true
             },

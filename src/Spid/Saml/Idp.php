@@ -47,7 +47,7 @@ class Idp implements IdpInterface
         }
 
         $idpSLO = array();
-        foreach ($xml->xpath('//md:SingleLogoutService') as $item) {
+        foreach ($xml->xpath('//md:SingleLogoutService') as $index => $item) {
             $idpSLO[$index]['location'] = $item->attributes()->Location->__toString();
             $idpSLO[$index]['binding'] = $item->attributes()->Binding->__toString();
         }
