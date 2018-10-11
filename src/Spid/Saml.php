@@ -58,7 +58,7 @@ class Saml implements SAMLInterface
         $id = preg_replace('/[^a-z0-9_-]/', '_', $entityID);
         $cert = Settings::cleanOpenSsl($this->settings['sp_cert_file']);
 
-        $sloLocation = $this->settings['sp_singlelogoutservice'];
+        $sloLocationArray = $this->settings['sp_singlelogoutservice'] ?? array();
         $assertcsArray = $this->settings['sp_assertionconsumerservice'] ?? array();
         $attrcsArray = $this->settings['sp_attributeconsumingservice'] ?? array();
 
@@ -70,7 +70,14 @@ class Saml implements SAMLInterface
                 <ds:X509Data><ds:X509Certificate>$cert</ds:X509Certificate></ds:X509Data>
             </ds:KeyInfo>
         </md:KeyDescriptor>
-        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="$sloLocation"/>
+XML;
+        for ($i = 0; $i < count($sloLocationArray); $i++) {
+            $xml .= <<<XML
+        
+        <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="$sloLocationArray[$i]"/>
+XML;
+        }
+        $xml .= <<<XML
         <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
 XML;
         for ($i = 0; $i < count($assertcsArray); $i++) {
@@ -164,25 +171,25 @@ XML;
         return false;
     }
 
-    public function logout($redirectTo = null, $shouldRedirect = true)
+    public function logout($slo, $redirectTo = null, $shouldRedirect = true)
     {
         $args = func_get_args();
         return $this->baseLogout(Settings::BINDING_REDIRECT, ...$args);
     }
 
-    public function logoutPost($redirectTo = null, $shouldRedirect = true)
+    public function logoutPost($slo, $redirectTo = null, $shouldRedirect = true)
     {
         $args = func_get_args();
         return $this->baseLogout(Settings::BINDING_POST, ...$args);
     }
 
-    private function baseLogout($binding = Settings::BINDING_REDIRECT, $redirectTo = null, $shouldRedirect = true)
+    private function baseLogout($binding = Settings::BINDING_REDIRECT, $slo, $redirectTo = null, $shouldRedirect = true)
     {
         if (!$this->isAuthenticated()) {
             return false;
         }
         $idp = $this->loadIdpFromFile($this->session->idp);
-        return $idp->logoutRequest($this->session, $binding, $redirectTo, $shouldRedirect);
+        return $idp->logoutRequest($this->session, $slo, $binding, $redirectTo, $shouldRedirect);
     }
 
     public function getAttributes() : array

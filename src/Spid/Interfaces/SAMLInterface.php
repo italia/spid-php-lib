@@ -72,15 +72,16 @@ interface SAMLInterface
     public function isAuthenticated() : bool;
 
     // performs logout
+    // $slo: index of the singlelogout service as per the SP metadata
     // $returnTo: return url
     // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
     // returns false if not logged in
     // returns an empty string if $shouldRedirect = true, the logout URL otherwhise
-    public function logout($redirectTo = null, $shouldRedirect = true);
+    public function logout($slo, $redirectTo = null, $shouldRedirect = true);
 
     // performs logout with POST Binding
     // uses the same parameters and return values as logout
-    public function logoutPost($redirectTo = null, $shouldRedirect = true);
+    public function logoutPost($slo, $redirectTo = null, $shouldRedirect = true);
 
     // returns attributes as an array or an empty array if not authenticated
     // example: array('name' => 'Franco', 'familyName' => 'Rossi', 'fiscalNumber' => 'FFFRRR88A12T4441R',)

@@ -23,11 +23,12 @@ interface IdpInterface
 
     // generate a LogoutRequest
     // $session: the currently active login session
+    // $slo: index of singlelogout service as per the SP metadata
     // $binding: HTTP Redirect or HTTP POST binding
     // $returnTo: return url
     // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
     // returns and empty string if $shouldRedirect = true, the logout URL otherwhise
-    public function logoutRequest(Session $session, $binding,  $returnTo = null, $shouldRedirect = true) : string;
+    public function logoutRequest(Session $session, $slo, $binding,  $returnTo = null, $shouldRedirect = true) : string;
 
     //generates a logoutResponse in response to an Idp initiated logout request
     public function logoutResponse(): string;

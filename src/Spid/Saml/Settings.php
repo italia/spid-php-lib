@@ -65,7 +65,7 @@ class Settings
             throw new \Exception($msg);
         }
 
-        self::checkSettingsValus($settings);
+        self::checkSettingsValues($settings);
     }
 
     public static function cleanOpenSsl($file, $isCert = false)
@@ -86,7 +86,7 @@ class Settings
 
     private static function checkSettingsValues($settings)
     {
-        if (filter_var($settings[''], FILTER_VALIDATE_URL) === false)
+        if (filter_var($settings['sp_entityid'], FILTER_VALIDATE_URL) === false)
             throw new \Exception('Invalid SP Entity ID provided');
         if (isset($settings['sp_attributeconsumingservice'])) {
            if (!is_array($settings['sp_attributeconsumingservice'])) throw new \Exception('sp_attributeconsumingservice should be an array');
@@ -97,7 +97,8 @@ class Settings
                 });
            });
         }
-        
+        if (!is_array($settings['sp_assertionconsumerservice'])) throw new \Exception('sp_assertionconsumerservice should be an array');
+        if (!is_array($settings['sp_singlelogoutservice'])) throw new \Exception('sp_singlelogoutservice should be an array');
 
     }
 }
