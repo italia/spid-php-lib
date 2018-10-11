@@ -93,7 +93,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testCanLoadAllIdpMetadata()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
-        $idps = ['idp_1', 'idp_2', 'idp_3', 'idp_4', 'idp_5', 'idp_6', 'idp_7', 'idp_8', 'testenv'];
+        $idps = $files = glob(SpTest::$settings['idp_metadata_folder'] . "*.xml");
         foreach ($idps as $idp) {
             $retrievedIdp = $sp->loadIdpFromFile($idp);
             $this->assertEquals($retrievedIdp->idpFileName, $idp);
