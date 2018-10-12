@@ -320,6 +320,14 @@ In addition, you can use the [SAML Developer Tools](https://www.samltool.com/onl
 
 ## Testing
 
+To test and lint this package you must place yourself in its root directory, then follow the provided instructions.
+
+Assuming you followed the installation instructions with composer, simply do:
+
+```sh
+cd vendor/italia/spid-php-lib
+```
+
 ### Unit tests
 
 Install prerequisites with composer and generate key and certificate for the SP with:
