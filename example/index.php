@@ -15,7 +15,7 @@ $settings = [
         $base . '/acs'
     ],
     'sp_singlelogoutservice' => [
-        $base . '/slo'
+        $base . '/slo' => "",
     ],
     'sp_org_name' => 'test',
     'sp_org_display_name' => 'Test',

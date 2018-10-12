@@ -99,6 +99,11 @@ class Settings
         }
         if (!is_array($settings['sp_assertionconsumerservice'])) throw new \Exception('sp_assertionconsumerservice should be an array');
         if (!is_array($settings['sp_singlelogoutservice'])) throw new \Exception('sp_singlelogoutservice should be an array');
-
+        array_walk($settings['sp_singlelogoutservice'], function($binding, $slo) {
+            if (!is_string($slo)) throw new \Exception('sp_singlelogoutservice elements key value pairs, with Location as key and Binding as value');
+            if (strcasecmp($binding, "POST") != 0 && strcasecmp($binding, "REDIRECT") != 0 && strcasecmp($binding, "") != 0) {
+                throw new \Exception('sp_singlelogoutservice elements Binding value should be one between "POST", "REDIRECT", or "" (empty string, defaults to POST)');
+            }
+        });
     }
 }
