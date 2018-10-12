@@ -78,7 +78,7 @@ sudo apt install composer make openssl php-curl php-zip php-xml
 
 
 1. Install with composer 
-    
+
     ```composer require italia/spid-php-lib```
 
 2. Generate key and certificate files for your Service Provider (SP).
@@ -92,7 +92,7 @@ sudo apt install composer make openssl php-curl php-zip php-xml
     mkdir idp_metadata
     php vendor/italia/spid-php-lib/bin/download_idp_metadata.php ./idp_metadata
     ```
-    
+
     *TEST ENVIRONMENT: If you are using [spid-testenv2](https://github.com/italia/spid-testenv2), manually download the IDP metadata and place it in your `idp_metadata` folder*
 
 4. Make your SP known to IDPs: for production follow the guidelines at [https://www.spid.gov.it/come-diventare-fornitore-di-servizi-pubblici-e-privati-con-spid](https://www.spid.gov.it/come-diventare-fornitore-di-servizi-pubblici-e-privati-con-spid)
@@ -138,7 +138,7 @@ $settings = array(
 
 then initialise the main Sp class
 
-```
+```php
 $sp = new Italia\Spid\Sp($settings);
 ```
 
@@ -157,13 +157,13 @@ $attrId = 1;
 $sp->login($idpName, $assertId, $attrId);
 ```
 Complete the login operation by calling
-```
+```php
 $sp->isAuthenticated();
 ```
 at the assertion consumer service URL. 
 
 Then call
-```
+```php
 $userAttributes = $sp->getAttributes();
 ```
 to receive an array of the requested user attributes.
@@ -171,7 +171,7 @@ to receive an array of the requested user attributes.
 #### Performing logout
 
 Call
-```
+```php
 // index of single logout service as per the SP metadata (sp_singlelogoutservice in settings array)
 $sloId = 0;
 
@@ -198,25 +198,16 @@ The method will redirect to the IDP Single Logout page, or return false if you a
 
 A basic demo application is provided in the [example/](example/) directory of this repository.
 
-**/example and /tests folders are NOT provided with the production version, remember to require dev-development version with composer**
-
+**/example and /tests folders are NOT provided with the production version from packagist, remember to require the `dev-develop` version or just clone this repository (advised)**
 
 To try it out:
 
-1. Configure and install this package using the development version
+1. Generate a test certificate and key pair with:
 
-    ```
-   composer require italia/spid-php-lib:dev-develop
+   ```sh
+   openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -subj "/C=IT/ST=Italy/L=Milan/O=myservice/CN=localhost" -keyout sp.key -out sp.crt
    ```
-   
-   or download the archived version directly from GitHub.
-   
-   Then generate a test certificate and key pair with:
-   
-   ```
-   openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -subj "/C=IT/ST=Italy/L=Milan/O=myservice/CN=localhost" -keyout sp.key -out sp.crt & wait;\
-   ```
-   
+
 2. Adapt the hostname of the SP changing the `$base` variable in the `example/index.php` file; the browser you'll be testing from must be able to resolve the FQDN (the default is `https://sp.example.com`). Using HTTPS is strongly suggested.
 
 3. Configure and install the test IdP [spid-testenv2](https://github.com/italia/spid-testenv2)
@@ -230,7 +221,8 @@ To try it out:
 7. Visit: https://sp.example.com and click `login`.
 
 #### Demo application
-A Docker based demo application is available at [https://github.com/simevo/spid-php-lib-example](https://github.com/simevo/spid-php-lib-example)
+
+A Docker-based demo application is available at [https://github.com/simevo/spid-php-lib-example](https://github.com/simevo/spid-php-lib-example).
 
 ## Features
 
@@ -328,18 +320,15 @@ In addition, you can use the [SAML Developer Tools](https://www.samltool.com/onl
 
 ## Testing
 
-To configure and install the SP, follow the instructions provided in the [Example](#example) section.
-
-Now move into the package directory to install dev dependencies
-```
-cd vendor/italia/spid-php-lib/
-composer install
-```
-
 ### Unit tests
 
-Make sure you are in the package directory and run
+Install prerequisites with composer and generate key and certificate for the SP with:
+```sh
+composer install
+make -C example/
+```
 
+then launch the unit tests with PHPunit:
 ```sh
 ./vendor/bin/phpunit --stderr --testdox tests
 ```
