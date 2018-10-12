@@ -5,7 +5,7 @@
 [![SPID on forum.italia.it](https://img.shields.io/badge/Forum-SPID-blue.svg)](https://forum.italia.it/c/spid)
 [![Build Status](https://travis-ci.org/italia/spid-php-lib.svg?branch=master)](https://travis-ci.org/italia/spid-php-lib)
 
->  **CURRENT VERSION: v0.11** 
+>  **CURRENT VERSION: v0.20**
 
 # spid-php-lib
 PHP package for SPID authentication.
@@ -198,10 +198,25 @@ The method will redirect to the IDP Single Logout page, or return false if you a
 
 A basic demo application is provided in the [example/](example/) directory of this repository.
 
+**/example and /tests folders are NOT provided with the production version, remember to require dev-development version with composer**
+
+
 To try it out:
 
-1. Configure and install this package
+1. Configure and install this package using the development version
 
+    ```
+   composer require italia/spid-php-lib:dev-develop
+   ```
+   
+   or download the archived version directly from GitHub.
+   
+   Then generate a test certificate and key pair with:
+   
+   ```
+   openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -subj "/C=IT/ST=Italy/L=Milan/O=myservice/CN=localhost" -keyout sp.key -out sp.crt & wait;\
+   ```
+   
 2. Adapt the hostname of the SP changing the `$base` variable in the `example/index.php` file; the browser you'll be testing from must be able to resolve the FQDN (the default is `https://sp.example.com`). Using HTTPS is strongly suggested.
 
 3. Configure and install the test IdP [spid-testenv2](https://github.com/italia/spid-testenv2)
@@ -313,15 +328,18 @@ In addition, you can use the [SAML Developer Tools](https://www.samltool.com/onl
 
 ## Testing
 
-### Unit tests
+To configure and install the SP, follow the instructions provided in the [Example](#example) section.
 
-Install prerequisites with composer and generate key and certificate for the SP with:
-```sh
+Now move into the package directory to install dev dependencies
+```
+cd vendor/italia/spid-php-lib/
 composer install
-make -C example/
 ```
 
-then launch the unit tests with PHPunit:
+### Unit tests
+
+Make sure you are in the package directory and run
+
 ```sh
 ./vendor/bin/phpunit --stderr --testdox tests
 ```
@@ -330,7 +348,8 @@ then launch the unit tests with PHPunit:
 
 This project complies with the [PSR-2: Coding Style Guide](https://www.php-fig.org/psr/psr-2/).
 
-Lint the code with:
+Make sure you are in the package directory, then lint the code with:
+
 ```
 ./vendor/bin/phpcs --standard=PSR2 xxx.php
 ```
