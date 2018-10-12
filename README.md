@@ -5,7 +5,7 @@
 [![SPID on forum.italia.it](https://img.shields.io/badge/Forum-SPID-blue.svg)](https://forum.italia.it/c/spid)
 [![Build Status](https://travis-ci.org/italia/spid-php-lib.svg?branch=master)](https://travis-ci.org/italia/spid-php-lib)
 
-> ⚠️ **WORK IN PROGRESS (but should be useable)** ⚠️
+>  **CURRENT VERSION: v0.11** 
 
 # spid-php-lib
 PHP package for SPID authentication.
@@ -68,7 +68,7 @@ Supports PHP 7.0, 7.1 and 7.2.
 ### Prerequisites
 
 ```sh
-sudo apt install composer make openssl php-curl php-zip php-xml phpunit
+sudo apt install composer make openssl php-curl php-zip php-xml
 ```
 
 ### Configuring and Installing
@@ -87,9 +87,10 @@ sudo apt install composer make openssl php-curl php-zip php-xml phpunit
     ```openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -subj "/C=IT/ST=Italy/L=Milan/O=myservice/CN=localhost" -keyout sp.key -out sp.crt & wait;\```
 
 3. Download the Identity Provider (IdP) metadata files and place them in a directory in your project, for example `idp_metadata`. 
-    A convenience tool is provided to download those of the production IdPs: [bin/download_idp_metadata.php](bin/download_idp_metadata.php), example usage:
+    A convenience tool is provided to download those of the production IdPs: [vendor/italia/spid-php-lib/bin/download_idp_metadata.php](bin/download_idp_metadata.php), example usage:
     ```sh
-    bin/download_idp_metadata.php ./example/idp_metadata
+    mkdir idp_metadata
+    php vendor/italia/spid-php-lib/bin/download_idp_metadata.php ./idp_metadata
     ```
     
     *TEST ENVIRONMENT: If you are using [spid-testenv2](https://github.com/italia/spid-testenv2), manually download the IDP metadata and place it in your `idp_metadata` folder*
@@ -114,13 +115,17 @@ Generate a settings array following this guideline
 
 ```php
 $settings = array(
-    'sp_entityid' => SP_BASE_URL, // Example: https://example.com/my-sp-service
+    'sp_entityid' => SP_BASE_URL, // Example: https://sp.example.com/
     'sp_key_file' => '/path/to/sp.key',
     'sp_cert_file' => '/path/to/sp.crt',
     'sp_assertionconsumerservice' => [
         SP_BASE_URL . '/acs'
     ],
-    'sp_singlelogoutservice' => SP_BASE_URL . '/slo',
+    'sp_singlelogoutservice' => [
+        [SP_BASE_URL . '/slo', 'POST'],
+        [SP_BASE_URL . '/slo', 'REDIRECT']
+        ...
+    ],
     'sp_org_name' => 'YOUR_ORGANIZATION',
     'sp_org_display_name' => 'YOUR_ORGANIZATION',
     'idp_metadata_folder' => '/path/to/idp_metadata/',
@@ -167,7 +172,10 @@ to receive an array of the requested user attributes.
 
 Call
 ```
-$sp->logout();
+// index of single logout service as per the SP metadata (sp_singlelogoutservice in settings array)
+$sloId = 0;
+
+$sp->logout($sloId);
 ```
 The method will redirect to the IDP Single Logout page, or return false if you are not logged in.
 
@@ -175,28 +183,28 @@ The method will redirect to the IDP Single Logout page, or return false if you a
 
 |**Method**|**Description**|
 |:---|:---|
-|loadIdpFromFile($filename)|loads an `Idp` object by parsing the provided XML at `$filename`|
+|loadIdpFromFile(string $filename)|loads an `Idp` object by parsing the provided XML at `$filename`|
 |getIdpList() : array|loads all the `Idp` objects from the `idp_metadata_folder` provided in settings|
-|getIdp($filename)|alias of `loadIdpFromFile`|
+|getIdp(string $filename)|alias of `loadIdpFromFile`|
 |getSPMetadata() : string|returns the SP metadata as a string|
-|login($idpFilename, $assertID, $attrID, $level = 1, $redirectTo = null, $shouldRedirect = true)|login with REDIRECT binding. Use `$idpFilename` to select in IDP for login by indicating the name (without extension) of an XML file in your `idp_metadata_folder`. `$assertID` and `$attrID` indicate respectively the array index of `sp_assertionconsumerservice` and `sp_attributeconsumingservice` provided in settings. Optional parameters: `$level` for SPID authentication level (1, 2 or 3), `$redirectTo` to indicate an url to redirect to after login, `$shouldRedirect` to indicate if the login function should automatically redirect to the IDP or should return the login url as a string|
-|loginPost($idpName, $ass, $attr, $level = 1, $redirectTo = null, $shouldRedirect = true)|like login, but uses POST binding|
-|public function logout($redirectTo = null, $shouldRedirect = true)|Optional parameters: `$redirectTo` to indicate an url to redirect to after login, `$shouldRedirect` to indicate if the login function should automatically redirect to the IDP or should return the login url as a string|
-|logoutPost($redirectTo = null, $shouldRedirect = true)|like logout, but uses POST binding|
+|login(string $idpFilename, int $assertID, int $attrID, $level = 1, string $redirectTo = null, $shouldRedirect = true)|login with REDIRECT binding. Use `$idpFilename` to select in IDP for login by indicating the name (without extension) of an XML file in your `idp_metadata_folder`. `$assertID` and `$attrID` indicate respectively the array index of `sp_assertionconsumerservice` and `sp_attributeconsumingservice` provided in settings. Optional parameters: `$level` for SPID authentication level (1, 2 or 3), `$redirectTo` to indicate an url to redirect to after login, `$shouldRedirect` to indicate if the login function should automatically redirect to the IDP or should return the login url as a string|
+|loginPost(string $idpName, int $ass, int $attr, $level = 1, string $redirectTo = null, $shouldRedirect = true)|like login, but uses POST binding|
+|public function logout(int $slo, string $redirectTo = null, $shouldRedirect = true)|`$slo` indicates the array index of the `sp_singlelogoutservice` provided in settings. Optional parameters: `$redirectTo` to indicate an url to redirect to after login, `$shouldRedirect` to indicate if the login function should automatically redirect to the IDP or should return the login url as a string|
+|logoutPost(int $slo, string $redirectTo = null, $shouldRedirect = true)|like logout, but uses POST binding|
 |isAuthenticated() : bool|checks if the user is authenticated. This method **MUST** be caled after login and logout to finalise the operation.|
 |getAttributes() : array|If you requested attributes with an attribute consuming service during login, this method will return them in array format|
 
 ### Example
 
-A basic demo application is provided in the [example/](example/) directory.
+A basic demo application is provided in the [example/](example/) directory of this repository.
 
 To try it out:
 
 1. Configure and install this package
 
-2. Adapt the hostname of the SP changing the `$base` variable in the `example/index.php` file; the browser you'll be testing from must be able to resolve the FQDN (the default is `sp.example.com`)
+2. Adapt the hostname of the SP changing the `$base` variable in the `example/index.php` file; the browser you'll be testing from must be able to resolve the FQDN (the default is `https://sp.example.com`). Using HTTPS is strongly suggested.
 
-3. Configure and install the test IsP [spid-testenv2](https://github.com/italia/spid-testenv2)
+3. Configure and install the test IdP [spid-testenv2](https://github.com/italia/spid-testenv2)
 
 4. Serve the `example` dir from your preferred webserver
 
