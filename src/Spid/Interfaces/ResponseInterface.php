@@ -8,5 +8,5 @@ interface ResponseInterface
     // Throws exceptions on missing or invalid values. 
     // returns false if resposne code is not success
     // returns true otherwise
-    public function validate($xml) : bool;
+    public function validate($xml, $hasAssertion) : bool;
 }
