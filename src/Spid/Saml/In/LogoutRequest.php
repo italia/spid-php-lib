@@ -15,9 +15,9 @@ class LogoutRequest implements ResponseInterface
         $this->saml = $saml;
     }
 
-    public function validate($xml) : bool
+    public function validate($xml, $hasAssertion) : bool
     {
-        $root = $xml->getElementsByTagName('LogoutRrquest')->item(0);
+        $root = $xml->getElementsByTagName('LogoutRequest')->item(0);
 
         if ($xml->getElementsByTagName('Issuer')->length == 0) throw new \Exception("Invalid Response. Missing Issuer element");
         if ($xml->getElementsByTagName('NameID')->length == 0) throw new \Exception("Invalid Response. Missing NameID element");
