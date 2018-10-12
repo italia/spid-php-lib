@@ -84,7 +84,7 @@ sudo apt install composer make openssl php-curl php-zip php-xml
 2. Generate key and certificate files for your Service Provider (SP).
 
     Example: 
-    ```openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -subj "/C=IT/ST=Italy/L=Milan/O=myservice/CN=localhost" -keyout sp.key -out sp.crt & wait;\```
+    ```openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -subj "/C=IT/ST=Italy/L=Milan/O=myservice/CN=localhost" -keyout sp.key -out sp.crt```
 
 3. Download the Identity Provider (IdP) metadata files and place them in a directory in your project, for example `idp_metadata`. 
     A convenience tool is provided to download those of the production IdPs: [vendor/italia/spid-php-lib/bin/download_idp_metadata.php](bin/download_idp_metadata.php), example usage:
