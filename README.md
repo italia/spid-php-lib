@@ -306,7 +306,7 @@ A Docker based demo application is available at [https://github.com/simevo/spid-
 
 ### More features
 
-* [ ] Generation of SPID button markup
+* [x] Generation of SPID button markup
 
 
 ## Troubleshooting
