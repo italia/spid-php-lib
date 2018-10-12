@@ -300,7 +300,6 @@ A Docker-based demo application is available at [https://github.com/simevo/spid-
 
 * [x] Generation of SPID button markup
 
-
 ## Troubleshooting
 
 It is advised to install a browser plugin to trace SAML messages:

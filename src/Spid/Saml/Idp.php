@@ -47,7 +47,7 @@ class Idp implements IdpInterface
         }
 
         $idpSLO = array();
-        foreach ($xml->xpath('//md:SingleLogoutService') as $item) {
+        foreach ($xml->xpath('//md:SingleLogoutService') as $index => $item) {
             $idpSLO[$index]['location'] = $item->attributes()->Location->__toString();
             $idpSLO[$index]['binding'] = $item->attributes()->Binding->__toString();
         }
@@ -101,16 +101,17 @@ class Idp implements IdpInterface
         exit("");
     }
 
-    public function logoutRequest(Session $session, $binding, $redirectTo = null, $shouldRedirect = true) : string
+    public function logoutRequest(Session $session, $slo, $binding, $redirectTo = null, $shouldRedirect = true) : string
     {
         $this->session = $session;
 
         $logoutRequest = new LogoutRequest($this);
         $url = ($binding == Settings::BINDING_REDIRECT) ? $logoutRequest->redirectUrl($redirectTo) : $logoutRequest->httpPost($redirectTo);
+
         $_SESSION['RequestID'] = $logoutRequest->id;
         $_SESSION['idpName'] = $this->idpFileName;
         $_SESSION['idpEntityId'] = $this->metadata['idpEntityId'];
-        $_SESSION['sloUrl'] = $this->sp->settings['sp_singlelogoutservice'];
+        $_SESSION['sloUrl'] = reset($this->sp->settings['sp_singlelogoutservice'][$slo]);
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;

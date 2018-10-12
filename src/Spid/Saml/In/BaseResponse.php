@@ -23,10 +23,14 @@ class BaseResponse
 
     public function __construct(Saml $saml = null)
     {
-        if (!isset($_POST) || !isset($_POST['SAMLResponse'])) {
+        if (
+            (!isset($_POST) || !isset($_POST['SAMLResponse'])) &&
+            (!isset($_GET) || !isset($_GET['SAMLResponse']))
+        ) {
             return;
         }
-        $xmlString = base64_decode($_POST['SAMLResponse']);
+        $xmlString = isset($_GET['SAMLResponse']) ? gzinflate(base64_decode($_GET['SAMLResponse'])): base64_decode($_POST['SAMLResponse']);
+        
         $this->xml = new \DOMDocument();
         $this->xml->loadXML($xmlString);
 
@@ -58,20 +62,23 @@ class BaseResponse
         if (is_null($this->response)) {
             return true;
         }
-        $signatures = $this->xml->getElementsByTagName('Signature');
-        if ($signatures->length == 0) throw new \Exception("Invalid Response. Response must contain at least one signature");
-
+        
         $hasAssertion = $this->xml->getElementsByTagName('Assertion')->length > 0;
+
+        $signatures = $this->xml->getElementsByTagName('Signature');
+        if ($hasAssertion && $signatures->length == 0) throw new \Exception("Invalid Response. Response must contain at least one signature");
+
         $responseSignature = null;
         $assertionSignature = null;
-        foreach ($signatures as $key => $item) {
-            if ($item->parentNode->nodeName == 'saml:Assertion') $assertionSignature = $item;
-            if ($item->parentNode->nodeName == $this->xml->firstChild->nodeName) $responseSignature = $item;
+        if ($signatures->length > 0) {
+            foreach ($signatures as $key => $item) {
+                if ($item->parentNode->nodeName == 'saml:Assertion') $assertionSignature = $item;
+                if ($item->parentNode->nodeName == $this->xml->firstChild->nodeName) $responseSignature = $item;
+            }
+            if ($hasAssertion && is_null($assertionSignature)) throw new \Exception("Invalid Response. Assertion must be signed");
         }
-        if ($hasAssertion && is_null($assertionSignature)) throw new \Exception("Invalid Response. Assertion must be signed");
-        
         if (!SignatureUtils::validateXmlSignature($responseSignature, $cert) || !SignatureUtils::validateXmlSignature($assertionSignature, $cert))
             throw new \Exception("Invalid Response. Signature validation failed");
-        return $this->response->validate($this->xml);
+        return $this->response->validate($this->xml, $hasAssertion);
     }
 }

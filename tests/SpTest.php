@@ -10,7 +10,10 @@ final class SpTest extends PHPUnit\Framework\TestCase
         'sp_key_file' => './example/sp.key',
         'sp_cert_file' => './example/sp.crt',
         'sp_assertionconsumerservice' => ['http://sp3.simevo.com/acs'],
-        'sp_singlelogoutservice' => 'http://sp3.simevo.com/slo',
+        'sp_singlelogoutservice' => [
+            ['http://sp3.simevo.com/slo', ''],
+            ['http://sp3.simevo.com/slo', 'REDIRECT']
+        ],
         'sp_org_name' => 'test_simevo',
         'sp_org_display_name' => 'Test Simevo',
         'idp_metadata_folder' => './example/idp_metadata/',
@@ -93,7 +96,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testCanLoadAllIdpMetadata()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
-        $idps = ['idp_1', 'idp_2', 'idp_3', 'idp_4', 'idp_5', 'idp_6', 'idp_7', 'idp_8', 'testenv'];
+        $idps = $files = glob(SpTest::$settings['idp_metadata_folder'] . "*.xml");
         foreach ($idps as $idp) {
             $retrievedIdp = $sp->loadIdpFromFile($idp);
             $this->assertEquals($retrievedIdp->idpFileName, $idp);

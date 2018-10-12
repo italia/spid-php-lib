@@ -6,7 +6,7 @@ use Italia\Spid\Spid\Interfaces\ResponseInterface;
 
 class LogoutResponse implements ResponseInterface
 {
-    public function validate($xml) : bool
+    public function validate($xml, $hasAssertion) : bool
     {
         $root = $xml->getElementsByTagName('LogoutResponse')->item(0);
 
