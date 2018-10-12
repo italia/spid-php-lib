@@ -107,7 +107,7 @@ All classes provided by this package reside in the `Italia\Spid` namespace.
 
 Load them using the composer-generated autoloader:
 ```php
-require_once(__DIR__ . "/../vendor/autoload.php");
+require_once(__DIR__ . "/vendor/autoload.php");
 ```
 
 The main class is `Italia\Spid\Sp` (service provider).
