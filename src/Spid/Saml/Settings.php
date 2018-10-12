@@ -88,6 +88,9 @@ class Settings
     {
         if (filter_var($settings['sp_entityid'], FILTER_VALIDATE_URL) === false)
             throw new \Exception('Invalid SP Entity ID provided');
+        // Save entity id host url for other checks
+        $host = parse_url($settings['sp_entityid'], PHP_URL_HOST);
+
         if (isset($settings['sp_attributeconsumingservice'])) {
            if (!is_array($settings['sp_attributeconsumingservice'])) throw new \Exception('sp_attributeconsumingservice should be an array');
            array_walk($settings['sp_attributeconsumingservice'], function($acs) {
@@ -97,13 +100,21 @@ class Settings
                 });
            });
         }
+
         if (!is_array($settings['sp_assertionconsumerservice'])) throw new \Exception('sp_assertionconsumerservice should be an array');
+        array_walk($settings['sp_assertionconsumerservice'], function($acs) use ($host){
+            if (strpos($acs, $host) === false) throw new \Exception('sp_assertionconsumerservice elements Location domain should be ' . $host . ', got ' .  parse_url($acs, PHP_URL_HOST) . 'instead');
+        });
+
         if (!is_array($settings['sp_singlelogoutservice'])) throw new \Exception('sp_singlelogoutservice should be an array');
-        array_walk($settings['sp_singlelogoutservice'], function($binding, $slo) {
-            if (!is_string($slo)) throw new \Exception('sp_singlelogoutservice elements key value pairs, with Location as key and Binding as value');
-            if (strcasecmp($binding, "POST") != 0 && strcasecmp($binding, "REDIRECT") != 0 && strcasecmp($binding, "") != 0) {
+        array_walk($settings['sp_singlelogoutservice'], function($slo) use($host) {
+            if (!is_array($slo)) throw new \Exception('sp_singlelogoutservice elements should be arrays');
+            if (count($slo) != 2) throw new \Exception('sp_singlelogoutservice array elements should contain exactly 2 elements, in order SLO Location and Binding');
+            if (!is_string($slo[0]) || !is_string($slo[1])) throw new \Exception('sp_singlelogoutservice array elements should contain 2 string values, in order SLO Location and Binding');
+            if (strcasecmp($slo[1], "POST") != 0 && strcasecmp($slo[1], "REDIRECT") != 0 && strcasecmp($slo[1], "") != 0) {
                 throw new \Exception('sp_singlelogoutservice elements Binding value should be one between "POST", "REDIRECT", or "" (empty string, defaults to POST)');
             }
+            if (strpos($slo[0], $host) === false) throw new \Exception('sp_singlelogoutservice elements Location domain should be ' . $host . ', got ' .  parse_url($slo[0], PHP_URL_HOST) . 'instead');
         });
     }
 }
