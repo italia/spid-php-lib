@@ -8,50 +8,54 @@ use Italia\Spid\Spid\Saml\Idp;
 interface SAMLInterface
 {
     // $settings = [
-    //     'sp_entityid' => $base, // preferred: https protocol, no trailing slash
-    //     'sp_key_file' => './sp.key',
-    //     'sp_cert_file' => './sp.crt',
+    //     'sp_entityid' => SP_BASE_URL, // preferred: https protocol, no trailing slash, example: https://sp.example.com/
+    //     'sp_key_file' => '/path/to/sp.key',
+    //     'sp_cert_file' => '/path/to/sp.crt',
     //     'sp_assertionconsumerservice' => [
-    //         // array of assertion consuming services
-    //         // order is important ! the 0-base index in this array will be used in the calls
-    //         $base . '/acs_route'
+    //         // order is important ! the 0-base index in this array will be used as ID in the calls
+    //         SP_BASE_URL . '/acs',
+    //         ...
     //     ],
-    //     'sp_singlelogoutservice' => $base . '/slo_route',  // path relative to sp_entityid base url or full url
+    //     'sp_singlelogoutservice' => [
+    //         // order is important ! the 0-base index in this array will be used as ID in the calls
+    //         [SP_BASE_URL . '/slo', 'POST'],
+    //         [SP_BASE_URL . '/slo', 'REDIRECT']
+    //         ...
+    //     ],
     //     'sp_org_name' => 'your organization full name',
     //     'sp_org_display_name' => 'your organization display name',
-    //     'idp_metadata_folder' => './idp_metadata/', // path to idp metadata folder
+    //     'idp_metadata_folder' => '/path/to/idp_metadata/',
     //     'sp_attributeconsumingservice' => [
-    //         // array of attribute consuming services
-    //         // order is important ! the 0-base index in this array will be used in the calls
-    //         ["name", "familyName", "fiscalNumber", "email"],
-    //         ["name", "familyName", "fiscalNumber", "email", "spidCode"]
-    //         ]
+    //         // order is important ! the 0-base index in this array will be used as ID in the calls
+    //         ["fiscalNumber"],
+    //         ["name", "familyName", "fiscalNumber", "email", "spidCode"],
+    //         ...
     //     ];
     public function __construct(array $settings);
 
-    // loads selected Identity Provider
-    // $filename: file name of the idp to be loaded. Only the file, without the path, needs to be provided.
+    // loads an Idp object by parsing the provided XML at $filename
+    // $filename: file name of the IdP to be loaded. Only the file, without the path, needs to be provided.
     // returns null or the Idp object.
     public function loadIdpFromFile(string $filename);
 
-    // loads all Idps found in the idp metadata folder provided in settings
-    // files are loaded with loadIdpFromFile($filename)
+    // loads all the `Idp` objects from the idp_metadata_folder provided in settings
+    // the individual files are loaded with loadIdpFromFile($filename)
     // returns an array mapping filename (without extension) => entityID (used for spid-smart-button)
-    // if no idps are found returns an empty array
+    // if no IdPs are found returns an empty array
     public function getIdpList() : array;
 
     // alias of loadIdpFromFile
     public function getIdp(string $filename);
 
-    // returns SP XML metadata as a string
+    // returns SP metadata as a string
     public function getSPMetadata() : string;
     
-    // performs login
-    // $idpFilename: shortname of IdP, same as the name of corresponding IdP metadata file, without .xml
+    // performs login with REDIRECT binding
+    // $idpFilename: shortname of IdP, same as the name of corresponding IdP metadata file, without .xml extension
     // $assertID: index of assertion consumer service as per the SP metadata
     // $attrID: index of attribute consuming service as per the SP metadata
     // $level: SPID level (1, 2 or 3)
-    // $returnTo: return url
+    // $returnTo: url to redirect to after login
     // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
     // returns false is already logged in
     // returns an empty string if $shouldRedirect = true, the login URL otherwhise
@@ -82,16 +86,15 @@ interface SAMLInterface
     // After updating the login status as described, return true if login session exists, false otherwise
     // IMPORTANT NOTICE: AFTER ANY LOGIN/LOGOUT OPERATION YOU MUST CALL THIS METHOD TO FINALIZE THE OPERATION
     // CALLING THIS METHOD AFTER LOGIN() WILL IN FACT FINISH THE OPERATION BY VALIDATING THE RESULT AND CREATING THE
-    // SESSION
-    // AND STORING USER ATTRIBUTES.
+    // SESSION AND STORING USER ATTRIBUTES.
     // SIMILARLY, AFTER A LOGOUT() CALLING THIS METHOD WILL VALIDATE THE RESULT AND DESTROY THE SESSION.
     // LOGIN() AND LOGOUT() ALONE INTERACT WITH THE IDP, BUT DON'T CHECK FOR RESULTS AND UPDATE THE SP
     public function isAuthenticated() : bool;
 
-    // performs logout
+    // performs logout with REDIRECT binding
     // $slo: index of the singlelogout service as per the SP metadata
-    // $returnTo: return url
-    // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
+    // $returnTo: url to redirect to after logout
+    // $shouldRedirect: tells if the function should emit headers and redirect to logout URL or return the URL as string
     // returns false if not logged in
     // returns an empty string if $shouldRedirect = true, the logout URL otherwhise
     public function logout(int $slo, string $redirectTo = null, $shouldRedirect = true);
