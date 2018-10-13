@@ -4,28 +4,26 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "2225f4a591b5965c090c9f7092aef01f",
-    "content-hash": "91a01bb53c8d9488198d87e6ed72b27c",
+    "hash": "37c5c2ee575d8d4c03e21d0210b98fa0",
+    "content-hash": "23779a52a706d949cca2564b1d693246",
     "packages": [
         {
             "name": "robrichards/xmlseclibs",
-            "version": "3.0.1",
+            "version": "3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/robrichards/xmlseclibs.git",
-                "reference": "d937712f70f93a584eb0299ccd87dc6374003781"
+                "reference": "1f4de0c0d121922aafd8c62c2a9f5e528830cf38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/robrichards/xmlseclibs/zipball/d937712f70f93a584eb0299ccd87dc6374003781",
-                "reference": "d937712f70f93a584eb0299ccd87dc6374003781",
+                "url": "https://api.github.com/repos/robrichards/xmlseclibs/zipball/1f4de0c0d121922aafd8c62c2a9f5e528830cf38",
+                "reference": "1f4de0c0d121922aafd8c62c2a9f5e528830cf38",
                 "shasum": ""
             },
             "require": {
+                "ext-openssl": "*",
                 "php": ">= 5.4"
-            },
-            "suggest": {
-                "ext-openssl": "OpenSSL extension"
             },
             "type": "library",
             "autoload": {
@@ -45,7 +43,7 @@
                 "xml",
                 "xmldsig"
             ],
-            "time": "2017-08-31 09:27:07"
+            "time": "2018-09-27 13:24:13"
         }
     ],
     "packages-dev": [
@@ -716,16 +714,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "6.5.12",
+            "version": "6.5.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "24da433d7384824d65ea93fbb462e2f31bbb494e"
+                "reference": "0973426fb012359b2f18d3bd1e90ef1172839693"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/24da433d7384824d65ea93fbb462e2f31bbb494e",
-                "reference": "24da433d7384824d65ea93fbb462e2f31bbb494e",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/0973426fb012359b2f18d3bd1e90ef1172839693",
+                "reference": "0973426fb012359b2f18d3bd1e90ef1172839693",
                 "shasum": ""
             },
             "require": {
@@ -796,7 +794,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2018-08-22 06:32:48"
+            "time": "2018-09-08 15:10:43"
         },
         {
             "name": "phpunit/phpunit-mock-objects",
@@ -1418,16 +1416,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.3.1",
+            "version": "3.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "628a481780561150481a9ec74709092b9759b3ec"
+                "reference": "6ad28354c04b364c3c71a34e4a18b629cc3b231e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/628a481780561150481a9ec74709092b9759b3ec",
-                "reference": "628a481780561150481a9ec74709092b9759b3ec",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/6ad28354c04b364c3c71a34e4a18b629cc3b231e",
+                "reference": "6ad28354c04b364c3c71a34e4a18b629cc3b231e",
                 "shasum": ""
             },
             "require": {
@@ -1465,7 +1463,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2018-07-26 23:47:18"
+            "time": "2018-09-23 23:08:17"
         },
         {
             "name": "theseer/tokenizer",
@@ -1563,6 +1561,8 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": "^7.0"
+    },
     "platform-dev": []
 }
