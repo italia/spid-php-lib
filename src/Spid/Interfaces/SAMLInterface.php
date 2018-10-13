@@ -31,7 +31,7 @@ interface SAMLInterface
 
     // loads selected Identity Provider
     // $filename: file name of the idp to be loaded. Only the file, without the path, needs to be provided.
-    // returns null or the Idp object. 
+    // returns null or the Idp object.
     public function loadIdpFromFile(string $filename);
 
     // loads all Idps found in the idp metadata folder provided in settings
@@ -55,17 +55,34 @@ interface SAMLInterface
     // $shouldRedirect: tells if the function should emit headers and redirect to login URL or return the URL as string
     // returns false is already logged in
     // returns an empty string if $shouldRedirect = true, the login URL otherwhise
-    public function login(string $idpFilename, int $assertID, int $attrID, $level = 1, string $redirectTo = null, $shouldRedirect = true);
+    public function login(
+        string $idpFilename,
+        int $assertID,
+        int $attrID,
+        $level = 1,
+        string $redirectTo = null,
+        $shouldRedirect = true
+    );
 
     // performs login with POST Binding
     // uses the same parameters and return values as login
-    public function loginPost(string $idpFilename, int $assertID, int $attrID, $level = 1, string $redirectTo = null, $shouldRedirect = true);
+    public function loginPost(
+        string $idpFilename,
+        int $assertID,
+        int $attrID,
+        $level = 1,
+        string $redirectTo = null,
+        $shouldRedirect = true
+    );
 
-    // This method takes the necessary steps to update the user login status, and return a boolean representing the result
-    // The method checks for any input response and validates it. The validation itself can create or destroy login sessions.
+    // This method takes the necessary steps to update the user login status, and return a boolean representing the
+    // result.
+    // The method checks for any input response and validates it. The validation itself can create or destroy login
+    // sessions.
     // After updating the login status as described, return true if login session exists, false otherwise
     // IMPORTANT NOTICE: AFTER ANY LOGIN/LOGOUT OPERATION YOU MUST CALL THIS METHOD TO FINALIZE THE OPERATION
-    // CALLING THIS METHOD AFTER LOGIN() WILL IN FACT FINISH THE OPERATION BY VALIDATING THE RESULT AND CREATING THE SESSION
+    // CALLING THIS METHOD AFTER LOGIN() WILL IN FACT FINISH THE OPERATION BY VALIDATING THE RESULT AND CREATING THE
+    // SESSION
     // AND STORING USER ATTRIBUTES.
     // SIMILARLY, AFTER A LOGOUT() CALLING THIS METHOD WILL VALIDATE THE RESULT AND DESTROY THE SESSION.
     // LOGIN() AND LOGOUT() ALONE INTERACT WITH THE IDP, BUT DON'T CHECK FOR RESULTS AND UPDATE THE SP

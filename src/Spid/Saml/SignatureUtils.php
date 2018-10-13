@@ -61,11 +61,16 @@ class SignatureUtils
 
     public static function validateXmlSignature($xml, $cert) : bool
     {
-        if (is_null($xml)) return true;
+        if (is_null($xml)) {
+            return true;
+        }
         $dom = clone $xml->ownerDocument;
 
         $certFingerprint = Settings::cleanOpenSsl($cert, true);
-        $signCertFingerprint = Settings::cleanOpenSsl($dom->getElementsByTagName('X509Certificate')->item(0)->nodeValue, true); 
+        $signCertFingerprint = Settings::cleanOpenSsl(
+            $dom->getElementsByTagName('X509Certificate')->item(0)->nodeValue,
+            true
+        );
         if ($signCertFingerprint != $certFingerprint) {
             return false;
         }

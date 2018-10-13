@@ -64,9 +64,13 @@ HTML;
         $location = null;
         $key = 'idp' . $service;
         array_walk($this->idp->metadata[$key], function ($val) use ($binding, &$location) {
-            if ($binding == $val['binding']) $location = $val['location'];
+            if ($binding == $val['binding']) {
+                $location = $val['location'];
+            }
         });
-        if (is_null($location)) throw new \Exception("No location found for binding " . $binding);
+        if (is_null($location)) {
+            throw new \Exception("No location found for binding " . $binding);
+        }
         return $location;
     }
 }
