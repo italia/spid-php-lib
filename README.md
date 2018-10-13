@@ -329,10 +329,11 @@ cd vendor/italia/spid-php-lib
 
 ### Unit tests
 
-Install prerequisites with composer and generate key and certificate for the SP with:
+Install prerequisites with composer, generate key and certificate for the SP and download the metadata for all current production IdPs with:
 ```sh
 composer install
 make -C example/
+bin/download_idp_metadata.php example/idp_metadata
 ```
 
 then launch the unit tests with PHPunit:

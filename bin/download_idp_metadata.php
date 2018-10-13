@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-// downloads the metadata for all current idps from the registry
+// downloads the metadata for all current production IdPs from the registry
 // and stores them all in the specified directory
 //
 // prerequisites:
