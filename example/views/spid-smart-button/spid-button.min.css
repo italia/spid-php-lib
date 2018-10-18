@@ -1,0 +1,931 @@
+@charset "UTF-8";
+/*
+    Created on : 7-ott-2017, 13.08.21
+    Author     : Simone Rescio
+*/
+/*
+ * Indirizzo di produzione degli assets, inserire indirizzo reale
+ */
+@import url(https://fonts.googleapis.com/css?family=Titillium+Web:400,600,700,900);
+body {
+  min-width: 300px; }
+
+h1 {
+  color: #17324d;
+  font-size: 2rem;
+  font-family: "Titillium Web", HelveticaNeue-Light, "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  min-width: 400px; }
+
+button:active {
+  border: 3px solid #f7910d; }
+  button:active#spid-cancel-access-button {
+    border: 3px solid #f7910d; }
+
+#spid-idp-list {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: row wrap;
+          flex-flow: row wrap;
+  padding: 20px; }
+  #spid-idp-list .agid-spid-idp {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    width: 50%; }
+    #spid-idp-list .agid-spid-idp form {
+      height: 100%;
+      border: 3px solid white;
+      padding: 10px;
+      background: white; }
+      #spid-idp-list .agid-spid-idp form:active {
+        border: 3px solid #f7910d; }
+      #spid-idp-list .agid-spid-idp form .agid-spid-idp-button {
+        border: 0;
+        width: 100%;
+        cursor: pointer;
+        background: #fff; }
+        #spid-idp-list .agid-spid-idp form .agid-spid-idp-button[disabled] {
+          cursor: not-allowed;
+          -webkit-filter: grayscale(1);
+                  filter: grayscale(1); }
+    #spid-idp-list .agid-spid-idp a {
+      height: 100%;
+      border: 3px solid white;
+      padding: 10px;
+      background: white; }
+      #spid-idp-list .agid-spid-idp a:active {
+        border: 3px solid #f7910d; }
+      #spid-idp-list .agid-spid-idp a[disabled] {
+        cursor: not-allowed;
+        -webkit-filter: grayscale(1);
+                filter: grayscale(1); }
+
+.agid-display-logo {
+  float: left;
+  width: 50%; }
+
+.agid-display-close {
+  float: right;
+  margin-top: 5px; }
+
+.agid-font {
+  font-family: "Titillium Web", HelveticaNeue, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif; }
+
+.agid-non-hai-spid-font {
+  font-size: 15px;
+  font-family: "Titillium Web", HelveticaNeue-Light, "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; }
+
+.agid-navigable {
+  background: transparent;
+  cursor: pointer;
+  font-size: 1em; }
+
+.agid-spid-enter {
+  position: relative; }
+  .agid-spid-enter .agid-logo {
+    position: absolute;
+    display: block;
+    margin: auto;
+    width: 12%;
+    visibility: hidden;
+    top: 30%;
+    left: 14%; }
+
+.agid-spid-link {
+  cursor: pointer;
+  color: #0073e6;
+  text-decoration: underline; }
+
+#spid-enter-container {
+  position: fixed;
+  z-index: 999;
+  top: 0;
+  left: 0; }
+
+#spid-non-hai-spid {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+  padding-top: 20px;
+  padding-bottom: 20px; }
+
+#spid-enter {
+  height: 0; }
+
+.agid-spid-panel {
+  top: 0;
+  left: 0;
+  margin-left: 0%;
+  margin-top: 0%;
+  margin-right: 0%;
+  width: 100vw;
+  height: 100vh;
+  color: #000;
+  position: fixed;
+  z-index: 1;
+  overflow: auto; }
+
+.agid-spid-header {
+  background-color: #fff;
+  color: #fff;
+  display: block;
+  overflow: hidden;
+  position: static;
+  min-width: 300px;
+  padding: 40px; }
+  .agid-spid-header .agid-spid-display-logo {
+    float: left;
+    width: 33.33333vw;
+    font-size: 30px; }
+  .agid-spid-header .agid-spid-panel-back a,
+  .agid-spid-header .agid-spid-panel-back button,
+  .agid-spid-header .agid-spid-panel-back button a {
+    float: left;
+    width: auto;
+    border: none;
+    outline: none;
+    display: block;
+    cursor: pointer; }
+  .agid-spid-header .agid-spid-panel-back button:hover,
+  .agid-spid-header .agid-spid-panel-back button:focus,
+  .agid-spid-header .agid-spid-panel-back a:hover,
+  .agid-spid-header .agid-spid-panel-back a:focus {
+    opacity: 0.5; }
+  .agid-spid-header .agid-spid-panel-back img {
+    max-height: 50px; }
+  .agid-spid-header .agid-spid-display-logo img {
+    max-height: 37px; }
+  .agid-spid-header .agid-spid-panel-element {
+    min-width: 32px; }
+
+#agid-spid-panel-content {
+  display: block;
+  overflow: hidden;
+  min-width: 300px;
+  background: #fff; }
+  #agid-spid-panel-content #spid-enter-title-page {
+    background: transparent;
+    display: block;
+    text-align: center; }
+
+.agid-spid-panel-content-center {
+  text-align: center;
+  margin: auto; }
+
+#agid-spid-panel-footer {
+  display: block;
+  position: fixed;
+  bottom: 0;
+  width: 100vw;
+  overflow: hidden;
+  text-align: center;
+  color: #fff;
+  background-color: #06c;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden; }
+  #agid-spid-panel-footer img {
+    max-width: 200px;
+    margin: 5px; }
+
+.agid-spid-enter-icon {
+  border: none;
+  padding-right: 8px;
+  vertical-align: middle;
+  display: inline-block; }
+  .agid-spid-enter-icon svg {
+    fill: #fff; }
+
+.agid-spid-enter-text {
+  vertical-align: top; }
+
+.agid-spid-enter-size-small {
+  font-size: 14px;
+  height: 40px;
+  padding: 10px 20px; }
+  .agid-spid-enter-size-small > span img {
+    width: 16px;
+    height: 16px;
+    border: 0; }
+
+.agid-spid-enter-size-medium {
+  font-size: 16px;
+  height: 48px;
+  padding: 12px 24px; }
+  .agid-spid-enter-size-medium > span img {
+    width: 24px;
+    height: 24px;
+    border: 0; }
+
+.agid-spid-enter-size-large {
+  font-size: 18px;
+  height: 56px;
+  padding: 14px 28px; }
+  .agid-spid-enter-size-large > span img {
+    width: 32px;
+    height: 32px;
+    border: 0; }
+
+.agid-spid-enter-fluid {
+  width: 100%;
+  max-width: 400px; }
+
+#spid-cancel-access-button {
+  background-color: #fcfdff;
+  color: #5c6f82;
+  font-family: "Titillium Web", HelveticaNeue, "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: bold;
+  -webkit-box-shadow: inset 0 0 0 1px #e6e9f2;
+          box-shadow: inset 0 0 0 1px #e6e9f2;
+  border-radius: 5px;
+  border: 1px solid currentColor;
+  height: 55px;
+  display: block;
+  margin: auto;
+  width: 85%;
+  cursor: default; }
+
+.agid-spid-col {
+  float: left;
+  width: 100vw;
+  width: 24.99999%; }
+  .agid-spid-col.xs12 {
+    width: 49.99999%; }
+
+#spid-enter-title-container {
+  padding-top: 1.25em; }
+
+#agid-action-button-container {
+  width: 100%; }
+  #agid-action-button-container button {
+    border: none; }
+
+.agid-action-button {
+  width: 49.99999%;
+  height: 65px;
+  color: #0073e6;
+  font-weight: 700;
+  background-color: #fff;
+  display: block;
+  float: left; }
+  .agid-action-button span {
+    position: relative;
+    top: -4px; }
+
+.agid-spid-visibile {
+  display: block !important;
+  opacity: 0; }
+
+#spid-enter-anim {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; }
+  #spid-enter-anim::before, #spid-enter-anim::after {
+    content: ''; }
+  #spid-enter-anim::before {
+    width: 180px;
+    height: 48px;
+    background-color: #fff;
+    border-radius: 4px;
+    position: absolute; }
+  #spid-enter-anim::after {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    position: absolute; }
+
+.agid-spid-enter-button-positive {
+  color: #fff;
+  background-color: #0073e6; }
+  .agid-spid-enter-button-positive:hover, .agid-spid-enter-button-positive:focus, .agid-spid-enter-button-positive:active {
+    background-color: #0059b3;
+    color: #fff; }
+  .agid-spid-enter-button-positive:visited {
+    background-color: #0073e6;
+    color: #fff; }
+  .agid-spid-enter-button-positive svg {
+    fill: #fff; }
+
+.agid-spid-enter-button-negative {
+  color: #0073e6;
+  background-color: #fff; }
+  .agid-spid-enter-button-negative:hover, .agid-spid-enter-button-negative:focus, .agid-spid-enter-button-negative:active {
+    background-color: #fff;
+    color: #0059b3; }
+  .agid-spid-enter-button-negative:visited {
+    background-color: #fff;
+    color: #0073e6; }
+
+.agid-spid-enter-button-rounded {
+  border-radius: 4px;
+  margin: 16px; }
+
+.agid-spid-enter-button-sharp {
+  border-radius: 0; }
+
+/*
+ * Deve essere l'ultimo set di regole, così che dopo che i pulsanti sono stati renderizzati con invisibilità inline
+ * si da tempo al browser di caricare e parsare i fogli di stile appena iniettati, di google font e del presente
+ * così da evitare di vedere prima i pulsanti "rotti" che poi si aggiustano gradualmente mentre il CSS viene scaricato e parsato
+ * in questo modo i pulsanti appaiono pochi istanti dopo correttamente stilizzati, sovrascrivendo l'attributo hidden
+ */
+.agid-spid-enter {
+  border: 0;
+  cursor: pointer;
+  display: inline-block; }
+
+@media screen and (max-width: 996px) {
+  .agid-body-list {
+    background-color: #f5f6f7; }
+    .agid-body-list .agid-spid-idp form {
+      margin: 5px;
+      border: 3px solid f5f6f7; } }
+
+@media screen and (max-width: 767px) {
+  #spid-foot-btn {
+    position: fixed;
+    background-color: white;
+    bottom: 0;
+    width: 100%;
+    padding-top: 4%;
+    padding-bottom: 4%;
+    -webkit-box-shadow: 0 -2px 5px 0 rgba(238, 238, 238, 0.7);
+            box-shadow: 0 -2px 5px 0 rgba(238, 238, 238, 0.7); } }
+
+@media (min-width: 361px) {
+  .agid-spid-panel-content-center {
+    max-width: 500px; } }
+
+@media (min-width: 768px) {
+  #spid-cancel-access-button {
+    width: 436px; } }
+
+.agid-spid-panel-anim {
+  -webkit-animation-delay: 0s;
+          animation-delay: 0s;
+  -webkit-animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+          animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  -webkit-animation-iteration-count: 1;
+          animation-iteration-count: 1;
+  -webkit-animation-direction: normal;
+          animation-direction: normal;
+  -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards; }
+
+#spid-enter-container {
+  display: block;
+  -webkit-transition-duration: 1s;
+       -o-transition-duration: 1s;
+          transition-duration: 1s;
+  -webkit-transition-delay: 0.5s;
+       -o-transition-delay: 0.5s;
+          transition-delay: 0.5s;
+  -webkit-transition-property: visibility;
+  -o-transition-property: visibility;
+  transition-property: visibility; }
+  #spid-enter-container[hidden] {
+    visibility: hidden;
+    -webkit-transition-duration: 0s;
+         -o-transition-duration: 0s;
+            transition-duration: 0s;
+    -webkit-transition-property: visibility;
+    -o-transition-property: visibility;
+    transition-property: visibility;
+    -webkit-transition-delay: 1s;
+         -o-transition-delay: 1s;
+            transition-delay: 1s;
+    pointer-events: none; }
+    #spid-enter-container[hidden] .agid-spid-panel-anim {
+      -webkit-animation-name: anim-panel-out;
+              animation-name: anim-panel-out;
+      -webkit-animation-duration: 1s;
+              animation-duration: 1s; }
+      #spid-enter-container[hidden] .agid-spid-panel-anim .agid-fade-out-left {
+        -webkit-animation-name: logoOutLeft;
+                animation-name: logoOutLeft;
+        -webkit-animation-duration: 1s;
+                animation-duration: 1s;
+        -webkit-animation-fill-mode: both;
+                animation-fill-mode: both; }
+      #spid-enter-container[hidden] .agid-spid-panel-anim .agid-fade-out-right {
+        -webkit-animation-name: closeOutRight;
+                animation-name: closeOutRight;
+        -webkit-animation-duration: 1s;
+                animation-duration: 1s;
+        -webkit-animation-fill-mode: both;
+                animation-fill-mode: both; }
+      #spid-enter-container[hidden] .agid-spid-panel-anim .agid-fade-out-bottom {
+        -webkit-animation-name: titleToBottom;
+                animation-name: titleToBottom;
+        -webkit-animation-duration: 1s;
+                animation-duration: 1s;
+        -webkit-animation-fill-mode: both;
+                animation-fill-mode: both; }
+  #spid-enter-container:not([hidden]) .agid-fade-in-cancel {
+    -webkit-animation-name: cancelBtn;
+            animation-name: cancelBtn;
+    -webkit-animation-delay: 1s;
+            animation-delay: 1s;
+    -webkit-animation-duration: 1.25s;
+            animation-duration: 1.25s;
+    -webkit-animation-fill-mode: both;
+            animation-fill-mode: both; }
+  #spid-enter-container:not([hidden]) .agid-spid-panel-anim {
+    -webkit-animation-name: anim-panel-in;
+            animation-name: anim-panel-in;
+    -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+    -webkit-animation-delay: 0.5s;
+            animation-delay: 0.5s; }
+    #spid-enter-container:not([hidden]) .agid-spid-panel-anim .agid-fade-in-left {
+      -webkit-animation-name: logoFromLeft;
+              animation-name: logoFromLeft;
+      -webkit-animation-duration: 1s;
+              animation-duration: 1s;
+      -webkit-animation-delay: 0.5s;
+              animation-delay: 0.5s;
+      -webkit-animation-fill-mode: both;
+              animation-fill-mode: both; }
+    #spid-enter-container:not([hidden]) .agid-spid-panel-anim .agid-fade-in-right {
+      -webkit-animation-name: closeFromRight;
+              animation-name: closeFromRight;
+      -webkit-animation-duration: 1s;
+              animation-duration: 1s;
+      -webkit-animation-delay: 0.5s;
+              animation-delay: 0.5s;
+      -webkit-animation-fill-mode: both;
+              animation-fill-mode: both; }
+    #spid-enter-container:not([hidden]) .agid-spid-panel-anim .agid-fade-in-bottom {
+      -webkit-animation-name: titleFromBottom;
+              animation-name: titleFromBottom;
+      -webkit-animation-duration: 1s;
+              animation-duration: 1s;
+      -webkit-animation-delay: 0.5s;
+              animation-delay: 0.5s;
+      -webkit-animation-fill-mode: both;
+              animation-fill-mode: both; }
+
+#spid-idp-list .agid-spid-idp {
+  -webkit-animation-name: spidIdp;
+          animation-name: spidIdp;
+  -webkit-animation-duration: 1s;
+          animation-duration: 1s;
+  -webkit-animation-delay: 0.5s;
+          animation-delay: 0.5s;
+  -webkit-animation-fill-mode: both;
+          animation-fill-mode: both; }
+
+@-webkit-keyframes spidIdp {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 1; } }
+
+@keyframes spidIdp {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 1; } }
+
+@-webkit-keyframes cancelBtn {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 1; } }
+
+@keyframes cancelBtn {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 1; } }
+
+@-webkit-keyframes logoFromLeft {
+  from {
+    opacity: 0;
+    -webkit-transform: translate(-50px);
+            transform: translate(-50px); }
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+
+@keyframes logoFromLeft {
+  from {
+    opacity: 0;
+    -webkit-transform: translate(-50px);
+            transform: translate(-50px); }
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+
+@-webkit-keyframes closeFromRight {
+  from {
+    opacity: 0;
+    -webkit-transform: none;
+            transform: none; }
+  to {
+    opacity: 1;
+    -webkit-transform: translate(-50px);
+            transform: translate(-50px); } }
+
+@keyframes closeFromRight {
+  from {
+    opacity: 0;
+    -webkit-transform: none;
+            transform: none; }
+  to {
+    opacity: 1;
+    -webkit-transform: translate(-50px);
+            transform: translate(-50px); } }
+
+@-webkit-keyframes titleFromBottom {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(200%);
+            transform: translateY(200%); }
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+
+@keyframes titleFromBottom {
+  from {
+    opacity: 0;
+    -webkit-transform: translateY(200%);
+            transform: translateY(200%); }
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+
+@-webkit-keyframes logoOutLeft {
+  from {
+    opacity: 0;
+    -webkit-transform: none;
+            transform: none; }
+  to {
+    opacity: 1;
+    -webkit-transform: translate(-50px);
+            transform: translate(-50px); } }
+
+@keyframes logoOutLeft {
+  from {
+    opacity: 0;
+    -webkit-transform: none;
+            transform: none; }
+  to {
+    opacity: 1;
+    -webkit-transform: translate(-50px);
+            transform: translate(-50px); } }
+
+@-webkit-keyframes closeOutRight {
+  from {
+    opacity: 0;
+    -webkit-transform: translate(-50px);
+            transform: translate(-50px); }
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+
+@keyframes closeOutRight {
+  from {
+    opacity: 0;
+    -webkit-transform: translate(-50px);
+            transform: translate(-50px); }
+  to {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+
+@-webkit-keyframes titleToBottom {
+  from {
+    opacity: 0;
+    -webkit-transform: none;
+            transform: none; }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(200%);
+            transform: translateY(200%); } }
+
+@keyframes titleToBottom {
+  from {
+    opacity: 0;
+    -webkit-transform: none;
+            transform: none; }
+  to {
+    opacity: 1;
+    -webkit-transform: translateY(200%);
+            transform: translateY(200%); } }
+
+@-webkit-keyframes anim-base-in {
+  0% {
+    width: 180px;
+    height: 48px;
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    border-radius: 100%;
+    opacity: 0; }
+  50% {
+    width: 180px;
+    height: 48px;
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    border-radius: 100%;
+    opacity: 1; }
+  100% {
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    -webkit-transform: scale(30);
+            transform: scale(30);
+    border-radius: 100%;
+    opacity: 1; } }
+
+@keyframes anim-base-in {
+  0% {
+    width: 180px;
+    height: 48px;
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    border-radius: 100%;
+    opacity: 0; }
+  50% {
+    width: 180px;
+    height: 48px;
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    border-radius: 100%;
+    opacity: 1; }
+  100% {
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    -webkit-transform: scale(30);
+            transform: scale(30);
+    border-radius: 100%;
+    opacity: 1; } }
+
+@-webkit-keyframes anim-base-out {
+  0% {
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    -webkit-transform: scale(30);
+            transform: scale(30);
+    border-radius: 100%;
+    opacity: 1; }
+  50% {
+    width: 180px;
+    height: 48px;
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    border-radius: 100%;
+    opacity: 0.5; }
+  100% {
+    width: 180px;
+    height: 48px;
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    border-radius: 100%;
+    opacity: 0; } }
+
+@keyframes anim-base-out {
+  0% {
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    -webkit-transform: scale(30);
+            transform: scale(30);
+    border-radius: 100%;
+    opacity: 1; }
+  50% {
+    width: 180px;
+    height: 48px;
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    border-radius: 100%;
+    opacity: 0.5; }
+  100% {
+    width: 180px;
+    height: 48px;
+    top: calc((100vh - 48px) / 2);
+    left: calc((100vw - 180px) / 2);
+    border-radius: 100%;
+    opacity: 0; } }
+
+@-webkit-keyframes anim-icon-in {
+  0% {
+    width: 30px;
+    height: 30px;
+    top: 50vh;
+    left: 50vw;
+    opacity: 0; }
+  5% {
+    width: 30px;
+    height: 30px;
+    top: 50vh;
+    left: 50vw;
+    opacity: 0.2; }
+  100% {
+    top: 0;
+    left: 20vw;
+    width: 120vw;
+    height: 120vh;
+    opacity: 0.1; } }
+
+@keyframes anim-icon-in {
+  0% {
+    width: 30px;
+    height: 30px;
+    top: 50vh;
+    left: 50vw;
+    opacity: 0; }
+  5% {
+    width: 30px;
+    height: 30px;
+    top: 50vh;
+    left: 50vw;
+    opacity: 0.2; }
+  100% {
+    top: 0;
+    left: 20vw;
+    width: 120vw;
+    height: 120vh;
+    opacity: 0.1; } }
+
+@-webkit-keyframes anim-icon-out {
+  0% {
+    top: 0;
+    left: 20vw;
+    width: 120vw;
+    height: 120vh;
+    opacity: 0.1; }
+  50% {
+    width: 30px;
+    height: 30px;
+    top: 50vh;
+    left: 50vw;
+    opacity: 0; }
+  100% {
+    width: 30px;
+    height: 30px;
+    top: 50vh;
+    left: 50vw;
+    opacity: 0; } }
+
+@keyframes anim-icon-out {
+  0% {
+    top: 0;
+    left: 20vw;
+    width: 120vw;
+    height: 120vh;
+    opacity: 0.1; }
+  50% {
+    width: 30px;
+    height: 30px;
+    top: 50vh;
+    left: 50vw;
+    opacity: 0; }
+  100% {
+    width: 30px;
+    height: 30px;
+    top: 50vh;
+    left: 50vw;
+    opacity: 0; } }
+
+@-webkit-keyframes anim-panel-in {
+  0% {
+    opacity: 0; }
+  15% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@keyframes anim-panel-in {
+  0% {
+    opacity: 0; }
+  15% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@-webkit-keyframes anim-panel-out {
+  0% {
+    opacity: 1; }
+  100% {
+    opacity: 0; } }
+
+@keyframes anim-panel-out {
+  0% {
+    opacity: 1; }
+  100% {
+    opacity: 0; } }
+
+@-webkit-keyframes hide-on-end {
+  0% {
+    height: 100vh; }
+  100% {
+    height: 0; } }
+
+@keyframes hide-on-end {
+  0% {
+    height: 100vh; }
+  100% {
+    height: 0; } }
+
+#spid-enter-button-container.agid-enter-transition .agid-spid-enter {
+  -webkit-animation-name: fadeOutEnterBtn;
+          animation-name: fadeOutEnterBtn;
+  -webkit-animation-duration: 1s;
+          animation-duration: 1s;
+  -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards; }
+
+#spid-enter-button-container.agid-enter-transition .agid-spid-enter-icon {
+  -webkit-animation-name: biggerLogo;
+          animation-name: biggerLogo;
+  -webkit-animation-duration: 1.2s;
+          animation-duration: 1.2s; }
+
+#spid-enter-button-container.agid-reverse-enter-transition .agid-spid-enter {
+  -webkit-animation-name: fadeInEnterBtn;
+          animation-name: fadeInEnterBtn;
+  -webkit-animation-duration: 1s;
+          animation-duration: 1s; }
+
+#spid-enter-button-container.agid-reverse-enter-transition .agid-spid-enter-icon {
+  -webkit-animation-name: smallerLogo;
+          animation-name: smallerLogo;
+  -webkit-animation-duration: 1s;
+          animation-duration: 1s; }
+
+@-webkit-keyframes fadeOutEnterBtn {
+  from {
+    outline: none;
+    opacity: 1; }
+  to {
+    outline: none;
+    opacity: 0; } }
+
+@keyframes fadeOutEnterBtn {
+  from {
+    outline: none;
+    opacity: 1; }
+  to {
+    outline: none;
+    opacity: 0; } }
+
+@-webkit-keyframes biggerLogo {
+  from {
+    opacity: 1;
+    visibility: hidden; }
+  to {
+    opacity: 0;
+    -webkit-transform: scale(60);
+            transform: scale(60);
+    visibility: visible; } }
+
+@keyframes biggerLogo {
+  from {
+    opacity: 1;
+    visibility: hidden; }
+  to {
+    opacity: 0;
+    -webkit-transform: scale(60);
+            transform: scale(60);
+    visibility: visible; } }
+
+@-webkit-keyframes fadeInEnterBtn {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 1; } }
+
+@keyframes fadeInEnterBtn {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 1; } }
+
+@-webkit-keyframes smallerLogo {
+  from {
+    opacity: 0;
+    -webkit-transform: scale(60);
+            transform: scale(60);
+    visibility: visible; }
+  to {
+    opacity: 1; } }
+
+@keyframes smallerLogo {
+  from {
+    opacity: 0;
+    -webkit-transform: scale(60);
+            transform: scale(60);
+    visibility: visible; }
+  to {
+    opacity: 1; } }

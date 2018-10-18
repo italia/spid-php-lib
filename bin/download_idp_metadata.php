@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-// downloads the metadata for all current idps from the registry
+// downloads the metadata for all current production IdPs from the registry
 // and stores them all in the specified directory
 //
 // prerequisites:
@@ -39,10 +39,18 @@ foreach ($idps->data as $idp) {
     curl_setopt($ch, CURLOPT_FAILONERROR, 1);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
     echo "Contacting $metadata_url" . PHP_EOL;
     $xml = curl_exec($ch);
+    // $info = curl_getinfo($ch);
+    // echo ('curl info = ');
+    // var_dump($info);
+    if ($xml === false) {
+        echo 'Operation failed with error: ' . curl_error($ch) . PHP_EOL;
+    } else {
+        // operation completed successfully
+        $file = "$dir/$ipa_entity_code.xml";
+        file_put_contents($file, $xml);
+    }
     curl_close($ch);
-    $file = "$dir/$ipa_entity_code.xml";
-    file_put_contents($file, $xml);
 }

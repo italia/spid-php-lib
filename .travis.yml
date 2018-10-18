@@ -1,0 +1,19 @@
+language: php
+
+php:
+  - 7.0.30
+  - 7.1.20
+  - 7.2.9
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    
+install:
+  - composer install --no-interaction
+  - mkdir -p example/idp_metadata
+  - make -C example
+  - php bin/download_idp_metadata.php ./example/idp_metadata
+  
+script:
+  - vendor/bin/phpunit --stderr tests

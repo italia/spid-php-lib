@@ -10,7 +10,10 @@ final class SpTest extends PHPUnit\Framework\TestCase
         'sp_key_file' => './example/sp.key',
         'sp_cert_file' => './example/sp.crt',
         'sp_assertionconsumerservice' => ['http://sp3.simevo.com/acs'],
-        'sp_singlelogoutservice' => 'http://sp3.simevo.com/slo',
+        'sp_singlelogoutservice' => [
+            ['http://sp3.simevo.com/slo', ''],
+            ['http://sp3.simevo.com/slo', 'REDIRECT']
+        ],
         'sp_org_name' => 'test_simevo',
         'sp_org_display_name' => 'Test Simevo',
         'idp_metadata_folder' => './example/idp_metadata/',
@@ -19,8 +22,8 @@ final class SpTest extends PHPUnit\Framework\TestCase
             ["name", "familyName", "fiscalNumber", "email", "spidCode"]
             ]
         ];
-    
-    public function testCanBeCreatedFromValidSettings(): void
+
+    public function testCanBeCreatedFromValidSettings()
     {
         $this->assertInstanceOf(
             Italia\Spid\Sp::class,
@@ -28,51 +31,85 @@ final class SpTest extends PHPUnit\Framework\TestCase
         );
     }
 
-    private function validateXml($xmlString, $schemaFile, $valid = true): void
+    private function validateXml($xmlString, $schemaFile, $valid = true)
     {
         $xml = new DOMDocument();
         $xml->loadXML($xmlString, LIBXML_NOBLANKS);
         $this->assertEquals($xml->schemaValidate($schemaFile), $valid);
     }
 
-    public function testMetatadaValid(): void
+    public function testMetatadaValid()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $metadata = $sp->getSPMetadata();
         $this->validateXml($metadata, "./tests/schemas/saml-schema-metadata-SPID-SP.xsd");
     }
 
-    public function testCanLoadAllIdpMetadata(): void
+    public function testSettingsWithoutEntityId()
     {
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
-        $idps = ['idp_1', 'idp_2', 'idp_3', 'idp_4', 'idp_5', 'idp_6', 'idp_7', 'idp_8', 'testenv2'];
-        foreach ($idps as $idp) {
-            $sp->loadIdpFromFile($idp);
-            $retrievedIdp = $sp->getIdp($idp);
-            $this->assertEquals($retrievedIdp->idpFileName, $idp);
-            // var_dump($retrievedIdp);
-            $idpEntityId = $retrievedIdp->metadata['idpEntityId'];
-            $idpSSO = $retrievedIdp->metadata['idpSSO'];
-            $this->assertContains($idpEntityId, $idpSSO);
-            $idpSLO = $retrievedIdp->metadata['idpSLO'];
-            $this->assertContains($idpEntityId, $idpSLO);
-        }
-    }
-
-    public function testSettingsWithoutEntityId(): void
-    {
-        // TODO check other missing keys:
-        // sp_key_file
-        // sp_cert_file
-        // sp_assertionconsumerservice
-        // sp_singlelogoutservice
-        // sp_org_name
-        // sp_org_display_name
-        // idp_metadata_folder
-        // sp_attributeconsumingservice
         $settings1 = SpTest::$settings;
         unset($settings1['sp_entityid']);
         $this->expectException(\Exception::class);
         $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutSpKeyFile()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_key_file']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutSpCertFile()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_cert_file']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutAssertionConsumerService()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_assertionconsumerservice']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutSingleLogoutService()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['sp_singlelogoutservice']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithoutIdpMetadataFolder()
+    {
+        $settings1 = SpTest::$settings;
+        unset($settings1['idp_metadata_folder']);
+        $this->expectException(\Exception::class);
+        $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testCanLoadAllIdpMetadata()
+    {
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $idps = $files = glob(SpTest::$settings['idp_metadata_folder'] . "*.xml");
+        foreach ($idps as $idp) {
+            $retrievedIdp = $sp->loadIdpFromFile($idp);
+            $this->assertEquals($retrievedIdp->idpFileName, $idp);
+            $idpEntityId = $retrievedIdp->metadata['idpEntityId'];
+            $host = parse_url($idpEntityId, PHP_URL_HOST);
+            $idpSSOArray = $retrievedIdp->metadata['idpSSO'];
+            foreach ($idpSSOArray as $key => $idpSSO) {
+                $this->assertContains($host, $idpSSO['location']);
+            }
+            $idpSLOArray = $retrievedIdp->metadata['idpSLO'];
+            foreach ($idpSLOArray as $key => $idpSLO) {
+                $this->assertContains($host, $idpSLO['location']);
+            }
+        }
     }
 }

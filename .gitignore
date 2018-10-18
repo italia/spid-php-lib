@@ -3,6 +3,6 @@
 .vscode
 .DS_Store
 /example/idp_metadata/*.xml
-example/sp.crt
-example/sp.key
+/example/sp.crt
+/example/sp.key
 .idea
