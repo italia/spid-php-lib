@@ -33,7 +33,9 @@ class Idp implements IdpInterface
         if (!file_exists($fileName)) {
             throw new \Exception("Metadata file $fileName not found", 1);
         }
-
+        if (!is_readable($fileName)) {
+            throw new \Exception("Metadata file $fileName is not readable. Please check file permissions.", 1);
+        }
         $xml = simplexml_load_file($fileName);
 
         $xml->registerXPathNamespace('md', 'urn:oasis:names:tc:SAML:2.0:metadata');

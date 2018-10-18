@@ -44,4 +44,32 @@ final class IdpTest extends PHPUnit\Framework\TestCase
         $this->assertAttributeNotEmpty('idpFileName', $idp);
         $this->assertAttributeNotEmpty('metadata', $idp);
     }
+
+    public function testCanLoadFromValidXMLFullPath()
+    {
+        $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
+        $idp = new Italia\Spid\Spid\Saml\Idp($sp);
+        $loaded = $idp->loadFromXml($sp->settings['idp_metadata_folder'] . 'testenv.xml');
+        $this->assertInstanceOf(
+            Italia\Spid\Spid\Saml\Idp::class,
+            $loaded
+        );
+        $this->assertAttributeNotEmpty('idpFileName', $idp);
+        $this->assertAttributeNotEmpty('metadata', $idp);
+    }
+
+    public function testLoadXMLWIthWrongFilePath()
+    {
+        $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
+        $idp = new Italia\Spid\Spid\Saml\Idp($sp);
+        $sp->settings['idp_metadata_folder'] = '/wrong/path/to/metadata/';
+
+        $this->expectException(\Exception::class);
+        $loaded = $idp->loadFromXml($sp->settings['idp_metadata_folder'] . 'testenv.xml');
+        
+        $this->assertAttributeNotEmpty(null, $idp);
+        $this->assertAttributeNotEmpty(null, $idp);
+    }
+
+    
 }
