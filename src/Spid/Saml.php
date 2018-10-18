@@ -10,9 +10,9 @@ use Italia\Spid\Spid\Interfaces\SAMLInterface;
 
 class Saml implements SAMLInterface
 {
-    var $settings;
-    var $idps = []; // contains filename -> Idp object array
-    var $session; // Session object
+    public $settings;
+    private $idps = []; // contains filename -> Idp object array
+    private $session; // Session object
 
     public function __construct(array $settings)
     {
@@ -22,7 +22,9 @@ class Saml implements SAMLInterface
 
     public function loadIdpFromFile(string $filename)
     {
-        if (empty($filename)) return null;
+        if (empty($filename)) {
+            return null;
+        }
         if (array_key_exists($filename, $this->idps)) {
             return $this->idps[$filename];
         }
@@ -37,7 +39,7 @@ class Saml implements SAMLInterface
 
         if (is_array($files)) {
             $mapping = array();
-            foreach($files as $filename) {
+            foreach ($files as $filename) {
                 $idp = $this->loadIdpFromFile($filename);
                 
                 $mapping[basename($filename, ".xml")] = $idp->metadata['idpEntityId'];
@@ -72,7 +74,7 @@ class Saml implements SAMLInterface
         </md:KeyDescriptor>
 XML;
         foreach ($sloLocationArray as $slo) {
-            $location = $slo[0]; 
+            $location = $slo[0];
             $binding = $slo[1];
             if (strcasecmp($binding, "POST") === 0 || strcasecmp($binding, "") === 0) {
                 $binding = Settings::BINDING_POST;
@@ -127,8 +129,14 @@ XML;
         return SignatureUtils::signXml($xml, $this->settings);
     }
 
-    public function login(string $idpName, int $assertId, int $attrId, $level = 1, string $redirectTo = null, $shouldRedirect = true)
-    {
+    public function login(
+        string $idpName,
+        int $assertId,
+        int $attrId,
+        $level = 1,
+        string $redirectTo = null,
+        $shouldRedirect = true
+    ) {
         $args = func_get_args();
         return $this->baseLogin(Settings::BINDING_REDIRECT, ...$args);
     }
@@ -139,8 +147,15 @@ XML;
         return $this->baseLogin(Settings::BINDING_POST, ...$args);
     }
 
-    private function baseLogin($binding = Settings::BINDING_REDIRECT, $idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true)
-    {
+    private function baseLogin(
+        $binding,
+        $idpName,
+        $assertId,
+        $attrId,
+        $level = 1,
+        $redirectTo = null,
+        $shouldRedirect = true
+    ) {
         if ($this->isAuthenticated()) {
             return false;
         }
@@ -162,7 +177,9 @@ XML;
     public function isAuthenticated() : bool
     {
         $selectedIdp = $_SESSION['idpName'] ?? $_SESSION['spidSession']->idp ?? null;
-        if (is_null($selectedIdp)) return false;
+        if (is_null($selectedIdp)) {
+            return false;
+        }
         $idp = $this->loadIdpFromFile($_SESSION['idpName'] ?? $_SESSION['spidSession']->idp);
         $response = new BaseResponse($this);
         if (!empty($idp) && !$response->validate($idp->metadata['idpCertValue'])) {
@@ -191,7 +208,7 @@ XML;
         return $this->baseLogout(Settings::BINDING_POST, ...$args);
     }
 
-    private function baseLogout($binding = Settings::BINDING_REDIRECT, $slo, $redirectTo = null, $shouldRedirect = true)
+    private function baseLogout($binding, $slo, $redirectTo = null, $shouldRedirect = true)
     {
         if (!$this->isAuthenticated()) {
             return false;
@@ -202,7 +219,9 @@ XML;
 
     public function getAttributes() : array
     {
-        if ($this->isAuthenticated() === false) return array();
+        if ($this->isAuthenticated() === false) {
+            return array();
+        }
         return $this->session->attributes;
     }
 }
