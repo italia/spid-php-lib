@@ -90,60 +90,78 @@ class Settings
     private static function checkSettingsValues($settings)
     {
         if (filter_var($settings['sp_entityid'], FILTER_VALIDATE_URL) === false) {
-            throw new \Exception('Invalid SP Entity ID provided');
+            throw new \InvalidArgumentException('Invalid SP Entity ID provided');
         }
         // Save entity id host url for other checks
         $host = parse_url($settings['sp_entityid'], PHP_URL_HOST);
 
+        if (!is_readable($settings['sp_key_file'])) {
+            throw new \InvalidArgumentException('Sp key file does not exist or is not readable.');
+        }
+        if (!is_readable($settings['sp_cert_file'])) {
+            throw new \InvalidArgumentException('Sp cert file does not exist or is not readable.');
+        }
+        if (!is_readable($settings['idp_metadata_folder'])) {
+            throw new \InvalidArgumentException('Idp metadata folder does not exist or is not readable.');
+        }
         if (isset($settings['sp_attributeconsumingservice'])) {
             if (!is_array($settings['sp_attributeconsumingservice'])) {
-                throw new \Exception('sp_attributeconsumingservice should be an array');
+                throw new \InvalidArgumentException('sp_attributeconsumingservice should be an array');
             }
             array_walk($settings['sp_attributeconsumingservice'], function ($acs) {
                 if (!is_array($acs)) {
-                    throw new \Exception('sp_attributeconsumingservice elements should be an arrays');
+                    throw new \InvalidArgumentException('sp_attributeconsumingservice elements should be an arrays');
+                }
+                if (count($acs) == 0) {
+                    throw new \InvalidArgumentException('sp_attributeconsumingservice elements should contain at least one element');
                 }
                 array_walk($acs, function ($field) {
                     if (!in_array($field, self::$validAttributeFields)) {
-                        throw new \Exception('Invalid Attribute field '. $field .' requested');
+                        throw new \InvalidArgumentException('Invalid Attribute field '. $field .' requested');
                     }
                 });
             });
         }
 
         if (!is_array($settings['sp_assertionconsumerservice'])) {
-            throw new \Exception('sp_assertionconsumerservice should be an array');
+            throw new \InvalidArgumentException('sp_assertionconsumerservice should be an array');
+        }
+        if (count($settings['sp_assertionconsumerservice']) == 0) {
+            throw new \InvalidArgumentException('sp_assertionconsumerservice should contain at least one element');
         }
         array_walk($settings['sp_assertionconsumerservice'], function ($acs) use ($host) {
             if (strpos($acs, $host) === false) {
-                throw new \Exception('sp_assertionconsumerservice elements Location domain should be ' . $host .
-                    ', got ' .  parse_url($acs, PHP_URL_HOST) . 'instead');
+                throw new \InvalidArgumentException('sp_assertionconsumerservice elements Location domain should be ' . $host .
+                    ', got ' .  parse_url($acs, PHP_URL_HOST) . ' instead');
             }
         });
 
         if (!is_array($settings['sp_singlelogoutservice'])) {
-            throw new \Exception('sp_singlelogoutservice should be an array');
+            throw new \InvalidArgumentException('sp_singlelogoutservice should be an array');
+        }
+        if (count($settings['sp_singlelogoutservice']) == 0) {
+            throw new \InvalidArgumentException('sp_singlelogoutservice should contain at least one element');
         }
         array_walk($settings['sp_singlelogoutservice'], function ($slo) use ($host) {
             if (!is_array($slo)) {
-                throw new \Exception('sp_singlelogoutservice elements should be arrays');
+                throw new \InvalidArgumentException('sp_singlelogoutservice elements should be arrays');
             }
             if (count($slo) != 2) {
-                throw new \Exception('sp_singlelogoutservice array elements should contain exactly 2 elements,\
+                throw new \InvalidArgumentException('sp_singlelogoutservice array elements should contain exactly 2 elements,\
                     in order SLO Location and Binding');
             }
             if (!is_string($slo[0]) || !is_string($slo[1])) {
-                throw new \Exception('sp_singlelogoutservice array elements should contain 2 string values,\
+                throw new \InvalidArgumentException('sp_singlelogoutservice array elements should contain 2 string values,\
                     in order SLO Location and Binding');
             }
             if (strcasecmp($slo[1], "POST") != 0 &&
                 strcasecmp($slo[1], "REDIRECT") != 0 &&
                 strcasecmp($slo[1], "") != 0) {
-                throw new \Exception('sp_singlelogoutservice elements Binding value should be one of\
+                throw new \InvalidArgumentException('sp_singlelogoutservice elements Binding value should be one of\
                     "POST", "REDIRECT", or "" (empty string, defaults to POST)');
             }
             if (strpos($slo[0], $host) === false) {
-                throw new \Exception('sp_singlelogoutservice elements Location domain should be ' . $host .
+                throw new \InvalidArgumentException('sp_singlelogoutservice elements Location domain should be ' . $host .
                     ', got ' .  parse_url($slo[0], PHP_URL_HOST) . 'instead');
             }
         });

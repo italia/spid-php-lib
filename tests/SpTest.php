@@ -22,7 +22,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
             ["name", "familyName", "fiscalNumber", "email", "spidCode"]
             ]
         ];
-
+        
     public function testCanBeCreatedFromValidSettings()
     {
         $this->assertInstanceOf(
@@ -91,6 +91,132 @@ final class SpTest extends PHPUnit\Framework\TestCase
         unset($settings1['idp_metadata_folder']);
         $this->expectException(\Exception::class);
         $sp = new Italia\Spid\Sp($settings1);
+    }
+
+    public function testSettingsWithInvalidSPEntityid()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $settings = self::$settings;
+        $settings['sp_entityid'] = "htp:/simevo";
+        new Italia\Spid\Sp($settings);  
+    }
+
+    public function testSettingsWithInvalidSpACS()
+    {
+        $settings = self::$settings;
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_assertionconsumerservice'] = "not an array";
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_assertionconsumerservice'] = [];
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_assertionconsumerservice'] = [
+            'http://wrong.url.com/acs'
+        ];
+        new Italia\Spid\Sp($settings);  
+    }
+
+    public function testSettingsWithInvalidSpSLO()
+    {
+        $settings = self::$settings;
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_singlelogoutservice'] = "not an array";
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_singlelogoutservice'] = [
+            'not an array'
+        ];
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_singlelogoutservice'] = [
+            []
+        ];
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_singlelogoutservice'] = [
+            ['too', 'many', 'elements']
+        ];
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_singlelogoutservice'] = [
+            ['both elements should be strings', 1]
+        ];
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_singlelogoutservice'] = [
+            ['http://wrong.url.com', '']
+        ];
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_singlelogoutservice'] = [
+            ['http://sp3.simevo.com/slo', 'invalid binding']
+        ];
+        new Italia\Spid\Sp($settings);
+    }
+
+    public function testSettingsWithInvalidSpAttrCS()
+    {
+        $settings = self::$settings;
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_attributeconsumingservice'] = "not an array";
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_attributeconsumingservice'] = [
+            'not an array'
+        ];
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_attributeconsumingservice'] = [
+            'not an array'
+        ];
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_attributeconsumingservice'] = [
+            []
+        ];
+        new Italia\Spid\Sp($settings);  
+
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_attributeconsumingservice'] = [
+            ['invalid name']
+        ];
+        new Italia\Spid\Sp($settings);  
+    }
+
+    public function testSettingsWithInvalidKey()
+    {
+        $settings = self::$settings;
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_key_file'] = "/invalid/path/sp.key";
+        new Italia\Spid\Sp($settings);  
+    }
+
+    public function testSettingsWithInvalidCert()
+    {
+        $settings = self::$settings;
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_cert_file'] = "/invalid/path/sp.cert";
+        new Italia\Spid\Sp($settings);  
+    }
+
+    public function testSettingsWithInvalidIdpMetaFolder()
+    {
+        $settings = self::$settings;
+        $this->expectException(InvalidArgumentException::class);
+        $settings['idp_metadata_folder'] = "/invalid/path/idp_metadata";
+        new Italia\Spid\Sp($settings);  
     }
 
     public function testCanLoadAllIdpMetadata()
