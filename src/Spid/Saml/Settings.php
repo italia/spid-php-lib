@@ -73,6 +73,9 @@ class Settings
         if ($isCert) {
             $k = $file;
         } else {
+            if (!is_readable($file)) {
+                throw new \Exception('File '.$file.' is not readable. Please check file permissions.');
+            }
             $k = file_get_contents($file);
         }
         $ck = '';
