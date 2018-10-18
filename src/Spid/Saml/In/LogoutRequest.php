@@ -10,7 +10,7 @@ class LogoutRequest implements ResponseInterface
 
     private $saml;
 
-    public function __construct(Saml $saml) 
+    public function __construct(Saml $saml)
     {
         $this->saml = $saml;
     }
@@ -19,9 +19,15 @@ class LogoutRequest implements ResponseInterface
     {
         $root = $xml->getElementsByTagName('LogoutRequest')->item(0);
 
-        if ($xml->getElementsByTagName('Issuer')->length == 0) throw new \Exception("Invalid Response. Missing Issuer element");
-        if ($xml->getElementsByTagName('NameID')->length == 0) throw new \Exception("Invalid Response. Missing NameID element");
-        if ($xml->getElementsByTagName('SessionIndex')->length == 0) throw new \Exception("Invalid Response. Missing SessionIndex element");
+        if ($xml->getElementsByTagName('Issuer')->length == 0) {
+            throw new \Exception("Invalid Response. Missing Issuer element");
+        }
+        if ($xml->getElementsByTagName('NameID')->length == 0) {
+            throw new \Exception("Invalid Response. Missing NameID element");
+        }
+        if ($xml->getElementsByTagName('SessionIndex')->length == 0) {
+            throw new \Exception("Invalid Response. Missing SessionIndex element");
+        }
         
         if ($issuer->getAttribute('Destination') == "") {
             throw new \Exception("Missing Destination attribute");

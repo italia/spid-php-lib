@@ -25,7 +25,7 @@ $mapping = $sp->getIdpList();
         lang: 'en',
         selector: '#spid-button',
         method: 'POST',
-        // POST data with the selected IDP will be sent to this URL with the name indicated in fieldName
+        // POST data with the selected IdP will be sent to this URL with the name indicated in fieldName
         // In this case redirect and reuse the provided login example page
         url: '/login',
         fieldName: 'selected_idp',
@@ -37,7 +37,7 @@ $mapping = $sp->getIdpList();
             }
             ?>
         },
-        // At least one supported IDP must be provided
+        // At least one supported IdP must be provided
         supported: [
             <?php 
             foreach ($mapping as $key => $value) {
@@ -46,7 +46,7 @@ $mapping = $sp->getIdpList();
             ?>
         ],
         // Il campo sarebbe opzionale, ma anche se il mapping contiene testenv, la libreria smart-button sembra 
-        // ignorare gli IDP non "ufficiali". extraProviders è quindi obbligatorio se vogliamo usare testenv
+        // ignorare gli IdP non "ufficiali". extraProviders è quindi obbligatorio se vogliamo usare testenv
         extraProviders: [           
             {
                 "protocols": ["SAML"],
