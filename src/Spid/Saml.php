@@ -56,6 +56,11 @@ class Saml implements SAMLInterface
 
     public function getSPMetadata(): string
     {
+        if (!is_readable($this->settings['sp_cert_file'])) {
+            return <<<XML
+            <error>Your SP certificate file is not readable. Please check file permissions.</error>
+XML;
+        }
         $entityID = $this->settings['sp_entityid'];
         $id = preg_replace('/[^a-z0-9_-]/', '_', $entityID);
         $cert = Settings::cleanOpenSsl($this->settings['sp_cert_file']);
