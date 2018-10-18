@@ -37,10 +37,10 @@ final class IdpTest extends PHPUnit\Framework\TestCase
         $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
         $idp = new Italia\Spid\Spid\Saml\Idp($sp);
         $loaded = $idp->loadFromXml('testenv');
-        // $this->assertInstanceOf(
-        //     Italia\Spid\Spid\Saml\Idp::class,
-        //     $loaded
-        // );
+        $this->assertInstanceOf(
+            Italia\Spid\Spid\Saml\Idp::class,
+            $loaded
+        );
         $this->assertAttributeNotEmpty('idpFileName', $idp);
         $this->assertAttributeNotEmpty('metadata', $idp);
     }
