@@ -52,7 +52,7 @@ final class IdpTest extends PHPUnit\Framework\TestCase
 
         $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
         $idp = new Italia\Spid\Spid\Saml\Idp($sp);
-        $loaded = $idp->loadFromXml('testenv');
+        $loaded = $idp->loadFromXml(self::$idps[0]);
         $this->assertInstanceOf(
             Italia\Spid\Spid\Saml\Idp::class,
             $loaded
@@ -70,7 +70,7 @@ final class IdpTest extends PHPUnit\Framework\TestCase
     {
         $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
         $idp = new Italia\Spid\Spid\Saml\Idp($sp);
-        $loaded = $idp->loadFromXml($sp->settings['idp_metadata_folder'] . 'testenv.xml');
+        $loaded = $idp->loadFromXml($sp->settings['idp_metadata_folder'] . self::idps[0]);
         $this->assertInstanceOf(
             Italia\Spid\Spid\Saml\Idp::class,
             $loaded
@@ -86,7 +86,7 @@ final class IdpTest extends PHPUnit\Framework\TestCase
         $sp->settings['idp_metadata_folder'] = '/wrong/path/to/metadata/';
 
         $this->expectException(\Exception::class);
-        $loaded = $idp->loadFromXml($sp->settings['idp_metadata_folder'] . 'testenv.xml');
+        $loaded = $idp->loadFromXml($sp->settings['idp_metadata_folder'] . self::$idps[0]);
         
         $this->assertAttributeNotEmpty(null, $idp);
         $this->assertAttributeNotEmpty(null, $idp);
