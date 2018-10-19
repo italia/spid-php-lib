@@ -247,4 +247,28 @@ final class SpTest extends PHPUnit\Framework\TestCase
             array_map('unlink', $idps);
         }
     }
+
+    public function testIsAuthenticatedNoIDP()
+    {
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $this->assertEquals(false, $sp->isAuthenticated());
+    }
+
+    public function testIsAuthenticatedInvalidIDP()
+    {
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $_SESSION['idpName'] = null;
+        $this->assertEquals(false, $sp->isAuthenticated());
+        unset($_SESSION);
+    }
+
+    public function testIsAuthenticated()
+    {
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $session = new Italia\Spid\Spid\Session();
+        $session->idp = 'testenv';
+        $_SESSION['spidSession'] = $session;
+        $this->assertEquals(true, $sp->isAuthenticated());
+        unset($_SESSION);
+    }
 }

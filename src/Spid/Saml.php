@@ -7,6 +7,7 @@ use Italia\Spid\Spid\Saml\In\BaseResponse;
 use Italia\Spid\Spid\Saml\Settings;
 use Italia\Spid\Spid\Saml\SignatureUtils;
 use Italia\Spid\Spid\Interfaces\SAMLInterface;
+use Italia\Spid\Spid\Session;
 
 class Saml implements SAMLInterface
 {
@@ -185,7 +186,7 @@ XML;
         if (is_null($selectedIdp)) {
             return false;
         }
-        $idp = $this->loadIdpFromFile($_SESSION['idpName'] ?? $_SESSION['spidSession']->idp);
+        $idp = $this->loadIdpFromFile($selectedIdp);
         $response = new BaseResponse($this);
         if (!empty($idp) && !$response->validate($idp->metadata['idpCertValue'])) {
             return false;
@@ -194,7 +195,12 @@ XML;
             $idp->logoutResponse();
             return false;
         }
-        if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
+        if (
+            isset($_SESSION) && 
+            isset($_SESSION['spidSession']) && 
+            $_SESSION['spidSession'] instanceof Session &&
+            $_SESSION['spidSession']->isValid()
+        ) {
             $this->session = $_SESSION['spidSession'];
             return true;
         }
