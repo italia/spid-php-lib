@@ -22,6 +22,20 @@ final class IdpTest extends PHPUnit\Framework\TestCase
             ["name", "familyName", "fiscalNumber", "email", "spidCode"]
             ]
         ];
+    
+    private static $idps = [];
+
+    public static function setupIdps()
+    {
+        self::$idps = glob(IdpTest::$settings['idp_metadata_folder'] . "*.xml");
+        // If no IDP is found, download production IDPs for tests
+        if (count(self::$idps) == 0) {
+            exec('php ./bin/download_idp_metadata.php ./example/idp_metadata/');
+            self::$idps = glob(IdpTest::$settings['idp_metadata_folder'] . "*.xml");
+            return true;
+        }
+        return false;
+    }
 
     public function testCanBeCreatedFromValidSP()
     {
@@ -34,6 +48,8 @@ final class IdpTest extends PHPUnit\Framework\TestCase
 
     public function testCanLoadFromValidXML()
     {
+        $result = self::setupIdps();
+
         $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
         $idp = new Italia\Spid\Spid\Saml\Idp($sp);
         $loaded = $idp->loadFromXml('testenv');
@@ -43,6 +59,11 @@ final class IdpTest extends PHPUnit\Framework\TestCase
         );
         $this->assertAttributeNotEmpty('idpFileName', $idp);
         $this->assertAttributeNotEmpty('metadata', $idp);
+
+        // If IDPs were downloaded for testing purposes, then delete them
+        if ($result) {
+            array_map('unlink', self::$idps);
+        }
     }
 
     public function testCanLoadFromValidXMLFullPath()
