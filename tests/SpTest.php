@@ -222,7 +222,12 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testCanLoadAllIdpMetadata()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
-        $idps = $files = glob(SpTest::$settings['idp_metadata_folder'] . "*.xml");
+        $idps = glob(SpTest::$settings['idp_metadata_folder'] . "*.xml");
+        // If no IDP is found, download production IDPs for tests
+        if (count($idps) == 0) {
+            $delete = true;
+            exec('php ./bin/download_idp_metadata.php ./example/idp_metadata/');
+        }
         foreach ($idps as $idp) {
             $retrievedIdp = $sp->loadIdpFromFile($idp);
             $this->assertEquals($retrievedIdp->idpFileName, $idp);
@@ -236,6 +241,10 @@ final class SpTest extends PHPUnit\Framework\TestCase
             foreach ($idpSLOArray as $key => $idpSLO) {
                 $this->assertContains($host, $idpSLO['location']);
             }
+        }
+        // If IDPs were downloaded for testing purposes, then delete them
+        if (isset($delete) && $delete) {
+            array_map('unlink', $idps);
         }
     }
 }

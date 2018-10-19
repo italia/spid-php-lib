@@ -71,5 +71,5 @@ final class IdpTest extends PHPUnit\Framework\TestCase
         $this->assertAttributeNotEmpty(null, $idp);
     }
 
-    
+    // TODO check if logout response should redirect
 }
