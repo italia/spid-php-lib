@@ -133,7 +133,8 @@ class Idp implements IdpInterface
 
     public function logoutResponse() : string
     {
-        $this->session = $session;
+        $binding = Settings::BINDING_POST;
+        $redirectTo = $this->sp->settings['sp_entityid'];
 
         $logoutResponse = new LogoutResponse($this);
         $url = ($binding == Settings::BINDING_REDIRECT) ?

@@ -6,6 +6,7 @@ use Italia\Spid\Spid\Interfaces\RequestInterface;
 use Italia\Spid\Spid\Saml\Settings;
 use Italia\Spid\Spid\Saml\Idp;
 use Italia\Spid\Spid\Saml\In\LogoutRequest;
+use Italia\Spid\Spid\Saml\SignatureUtils;
 
 class LogoutResponse extends Base implements RequestInterface
 {

@@ -256,19 +256,54 @@ final class SpTest extends PHPUnit\Framework\TestCase
 
     public function testIsAuthenticatedInvalidIDP()
     {
+        session_unset();
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $_SESSION['idpName'] = null;
         $this->assertEquals(false, $sp->isAuthenticated());
-        unset($_SESSION);
+    }
+
+    public function testIsAuthenticatedInvalidSession()
+    {
+        session_unset();
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $session = new Italia\Spid\Spid\Session();
+        $session->idp = 'testenv';
+        // IF these values are not set, the session is invalid
+        // $session->idpEntityID = 'https:/sp.example.com/';
+        // $session->level = 1;
+        // $session->sessionID = 'test123';
+        $_SESSION['spidSession'] = $session;
+        $this->assertEquals(false, $sp->isAuthenticated());
+    }
+
+    public function testIsAuthenticatedInvalidResponse()
+    {
+        session_unset();
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $_POST['SAMLResponse'] = "";
+        $this->assertEquals(false, $sp->isAuthenticated());
+        unset($_POST['SAMLResponse']);
+    }
+
+    public function testIsAuthenticatedLogoutResponse()
+    {
+        session_unset();
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $_SESSION['idpName'] = "testenv";
+        $_SESSION['inResponseTo'] = "PROVA";
+        $this->assertEquals(false, $sp->isAuthenticated());
     }
 
     public function testIsAuthenticated()
     {
+        session_unset();
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $session = new Italia\Spid\Spid\Session();
         $session->idp = 'testenv';
+        $session->idpEntityID = 'https:/sp.example.com/';
+        $session->level = 1;
+        $session->sessionID = 'test123';
         $_SESSION['spidSession'] = $session;
         $this->assertEquals(true, $sp->isAuthenticated());
-        unset($_SESSION);
     }
 }

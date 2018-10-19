@@ -233,6 +233,7 @@ XML;
         if ($this->isAuthenticated() === false) {
             return array();
         }
+        // TODO handle no attributes requested case
         return $this->session->attributes;
     }
 }
