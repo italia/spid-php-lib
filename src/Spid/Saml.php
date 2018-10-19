@@ -153,15 +153,7 @@ XML;
         return $this->baseLogin(Settings::BINDING_POST, ...$args);
     }
 
-    private function baseLogin(
-        $binding,
-        $idpName,
-        $assertId,
-        $attrId,
-        $level = 1,
-        $redirectTo = null,
-        $shouldRedirect = true
-    ) {
+    private function baseLogin($binding, $idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true) {
         if ($this->isAuthenticated()) {
             return false;
         }

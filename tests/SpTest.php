@@ -375,7 +375,51 @@ final class SpTest extends PHPUnit\Framework\TestCase
         // If IDPs were downloaded for testing purposes, then delete them
         if ($result) {
             array_map('unlink', self::$idps);
-        }
-                
+        }            
     }
+
+    public function testLoginInvalidACS()
+    {
+        unset($_SESSION);
+        $result = self::setupIdps();
+        
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+
+        $this->expectException(\Exception::class);
+        $sp->login(self::$idps[0], 12, 0);
+    }
+
+    public function testLoginInvalidAttrCS()
+    {
+        unset($_SESSION);
+        $result = self::setupIdps();
+        
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+
+        $this->expectException(\Exception::class);
+        $sp->login(self::$idps[0], 0, 12);
+    }
+
+    public function testLoginAlreadyAuthenticated()
+    {
+        unset($_SESSION);
+        $result = self::setupIdps();
+
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $session = new Italia\Spid\Spid\Session();
+        $session->idp = self::$idps[0];
+        $session->idpEntityID = 'https:/sp.example.com/';
+        $session->level = 1;
+        $session->sessionID = 'test123';
+        $_SESSION['spidSession'] = $session;
+        $this->assertEquals(true, $sp->isAuthenticated());
+
+        $this->assertEquals(false, $sp->login(self::$idps[0], 0, 0));
+        // If IDPs were downloaded for testing purposes, then delete them
+        if ($result) {
+            array_map('unlink', self::$idps);
+        }
+    }
+
+
 }
