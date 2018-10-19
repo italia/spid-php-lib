@@ -325,15 +325,19 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $session->idpEntityID = 'https:/sp.example.com/';
         $session->level = 1;
         $session->sessionID = 'test123';
-        //  Test as if only name attiribute was requested
-        $session->attributes = [
-            'name' => 'Test'
-        ];
+        // Test with no attributes requested first
         $_SESSION['spidSession'] = $session;
         $this->assertEquals(true, $sp->isAuthenticated());
         // Authentication completed, request attributes
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $this->assertInternalType('array', $sp->getAttributes());
+        $this->assertEquals(0, count($sp->getAttributes()));
+        //  No test with attributes requested
+        $session->attributes = [
+            'name' => 'Test'
+        ];
+        $this->assertInternalType('array', $sp->getAttributes());
         $this->assertEquals(1, count($sp->getAttributes()));
+                
     }
 }

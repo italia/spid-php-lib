@@ -234,6 +234,6 @@ XML;
             return array();
         }
         // TODO handle no attributes requested case
-        return $this->session->attributes;
+        return isset($this->session->attributes) ? $this->session->attributes : array();
     }
 }
