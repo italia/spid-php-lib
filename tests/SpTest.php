@@ -256,7 +256,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
 
     public function testIsAuthenticatedInvalidIDP()
     {
-        session_unset();
+        unset($_SESSION);
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $_SESSION['idpName'] = null;
         $this->assertEquals(false, $sp->isAuthenticated());
@@ -264,7 +264,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
 
     public function testIsAuthenticatedInvalidSession()
     {
-        session_unset();
+        unset($_SESSION);
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $session = new Italia\Spid\Spid\Session();
         $session->idp = 'testenv';
@@ -278,7 +278,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
 
     public function testIsAuthenticatedInvalidResponse()
     {
-        session_unset();
+        unset($_SESSION);
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $_POST['SAMLResponse'] = "";
         $this->assertEquals(false, $sp->isAuthenticated());
@@ -287,7 +287,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
 
     public function testIsAuthenticatedLogoutResponse()
     {
-        session_unset();
+        unset($_SESSION);
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $_SESSION['idpName'] = "testenv";
         $_SESSION['inResponseTo'] = "PROVA";
@@ -296,7 +296,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
 
     public function testIsAuthenticated()
     {
-        session_unset();
+        unset($_SESSION);
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $session = new Italia\Spid\Spid\Session();
         $session->idp = 'testenv';
@@ -305,5 +305,35 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $session->sessionID = 'test123';
         $_SESSION['spidSession'] = $session;
         $this->assertEquals(true, $sp->isAuthenticated());
+    }
+
+    public function testGetAttributesNoAuth()
+    {
+        unset($_SESSION);
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $this->assertEquals(false, $sp->isAuthenticated());
+        $this->assertEquals([], $sp->getAttributes());
+    }
+
+    public function testGetAttributes()
+    {
+        // Authenticate first
+        unset($_SESSION);
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $session = new Italia\Spid\Spid\Session();
+        $session->idp = 'testenv';
+        $session->idpEntityID = 'https:/sp.example.com/';
+        $session->level = 1;
+        $session->sessionID = 'test123';
+        //  Test as if only name attiribute was requested
+        $session->attributes = [
+            'name' => 'Test'
+        ];
+        $_SESSION['spidSession'] = $session;
+        $this->assertEquals(true, $sp->isAuthenticated());
+        // Authentication completed, request attributes
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $this->assertInternalType('array', $sp->getAttributes());
+        $this->assertEquals(1, count($sp->getAttributes()));
     }
 }
