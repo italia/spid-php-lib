@@ -229,4 +229,13 @@ XML;
         }
         return $this->session->attributes;
     }
+    
+    public function isConfigured() : bool
+    {
+        return true;
+    }
+
+    public function generateCerts(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress) {
+        return;
+    }
 }

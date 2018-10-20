@@ -106,4 +106,12 @@ interface SAMLInterface
     // returns attributes as an array or an empty array if not authenticated
     // example: array('name' => 'Franco', 'familyName' => 'Rossi', 'fiscalNumber' => 'FFFRRR88A12T4441R',)
     public function getAttributes() : array;
+
+    // returns true if the SP certificates are found where the settings says they are, and they are valid
+    // (i.e. the library has been configured correctly
+    public function isConfigured() : bool;
+    
+    // Generates with openssl the SP certificates where the settings says they should be
+    // this function should be used with care because it requires write access to the filesystem, and invalidates the metadata
+    public function generateCerts(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress);
 }
