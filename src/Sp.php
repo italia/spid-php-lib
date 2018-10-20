@@ -31,7 +31,7 @@ class Sp
     {
         $methods_implemented = get_class_methods($this->protocol);
         if (!in_array($method, $methods_implemented)) {
-            throw new \Exception("Invalid method requested", 1);
+            throw new \Exception("Invalid method [$method] requested", 1);
         }
         return call_user_func_array(array($this->protocol, $method), $arguments);
     }
