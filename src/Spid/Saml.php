@@ -232,10 +232,46 @@ XML;
     
     public function isConfigured() : bool
     {
+        if (!is_readable($this->settings['sp_key_file'])) {
+            return false;
+        }
+        if (!is_readable($this->settings['sp_cert_file'])) {
+            return false;
+        }
+        $key = file_get_contents($this->settings['sp_key_file']);
+        if (!openssl_get_privatekey($key)) {
+            return false;
+        }
+        $cert = file_get_contents($this->settings['sp_cert_file']);
+        if (!openssl_get_publickey($cert)) {
+            return false;
+        }
         return true;
     }
 
-    public function generateCerts(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress) {
-        return;
+    public function generateCerts(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress)
+    {
+        $numberofdays = 3652 * 2;
+        $privkey = openssl_pkey_new(array(
+            "private_key_bits" => 2048,
+            "private_key_type" => OPENSSL_KEYTYPE_RSA,
+        ));
+        $dn = array(
+            "countryName" => $countryName,
+            "stateOrProvinceName" => $stateName,
+            "localityName" => $localityName,
+            "organizationName" => $orgName = $this->settings['sp_org_name'],
+            "organizationalUnitName" => $this->settings['sp_org_display_name'],
+            "commonName" => $commonName,
+            "emailAddress" => $emailAddress
+        );
+        $csr = openssl_csr_new($dn, $privkey, array('digest_alg' => 'sha256'));
+        $myserial = (int) hexdec(bin2hex(openssl_random_pseudo_bytes(8)));
+        $configArgs = array("digest_alg" => "sha256");
+        $sscert = openssl_csr_sign($csr, null, $privkey, $numberofdays, $configArgs, $myserial);
+        openssl_x509_export($sscert, $publickey);
+        openssl_pkey_export($privkey, $privatekey);
+        file_put_contents($this->settings['sp_key_file'], $privatekey);
+        file_put_contents($this->settings['sp_cert_file'], $publickey);
     }
 }

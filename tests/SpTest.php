@@ -125,18 +125,8 @@ final class SpTest extends PHPUnit\Framework\TestCase
         }
     }
 
-    public function testConfiguredState() {
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
-        if (!$sp->isConfigured()) {
-            $sp->generateCerts("IT", "Italy", "Rome", "localhost", "sp@example.com");
-        }
-        $filename = SpTest::$settings['sp_key_file'];
-        $this->assertTrue(file_exists($filename));
-        $filename = SpTest::$settings['sp_cert_file'];
-        $this->assertTrue(file_exists($filename));
-    }
-
-    public function testNotConfiguredState1() {
+    public function testNotConfiguredState1()
+    {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         if (!$sp->isConfigured()) {
             $sp->generateCerts("IT", "Italy", "Rome", "localhost", "sp@example.com");
@@ -148,7 +138,8 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $this->assertFalse($sp->isConfigured());
     }
 
-    public function testNotConfiguredState2() {
+    public function testNotConfiguredState2()
+    {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         if (!$sp->isConfigured()) {
             $sp->generateCerts("IT", "Italy", "Rome", "localhost", "sp@example.com");
@@ -158,5 +149,17 @@ final class SpTest extends PHPUnit\Framework\TestCase
             unlink($filename);
         }
         $this->assertFalse($sp->isConfigured());
+    }
+
+    public function testConfiguredState()
+    {
+        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        if (!$sp->isConfigured()) {
+            $sp->generateCerts("IT", "Italy", "Rome", "localhost", "sp@example.com");
+        }
+        $filename = SpTest::$settings['sp_key_file'];
+        $this->assertTrue(file_exists($filename));
+        $filename = SpTest::$settings['sp_cert_file'];
+        $this->assertTrue(file_exists($filename));
     }
 }
