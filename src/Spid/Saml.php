@@ -249,7 +249,7 @@ XML;
         return true;
     }
 
-    public function generateCerts(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress)
+    public function configure(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress)
     {
         $numberofdays = 3652 * 2;
         $privkey = openssl_pkey_new(array(

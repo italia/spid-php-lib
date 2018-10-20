@@ -113,5 +113,5 @@ interface SAMLInterface
     
     // Generates with openssl the SP certificates where the settings says they should be
     // this function should be used with care because it requires write access to the filesystem, and invalidates the metadata
-    public function generateCerts(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress);
+    public function configure(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress);
 }

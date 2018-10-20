@@ -201,7 +201,7 @@ The method will redirect to the IdP Single Logout page, or return false if you a
 |isAuthenticated() : bool|checks if the user is authenticated. This method **MUST** be caled after login and logout to finalise the operation.|
 |getAttributes() : array|If you requested attributes with an attribute consuming service during login, this method will return them in array format|
 |isConfigured() : bool|Returns true if the SP certificates are found where the settings says they are, and they are valid (i.e. the library has been configured correctly)|
-|generateCerts(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress)|Generates with openssl the SP certificates where the settings says they should be; this function should be used with care because it requires write access to the filessystem, and invalidates the metadata|
+|configure(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress)|Generates the SP key and certificate (validity = 10 years) where the settings says they should be; this function should be used with care because it requires write access to the filessystem, and invalidates the metadata|
 
 ### Example
 

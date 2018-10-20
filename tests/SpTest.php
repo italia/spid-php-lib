@@ -42,7 +42,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         if (!$sp->isConfigured()) {
-            $sp->generateCerts(
+            $sp->configure(
                 "IT", // countryName
                 "Italy", // stateName
                 "Rome", // localityName
@@ -106,7 +106,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         if (!$sp->isConfigured()) {
-            $sp->generateCerts("IT", "Italy", "Rome", "localhost", "sp@example.com");
+            $sp->configure("IT", "Italy", "Rome", "localhost", "sp@example.com");
         }
         $idps = $files = glob(SpTest::$settings['idp_metadata_folder'] . "*.xml");
         foreach ($idps as $idp) {
@@ -129,7 +129,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         if (!$sp->isConfigured()) {
-            $sp->generateCerts("IT", "Italy", "Rome", "localhost", "sp@example.com");
+            $sp->configure("IT", "Italy", "Rome", "localhost", "sp@example.com");
         }
         $filename = SpTest::$settings['sp_key_file'];
         if (file_exists($filename)) {
@@ -142,7 +142,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         if (!$sp->isConfigured()) {
-            $sp->generateCerts("IT", "Italy", "Rome", "localhost", "sp@example.com");
+            $sp->configure("IT", "Italy", "Rome", "localhost", "sp@example.com");
         }
         $filename = SpTest::$settings['sp_cert_file'];
         if (file_exists($filename)) {
@@ -155,7 +155,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         if (!$sp->isConfigured()) {
-            $sp->generateCerts("IT", "Italy", "Rome", "localhost", "sp@example.com");
+            $sp->configure("IT", "Italy", "Rome", "localhost", "sp@example.com");
         }
         $filename = SpTest::$settings['sp_key_file'];
         $this->assertTrue(file_exists($filename));
