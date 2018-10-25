@@ -7,17 +7,28 @@ class Settings
     const BINDING_REDIRECT = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect';
     const BINDING_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST';
 
+    const REQUIRED = 1;
+    const NOT_REQUIRED = 0;
     // Settings with value 1 are mandatory
     private static $validSettings = [
-        'sp_entityid' => 1,
-        'sp_key_file' => 1,
-        'sp_cert_file' => 1,
-        'sp_assertionconsumerservice' => 1,
-        'sp_singlelogoutservice' => 1,
-        'sp_attributeconsumingservice' => 0,
-        'sp_org_name' => 0,
-        'sp_org_display_name' => 0,
-        'idp_metadata_folder' => 1
+        'sp_entityid' => self::REQUIRED,
+        'sp_key_file' => self::REQUIRED,
+        'sp_cert_file' => self::REQUIRED,
+        'sp_assertionconsumerservice' => self::REQUIRED,
+        'sp_singlelogoutservice' => self::REQUIRED,
+        'sp_attributeconsumingservice' => self::NOT_REQUIRED,
+        'sp_org_name' => self::NOT_REQUIRED,
+        'sp_org_display_name' => self::NOT_REQUIRED,
+        'sp_key_cert_values' => [ 'required' => self::NOT_REQUIRED,
+            'values' => [
+                'countryName' => self::REQUIRED,
+                'stateOrProvinceName' => self::REQUIRED,
+                'localityName' => self::REQUIRED,
+                'commonName' => self::REQUIRED,
+                'emailAddress' => self::REQUIRED
+            ]            
+        ],
+        'idp_metadata_folder' => self::REQUIRED
     ];
 
     private static $validAttributeFields = [
@@ -45,7 +56,16 @@ class Settings
         $missingSettings = array();
         $msg = 'Missing settings fields: ';
         array_walk(self::$validSettings, function ($v, $k) use (&$missingSettings, &$settings) {
-            if (self::$validSettings[$k] == 1 && !array_key_exists($k, $settings)) {
+            if (is_array($v) && $v['required'] == self::REQUIRED) {
+                foreach ($v['values'] as $key => $value) {
+                    if (
+                        $value == self::REQUIRED &&
+                        !array_key_exists($key, $settings[$k]['values'])
+                    ) {
+                        $missingSettings[$key] = 1;
+                    }
+                }
+            } else if (self::$validSettings[$k] == self::REQUIRED && !array_key_exists($k, $settings)) {
                 $missingSettings[$k] = 1;
             }
         });
