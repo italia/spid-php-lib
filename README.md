@@ -133,6 +133,13 @@ $settings = array(
     ],
     'sp_org_name' => 'your organization full name',
     'sp_org_display_name' => 'your organization display name',
+    'sp_key_cert_values' => [
+        'countryName' => 'Your Country',
+        'stateOrProvinceName' => 'Your Province or State',
+        'localityName' => 'Locality',
+        'commonName' => 'Name',
+        'emailAddress' => 'your@email.com',
+    ]
     'idp_metadata_folder' => '/path/to/idp_metadata/',
     'sp_attributeconsumingservice' => [
         // order is important ! the 0-base index in this array will be used as ID in the calls

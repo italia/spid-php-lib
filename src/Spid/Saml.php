@@ -271,7 +271,7 @@ XML;
             "organizationName" => $orgName = $this->settings['sp_org_name'],
             "organizationalUnitName" => $this->settings['sp_org_display_name'],
             "commonName" => $this->settings['sp_key_cert_values']['commonName'],
-            "emailAddress" => $this->settings['sp_orsp_key_cert_valuesg_name']['emailAddress']
+            "emailAddress" => $this->settings['sp_key_cert_values']['emailAddress']
         );
         $csr = openssl_csr_new($dn, $privkey, array('digest_alg' => 'sha256'));
         $myserial = (int) hexdec(bin2hex(openssl_random_pseudo_bytes(8)));

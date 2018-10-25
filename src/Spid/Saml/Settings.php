@@ -19,13 +19,15 @@ class Settings
         'sp_attributeconsumingservice' => self::NOT_REQUIRED,
         'sp_org_name' => self::NOT_REQUIRED,
         'sp_org_display_name' => self::NOT_REQUIRED,
-        'sp_key_cert_values' => [
+        'sp_key_cert_values' => [ 
+            self::REQUIRED => [
                 'countryName' => self::REQUIRED,
                 'stateOrProvinceName' => self::REQUIRED,
                 'localityName' => self::REQUIRED,
                 'commonName' => self::REQUIRED,
                 'emailAddress' => self::REQUIRED
-            ],
+            ]
+        ],
         'idp_metadata_folder' => self::REQUIRED
     ];
 
@@ -54,8 +56,16 @@ class Settings
         $missingSettings = array();
         $msg = 'Missing settings fields: ';
         array_walk(self::$validSettings, function ($v, $k) use (&$missingSettings, &$settings) {
-            if (is_array($v) && array_key_exists($k, $settings) && is_array($settings[$k])) {
-                foreach ($v as $key => $value) {
+            $settingRequired = self::$validSettings[$k];
+            $childSettings = [];
+            if (is_array($v) && isset($v[self::REQUIRED])) {
+                $settingRequired = self::REQUIRED;
+                $childSettings[$k] = $v[self::REQUIRED];
+            }
+            if ($settingRequired == self::REQUIRED && !array_key_exists($k, $settings)) {
+                $missingSettings[$k] = 1;
+            } else {
+                foreach ($childSettings as $key => $value) {
                     if (
                         $value == self::REQUIRED &&
                         !array_key_exists($key, $settings[$k])
@@ -63,8 +73,6 @@ class Settings
                         $missingSettings[$key] = 1;
                     }
                 }
-            } else if (self::$validSettings[$k] == self::REQUIRED && !array_key_exists($k, $settings)) {
-                $missingSettings[$k] = 1;
             }
         });
         foreach ($missingSettings as $k => $v) {
@@ -75,9 +83,16 @@ class Settings
         }
 
         $invalidFields = array_diff_key($settings, self::$validSettings);
-        if (isset($settings['sp_key_cert_values']) && is_array($settings['sp_key_cert_values'])) {
-                $invalidFields = array_merge($invalidFields, array_diff_key($settings['sp_key_cert_values'], self::$validSettings['sp_key_cert_values']));
-        }
+        // Check for settings that have child values
+        array_walk(self::$validSettings, function($v, $k) use (&$invalidFields) {
+            // Child values found, check if settings array is set for that key
+            if (is_array($v) && isset($settings[$k])) {
+                // $v has at most 2 keys, self::REQUIRED and self::NOT_REQUIRED
+                // do array_dif_key for both sub arrays
+                $invalidFields = array_merge($invalidFields, array_diff_key($settings[$k], reset($v)));
+                $invalidFields = array_merge($invalidFields, array_diff_key($settings[$k], end($v)));
+            }
+        });
         $msg = 'Invalid settings fields: ';
         foreach ($invalidFields as $k => $v) {
             $msg .= $k . ', ';
