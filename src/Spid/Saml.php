@@ -14,12 +14,12 @@ class Saml implements SAMLInterface
     private $idps = []; // contains filename -> Idp object array
     private $session; // Session object
 
-    public function __construct(array $settings)
+    public function __construct(array $settings, $autoconfigure = true)
     {
         Settings::validateSettings($settings);
         $this->settings = $settings;
 
-        if (!$this->isConfigured()) {
+        if (!$this->isConfigured() && $autoconfigure) {
             $this->configure();
         }
     }

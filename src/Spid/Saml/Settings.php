@@ -192,6 +192,9 @@ class Settings
                     throw new \Exception('sp_key_cert_values values should be strings. Valued provided for key ' . $key . ' is not a string');
                 }
             }
+            if (strlen($settings['sp_key_cert_values']['countryName']) != 2) {
+                throw new \Exception('sp_key_cert_values countryName should be a 2 characters country code');
+            }
         }
     }
 }
