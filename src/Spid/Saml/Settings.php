@@ -54,7 +54,7 @@ class Settings
         $missingSettings = array();
         $msg = 'Missing settings fields: ';
         array_walk(self::$validSettings, function ($v, $k) use (&$missingSettings, &$settings) {
-            if (is_array($v)) {
+            if (is_array($v) && array_key_exists($k, $settings) && is_array($settings[$k])) {
                 foreach ($v as $key => $value) {
                     if (
                         $value == self::REQUIRED &&
@@ -75,6 +75,9 @@ class Settings
         }
 
         $invalidFields = array_diff_key($settings, self::$validSettings);
+        if (isset($settings['sp_key_cert_values']) && is_array($settings['sp_key_cert_values'])) {
+                $invalidFields = array_merge($invalidFields, array_diff_key($settings['sp_key_cert_values'], self::$validSettings['sp_key_cert_values']));
+        }
         $msg = 'Invalid settings fields: ';
         foreach ($invalidFields as $k => $v) {
             $msg .= $k . ', ';
@@ -165,5 +168,15 @@ class Settings
                     ', got ' .  parse_url($slo[0], PHP_URL_HOST) . 'instead');
             }
         });
+        if (isset($settings['sp_key_cert_values'])) {
+            if (!is_array($settings['sp_key_cert_values'])) {
+                throw new \Exception('sp_key_cert_values should be an array');
+            }
+            foreach ($settings['sp_key_cert_values'] as $key => $value) {
+                if (!is_string($value)) {
+                    throw new \Exception('sp_key_cert_values values should be strings. Valued provided for key ' . $key . ' is not a string');
+                }
+            }
+        }
     }
 }
