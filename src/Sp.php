@@ -13,17 +13,17 @@ class Sp
     */
     private $protocol;
 
-    public function __construct(array $settings, String $protocol = null)
+    public function __construct(array $settings, String $protocol = null, $autoconfigure = true)
     {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         switch ($protocol) {
             case 'saml':
-                $this->protocol = new Spid\Saml($settings);
+                $this->protocol = new Spid\Saml($settings, $autoconfigure);
                 break;
             default:
-                $this->protocol = new Spid\Saml($settings);
+                $this->protocol = new Spid\Saml($settings, $autoconfigure);
         }
     }
 

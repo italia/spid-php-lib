@@ -16,6 +16,13 @@ final class SpTest extends PHPUnit\Framework\TestCase
         ],
         'sp_org_name' => 'test_simevo',
         'sp_org_display_name' => 'Test Simevo',
+        'sp_key_cert_values' => [
+            'countryName' => 'IT',
+            'stateOrProvinceName' => 'Milan',
+            'localityName' => 'Milan',
+            'commonName' => 'Name',
+            'emailAddress' => 'test@test.com',
+        ],
         'idp_metadata_folder' => './example/idp_metadata/',
         'sp_attributeconsumingservice' => [
             ["name", "familyName", "fiscalNumber", "email"],
@@ -29,6 +36,31 @@ final class SpTest extends PHPUnit\Framework\TestCase
             Italia\Spid\Sp::class,
             new Italia\Spid\Sp(SpTest::$settings)
         );
+        $this->assertTrue(is_readable(self::$settings['sp_key_file']));
+        $this->assertTrue(is_readable(self::$settings['sp_cert_file']));
+    }
+
+    public function testCanBeCreatedWithoutAutoconfigure()
+    {
+        $settings = SpTest::$settings;
+        $settings['sp_key_file'] = './wrong/location/sp.key';
+        $settings['sp_cert_file'] = './wrong/location/sp.crt';
+        $this->assertInstanceOf(
+            Italia\Spid\Sp::class,
+            new Italia\Spid\Sp(SpTest::$settings, null, false)
+        );
+        $this->assertFalse(is_readable($settings['sp_key_file']));
+        $this->assertFalse(is_readable($settings['sp_cert_file']));
+    }
+
+    public function testCannotCreateNoKeyCert()
+    {
+        $this->assertInstanceOf(
+            Italia\Spid\Sp::class,
+            new Italia\Spid\Sp(SpTest::$settings, null, false)
+        );
+        $this->assertTrue(is_readable(self::$settings['sp_key_file']));
+        $this->assertTrue(is_readable(self::$settings['sp_cert_file']));
     }
 
     private function validateXml($xmlString, $schemaFile, $valid = true)
@@ -41,15 +73,6 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testMetatadaValid()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
-        if (!$sp->isConfigured()) {
-            $sp->configure(
-                "IT", // countryName
-                "Italy", // stateName
-                "Rome", // localityName
-                "localhost", // commonName
-                "sp@example.com" // emailAddress
-            );
-        }
         $metadata = $sp->getSPMetadata();
         $this->validateXml($metadata, "./tests/schemas/saml-schema-metadata-SPID-SP.xsd");
     }
@@ -105,9 +128,6 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testCanLoadAllIdpMetadata()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
-        if (!$sp->isConfigured()) {
-            $sp->configure("IT", "Italy", "Rome", "localhost", "sp@example.com");
-        }
         $idps = $files = glob(SpTest::$settings['idp_metadata_folder'] . "*.xml");
         foreach ($idps as $idp) {
             $retrievedIdp = $sp->loadIdpFromFile($idp);
@@ -123,43 +143,5 @@ final class SpTest extends PHPUnit\Framework\TestCase
                 $this->assertContains($host, $idpSLO['location']);
             }
         }
-    }
-
-    public function testNotConfiguredState1()
-    {
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
-        if (!$sp->isConfigured()) {
-            $sp->configure("IT", "Italy", "Rome", "localhost", "sp@example.com");
-        }
-        $filename = SpTest::$settings['sp_key_file'];
-        if (file_exists($filename)) {
-            unlink($filename);
-        }
-        $this->assertFalse($sp->isConfigured());
-    }
-
-    public function testNotConfiguredState2()
-    {
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
-        if (!$sp->isConfigured()) {
-            $sp->configure("IT", "Italy", "Rome", "localhost", "sp@example.com");
-        }
-        $filename = SpTest::$settings['sp_cert_file'];
-        if (file_exists($filename)) {
-            unlink($filename);
-        }
-        $this->assertFalse($sp->isConfigured());
-    }
-
-    public function testConfiguredState()
-    {
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
-        if (!$sp->isConfigured()) {
-            $sp->configure("IT", "Italy", "Rome", "localhost", "sp@example.com");
-        }
-        $filename = SpTest::$settings['sp_key_file'];
-        $this->assertTrue(file_exists($filename));
-        $filename = SpTest::$settings['sp_cert_file'];
-        $this->assertTrue(file_exists($filename));
     }
 }
