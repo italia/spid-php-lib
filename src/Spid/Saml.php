@@ -18,6 +18,10 @@ class Saml implements SAMLInterface
     {
         Settings::validateSettings($settings);
         $this->settings = $settings;
+
+        if (!$this->isConfigured()) {
+            $this->configure();
+        }
     }
 
     public function loadIdpFromFile(string $filename)
@@ -230,7 +234,9 @@ XML;
         return $this->session->attributes;
     }
     
-    public function isConfigured() : bool
+    // returns true if the SP certificates are found where the settings says they are, and they are valid
+    // (i.e. the library has been configured correctly
+    private function isConfigured() : bool
     {
         if (!is_readable($this->settings['sp_key_file'])) {
             return false;
@@ -249,7 +255,9 @@ XML;
         return true;
     }
 
-    public function configure(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress)
+    // Generates with openssl the SP certificates where the settings says they should be
+    // this function should be used with care because it requires write access to the filesystem, and invalidates the metadata
+    private function configure()
     {
         $numberofdays = 3652 * 2;
         $privkey = openssl_pkey_new(array(
@@ -257,13 +265,13 @@ XML;
             "private_key_type" => OPENSSL_KEYTYPE_RSA,
         ));
         $dn = array(
-            "countryName" => $countryName,
-            "stateOrProvinceName" => $stateName,
-            "localityName" => $localityName,
+            "countryName" => $this->settings['sp_key_cert_values']['countryName'],
+            "stateOrProvinceName" => $this->settings['sp_key_cert_values']['stateOrProvinceName'],
+            "localityName" => $this->settings['sp_key_cert_values']['localityName'],
             "organizationName" => $orgName = $this->settings['sp_org_name'],
             "organizationalUnitName" => $this->settings['sp_org_display_name'],
-            "commonName" => $commonName,
-            "emailAddress" => $emailAddress
+            "commonName" => $this->settings['sp_key_cert_values']['commonName'],
+            "emailAddress" => $this->settings['sp_orsp_key_cert_valuesg_name']['emailAddress']
         );
         $csr = openssl_csr_new($dn, $privkey, array('digest_alg' => 'sha256'));
         $myserial = (int) hexdec(bin2hex(openssl_random_pseudo_bytes(8)));
