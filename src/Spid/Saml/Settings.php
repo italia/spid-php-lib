@@ -19,15 +19,13 @@ class Settings
         'sp_attributeconsumingservice' => self::NOT_REQUIRED,
         'sp_org_name' => self::NOT_REQUIRED,
         'sp_org_display_name' => self::NOT_REQUIRED,
-        'sp_key_cert_values' => [ 'required' => self::NOT_REQUIRED,
-            'values' => [
+        'sp_key_cert_values' => [
                 'countryName' => self::REQUIRED,
                 'stateOrProvinceName' => self::REQUIRED,
                 'localityName' => self::REQUIRED,
                 'commonName' => self::REQUIRED,
                 'emailAddress' => self::REQUIRED
-            ]            
-        ],
+            ],
         'idp_metadata_folder' => self::REQUIRED
     ];
 
@@ -56,11 +54,11 @@ class Settings
         $missingSettings = array();
         $msg = 'Missing settings fields: ';
         array_walk(self::$validSettings, function ($v, $k) use (&$missingSettings, &$settings) {
-            if (is_array($v) && $v['required'] == self::REQUIRED) {
-                foreach ($v['values'] as $key => $value) {
+            if (is_array($v)) {
+                foreach ($v as $key => $value) {
                     if (
                         $value == self::REQUIRED &&
-                        !array_key_exists($key, $settings[$k]['values'])
+                        !array_key_exists($key, $settings[$k])
                     ) {
                         $missingSettings[$key] = 1;
                     }
