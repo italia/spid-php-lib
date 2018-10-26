@@ -174,7 +174,7 @@ XML;
 
     public function isAuthenticated() : bool
     {
-        $selectedIdp = $_SESSION['idpName'] ?? $_SESSION['spidSession']->idp ?? null;
+        $selectedIdp = $_SESSION['idpName'] ?? $_SESSION['spidSession']['idp'] ?? null;
         if (is_null($selectedIdp)) {
             return false;
         }
@@ -187,14 +187,12 @@ XML;
             $idp->logoutResponse();
             return false;
         }
-        if (
-            isset($_SESSION) && 
-            isset($_SESSION['spidSession']) && 
-            $_SESSION['spidSession'] instanceof Session &&
-            $_SESSION['spidSession']->isValid()
-        ) {
-            $this->session = $_SESSION['spidSession'];
-            return true;
+        if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
+            $session = new Session($_SESSION['spidSession']);
+            if ($session->isValid()) {
+                $this->session = $session;
+                return true;
+            }
         }
         return false;
     }
@@ -222,6 +220,7 @@ XML;
 
     public function getAttributes() : array
     {
+        
         if ($this->isAuthenticated() === false) {
             return array();
         }

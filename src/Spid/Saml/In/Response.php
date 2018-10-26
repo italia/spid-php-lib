@@ -94,7 +94,8 @@ class Response implements ResponseInterface
         }
 
         // Response OK
-        $_SESSION['spidSession'] = $this->spidSession($xml);
+        $session = $this->spidSession($xml);
+        $_SESSION['spidSession'] = (array)$session;
         unset($_SESSION['RequestID']);
         unset($_SESSION['idpName']);
         unset($_SESSION['idpEntityId']);
