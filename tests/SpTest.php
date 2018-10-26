@@ -7,8 +7,8 @@ final class SpTest extends PHPUnit\Framework\TestCase
 {
     private static $settings = [
         'sp_entityid' => 'http://sp3.simevo.com/',
-        'sp_key_file' => './example/sp.key',
-        'sp_cert_file' => './example/sp.crt',
+        'sp_key_file' => './example/test_sp.key',
+        'sp_cert_file' => './example/test_sp.crt',
         'sp_assertionconsumerservice' => ['http://sp3.simevo.com/acs'],
         'sp_singlelogoutservice' => [
             ['http://sp3.simevo.com/slo', ''],
@@ -52,29 +52,22 @@ final class SpTest extends PHPUnit\Framework\TestCase
         );
         $this->assertTrue(is_readable(self::$settings['sp_key_file']));
         $this->assertTrue(is_readable(self::$settings['sp_cert_file']));
+
+        unlink(self::$settings['sp_key_file']);
+        unlink(self::$settings['sp_cert_file']);
     }
 
     public function testCanBeCreatedWithoutAutoconfigure()
     {
         $settings = SpTest::$settings;
-        $settings['sp_key_file'] = './wrong/location/sp.key';
-        $settings['sp_cert_file'] = './wrong/location/sp.crt';
+        $settings['sp_key_file'] = './some/location/sp.key';
+        $settings['sp_cert_file'] = './some/location/sp.crt';
         $this->assertInstanceOf(
             Italia\Spid\Sp::class,
             new Italia\Spid\Sp(SpTest::$settings, null, false)
         );
         $this->assertFalse(is_readable($settings['sp_key_file']));
         $this->assertFalse(is_readable($settings['sp_cert_file']));
-    }
-
-    public function testCannotCreateNoKeyCert()
-    {
-        $this->assertInstanceOf(
-            Italia\Spid\Sp::class,
-            new Italia\Spid\Sp(SpTest::$settings, null, false)
-        );
-        $this->assertTrue(is_readable(self::$settings['sp_key_file']));
-        $this->assertTrue(is_readable(self::$settings['sp_cert_file']));
     }
 
     private function validateXml($xmlString, $schemaFile, $valid = true)
@@ -315,7 +308,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         // $session->idpEntityID = 'https:/sp.example.com/';
         // $session->level = 1;
         // $session->sessionID = 'test123';
-        $_SESSION['spidSession'] = $session;
+        $_SESSION['spidSession'] = (array)$session;
         $this->assertEquals(false, $sp->isAuthenticated());
 
         // If IDPs were downloaded for testing purposes, then delete them
@@ -360,7 +353,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $session->idpEntityID = 'https:/sp.example.com/';
         $session->level = 1;
         $session->sessionID = 'test123';
-        $_SESSION['spidSession'] = $session;
+        $_SESSION['spidSession'] = (array)$session;
         $this->assertEquals(true, $sp->isAuthenticated());
 
         // If IDPs were downloaded for testing purposes, then delete them
@@ -391,7 +384,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $session->level = 1;
         $session->sessionID = 'test123';
         // Test with no attributes requested first
-        $_SESSION['spidSession'] = $session;
+        $_SESSION['spidSession'] = (array)$session;
         $this->assertEquals(true, $sp->isAuthenticated());
         // Authentication completed, request attributes
         $sp = new Italia\Spid\Sp(SpTest::$settings);
@@ -401,6 +394,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $session->attributes = [
             'name' => 'Test'
         ];
+        $_SESSION['spidSession'] = (array)$session;
         $this->assertInternalType('array', $sp->getAttributes());
         $this->assertEquals(1, count($sp->getAttributes()));
 
@@ -443,7 +437,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $session->idpEntityID = 'https:/sp.example.com/';
         $session->level = 1;
         $session->sessionID = 'test123';
-        $_SESSION['spidSession'] = $session;
+        $_SESSION['spidSession'] = (array)$session;
         $this->assertEquals(true, $sp->isAuthenticated());
 
         $this->assertEquals(false, $sp->login(self::$idps[0], 0, 0));

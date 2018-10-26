@@ -131,12 +131,6 @@ class Settings
         // Save entity id host url for other checks
         $host = parse_url($settings['sp_entityid'], PHP_URL_HOST);
 
-        if (!is_readable($settings['sp_key_file'])) {
-            throw new \InvalidArgumentException('Sp key file does not exist or is not readable.');
-        }
-        if (!is_readable($settings['sp_cert_file'])) {
-            throw new \InvalidArgumentException('Sp cert file does not exist or is not readable.');
-        }
         if (!is_readable($settings['idp_metadata_folder'])) {
             throw new \InvalidArgumentException('Idp metadata folder does not exist or is not readable.');
         }

@@ -228,12 +228,10 @@ XML;
 
     public function getAttributes() : array
     {
-        
         if ($this->isAuthenticated() === false) {
             return array();
         }
-        // TODO handle no attributes requested case
-        return isset($this->session->attributes) ? $this->session->attributes : array();
+        return isset($this->session->attributes) && is_array($this->session->attributes) ? $this->session->attributes : array();
     }
     
     // returns true if the SP certificates are found where the settings says they are, and they are valid
@@ -268,6 +266,4 @@ XML;
         file_put_contents($this->settings['sp_key_file'], $keyCert['key']);
         file_put_contents($this->settings['sp_cert_file'], $keyCert['cert']);
     }
-
-
 }
