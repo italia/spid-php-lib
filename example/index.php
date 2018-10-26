@@ -20,6 +20,13 @@ $settings = [
     ],
     'sp_org_name' => 'test',
     'sp_org_display_name' => 'Test',
+    'sp_key_cert_values' => [
+        'countryName' => 'IT',
+        'stateOrProvinceName' => 'Milan',
+        'localityName' => 'Milan',
+        'commonName' => 'Name',
+        'emailAddress' => 'test@test.com',
+    ],
     'idp_metadata_folder' => './idp_metadata/',
     'sp_attributeconsumingservice' => [
         ["name", "familyName", "fiscalNumber", "email"],

@@ -133,6 +133,13 @@ $settings = array(
     ],
     'sp_org_name' => 'your organization full name',
     'sp_org_display_name' => 'your organization display name',
+    'sp_key_cert_values' => [
+        'countryName' => 'Your Country',
+        'stateOrProvinceName' => 'Your Province or State',
+        'localityName' => 'Locality',
+        'commonName' => 'Name',
+        'emailAddress' => 'your@email.com',
+    ]
     'idp_metadata_folder' => '/path/to/idp_metadata/',
     'sp_attributeconsumingservice' => [
         // order is important ! the 0-base index in this array will be used as ID in the calls
@@ -196,10 +203,12 @@ The method will redirect to the IdP Single Logout page, or return false if you a
 |getSPMetadata() : string|returns the SP metadata as a string|
 |login(string $idpFilename, int $assertID, int $attrID, $level = 1, string $redirectTo = null, $shouldRedirect = true)|login with REDIRECT binding. Use `$idpFilename` to select in IdP for login by indicating the name (without extension) of an XML file in your `idp_metadata_folder`. `$assertID` and `$attrID` indicate respectively the array index of `sp_assertionconsumerservice` and `sp_attributeconsumingservice` provided in settings. Optional parameters: `$level` for SPID authentication level (1, 2 or 3), `$redirectTo` to indicate an url to redirect to after login, `$shouldRedirect` to indicate if the login function should automatically redirect to the IdP or should return the login url as a string|
 |loginPost(string $idpName, int $ass, int $attr, $level = 1, string $redirectTo = null, $shouldRedirect = true)|like login, but uses POST binding|
-|public function logout(int $slo, string $redirectTo = null, $shouldRedirect = true)|logout with REDIRECT binding. `$slo` indicates the array index of the `sp_singlelogoutservice` provided in settings. Optional parameters: `$redirectTo` to indicate an url to redirect to after login, `$shouldRedirect` to indicate if the login function should automatically redirect to the IdP or should return the login url as a string|
+|logout(int $slo, string $redirectTo = null, $shouldRedirect = true)|logout with REDIRECT binding. `$slo` indicates the array index of the `sp_singlelogoutservice` provided in settings. Optional parameters: `$redirectTo` to indicate an url to redirect to after login, `$shouldRedirect` to indicate if the login function should automatically redirect to the IdP or should return the login url as a string|
 |logoutPost(int $slo, string $redirectTo = null, $shouldRedirect = true)|like logout, but uses POST binding|
 |isAuthenticated() : bool|checks if the user is authenticated. This method **MUST** be caled after login and logout to finalise the operation.|
 |getAttributes() : array|If you requested attributes with an attribute consuming service during login, this method will return them in array format|
+|isConfigured() : bool|Returns true if the SP certificates are found where the settings says they are, and they are valid (i.e. the library has been configured correctly)|
+|configure(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress)|Generates the SP key and certificate (validity = 10 years) where the settings says they should be; this function should be used with care because it requires write access to the filessystem, and invalidates the metadata|
 
 ### Example
 
@@ -339,7 +348,6 @@ cd vendor/italia/spid-php-lib
 Install prerequisites with composer, generate key and certificate for the SP and download the metadata for all current production IdPs with:
 ```sh
 composer install
-make -C example/
 bin/download_idp_metadata.php example/idp_metadata
 ```
 

@@ -13,17 +13,17 @@ class Sp
     */
     private $protocol;
 
-    public function __construct(array $settings, String $protocol = null)
+    public function __construct(array $settings, String $protocol = null, $autoconfigure = true)
     {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         switch ($protocol) {
             case 'saml':
-                $this->protocol = new Spid\Saml($settings);
+                $this->protocol = new Spid\Saml($settings, $autoconfigure);
                 break;
             default:
-                $this->protocol = new Spid\Saml($settings);
+                $this->protocol = new Spid\Saml($settings, $autoconfigure);
         }
     }
 
@@ -31,7 +31,7 @@ class Sp
     {
         $methods_implemented = get_class_methods($this->protocol);
         if (!in_array($method, $methods_implemented)) {
-            throw new \Exception("Invalid method requested", 1);
+            throw new \Exception("Invalid method [$method] requested", 1);
         }
         return call_user_func_array(array($this->protocol, $method), $arguments);
     }
