@@ -162,7 +162,7 @@ $sp = new Italia\Spid\Sp($settings);
 
 ```php
 // $autoconfiguration skips .key/.crt generation if set to false
-$sp = new Italia\Spid\Sp($settings, null, $autoconfiguration = false); to false
+$sp = new Italia\Spid\Sp($settings, null, $autoconfiguration = false);
 ```
 
 #### Performing login
