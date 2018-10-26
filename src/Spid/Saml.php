@@ -7,6 +7,7 @@ use Italia\Spid\Spid\Saml\In\BaseResponse;
 use Italia\Spid\Spid\Saml\Settings;
 use Italia\Spid\Spid\Saml\SignatureUtils;
 use Italia\Spid\Spid\Interfaces\SAMLInterface;
+use Italia\Spid\Spid\Session;
 
 class Saml implements SAMLInterface
 {
@@ -19,7 +20,11 @@ class Saml implements SAMLInterface
         Settings::validateSettings($settings);
         $this->settings = $settings;
 
-        if (!$this->isConfigured() && $autoconfigure) {
+        // Do not attemp autoconfiguration if key and cert values have not been set
+        if (!array_key_exists('sp_key_cert_values', $this->settings)) {
+            $autoconfigure = false;
+        }
+        if ($autoconfigure && !$this->isConfigured()) {
             $this->configure();
         }
     }
@@ -252,6 +257,9 @@ XML;
         if (!openssl_get_publickey($cert)) {
             return false;
         }
+        if (!SignatureUtils::certDNEquals($cert, $this->settings)) {
+            return false;
+        }
         return true;
     }
 
@@ -259,27 +267,10 @@ XML;
     // this function should be used with care because it requires write access to the filesystem, and invalidates the metadata
     private function configure()
     {
-        $numberofdays = 3652 * 2;
-        $privkey = openssl_pkey_new(array(
-            "private_key_bits" => 2048,
-            "private_key_type" => OPENSSL_KEYTYPE_RSA,
-        ));
-        $dn = array(
-            "countryName" => $this->settings['sp_key_cert_values']['countryName'],
-            "stateOrProvinceName" => $this->settings['sp_key_cert_values']['stateOrProvinceName'],
-            "localityName" => $this->settings['sp_key_cert_values']['localityName'],
-            "organizationName" => $orgName = $this->settings['sp_org_name'],
-            "organizationalUnitName" => $this->settings['sp_org_display_name'],
-            "commonName" => $this->settings['sp_key_cert_values']['commonName'],
-            "emailAddress" => $this->settings['sp_key_cert_values']['emailAddress']
-        );
-        $csr = openssl_csr_new($dn, $privkey, array('digest_alg' => 'sha256'));
-        $myserial = (int) hexdec(bin2hex(openssl_random_pseudo_bytes(8)));
-        $configArgs = array("digest_alg" => "sha256");
-        $sscert = openssl_csr_sign($csr, null, $privkey, $numberofdays, $configArgs, $myserial);
-        openssl_x509_export($sscert, $publickey);
-        openssl_pkey_export($privkey, $privatekey);
-        file_put_contents($this->settings['sp_key_file'], $privatekey);
-        file_put_contents($this->settings['sp_cert_file'], $publickey);
+        $keyCert = SignatureUtils::generateKeyCert($this->settings);
+        file_put_contents($this->settings['sp_key_file'], $keyCert['key']);
+        file_put_contents($this->settings['sp_cert_file'], $keyCert['cert']);
     }
+
+
 }

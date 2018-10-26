@@ -20,7 +20,7 @@ class Settings
         'sp_org_name' => self::NOT_REQUIRED,
         'sp_org_display_name' => self::NOT_REQUIRED,
         'sp_key_cert_values' => [ 
-            self::REQUIRED => [
+            self::NOT_REQUIRED => [
                 'countryName' => self::REQUIRED,
                 'stateOrProvinceName' => self::REQUIRED,
                 'localityName' => self::REQUIRED,
@@ -186,6 +186,9 @@ class Settings
         if (isset($settings['sp_key_cert_values'])) {
             if (!is_array($settings['sp_key_cert_values'])) {
                 throw new \Exception('sp_key_cert_values should be an array');
+            }
+            if (count($settings['sp_key_cert_values']) != 5) {
+                throw new \Exception('sp_key_cert_values should contain 5 values: countryName, stateOrProvinceName, localityName, commonName, emailAddress');
             }
             foreach ($settings['sp_key_cert_values'] as $key => $value) {
                 if (!is_string($value)) {
