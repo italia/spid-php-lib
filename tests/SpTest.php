@@ -16,6 +16,13 @@ final class SpTest extends PHPUnit\Framework\TestCase
         ],
         'sp_org_name' => 'test_simevo',
         'sp_org_display_name' => 'Test Simevo',
+        'sp_key_cert_values' => [
+            'countryName' => 'IT',
+            'stateOrProvinceName' => 'Milan',
+            'localityName' => 'Milan',
+            'commonName' => 'Name',
+            'emailAddress' => 'test@test.com',
+        ],
         'idp_metadata_folder' => './example/idp_metadata/',
         'sp_attributeconsumingservice' => [
             ["name", "familyName", "fiscalNumber", "email"],
@@ -29,6 +36,31 @@ final class SpTest extends PHPUnit\Framework\TestCase
             Italia\Spid\Sp::class,
             new Italia\Spid\Sp(SpTest::$settings)
         );
+        $this->assertTrue(is_readable(self::$settings['sp_key_file']));
+        $this->assertTrue(is_readable(self::$settings['sp_cert_file']));
+    }
+
+    public function testCanBeCreatedWithoutAutoconfigure()
+    {
+        $settings = SpTest::$settings;
+        $settings['sp_key_file'] = './wrong/location/sp.key';
+        $settings['sp_cert_file'] = './wrong/location/sp.crt';
+        $this->assertInstanceOf(
+            Italia\Spid\Sp::class,
+            new Italia\Spid\Sp(SpTest::$settings, null, false)
+        );
+        $this->assertFalse(is_readable($settings['sp_key_file']));
+        $this->assertFalse(is_readable($settings['sp_cert_file']));
+    }
+
+    public function testCannotCreateNoKeyCert()
+    {
+        $this->assertInstanceOf(
+            Italia\Spid\Sp::class,
+            new Italia\Spid\Sp(SpTest::$settings, null, false)
+        );
+        $this->assertTrue(is_readable(self::$settings['sp_key_file']));
+        $this->assertTrue(is_readable(self::$settings['sp_cert_file']));
     }
 
     private function validateXml($xmlString, $schemaFile, $valid = true)

@@ -107,6 +107,52 @@ class SignatureUtils
         return false;
     }
 
+    public static function certDNEquals($cert, $settings)
+    {
+        $parsed = openssl_x509_parse($cert);
+        $dn = $parsed['subject'];
+
+        $newDN = array();
+        $newDN[] = $settings['sp_org_name'] ?? [];
+        $newDN[] = $settings['sp_org_display_name'] ?? [];
+        $newDN = array_merge($newDN, $settings['sp_key_cert_values'] ?? []);
+        asort($dn);
+        asort($newDN);
+
+        if (array_values($dn) == array_values($newDN)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static function generateKeyCert($settings) : array
+    {
+        $numberofdays = 3652 * 2;
+        $privkey = openssl_pkey_new(array(
+            "private_key_bits" => 2048,
+            "private_key_type" => OPENSSL_KEYTYPE_RSA,
+        ));
+        $dn = array(
+            "countryName" => $settings['sp_key_cert_values']['countryName'],
+            "stateOrProvinceName" => $settings['sp_key_cert_values']['stateOrProvinceName'],
+            "localityName" => $settings['sp_key_cert_values']['localityName'],
+            "organizationName" => $orgName = $settings['sp_org_name'],
+            "organizationalUnitName" => $settings['sp_org_display_name'],
+            "commonName" => $settings['sp_key_cert_values']['commonName'],
+            "emailAddress" => $settings['sp_key_cert_values']['emailAddress']
+        );
+        $csr = openssl_csr_new($dn, $privkey, array('digest_alg' => 'sha256'));
+        $myserial = (int) hexdec(bin2hex(openssl_random_pseudo_bytes(8)));
+        $configArgs = array("digest_alg" => "sha256");
+        $sscert = openssl_csr_sign($csr, null, $privkey, $numberofdays, $configArgs, $myserial);
+        openssl_x509_export($sscert, $publickey);
+        openssl_pkey_export($privkey, $privatekey);
+        return [
+            'key' => $privatekey,
+            'cert' => $publickey
+        ];
+    }
+
     private static function query(\DOMDocument $dom, $query, \DOMElement $context = null)
     {
         $xpath = new \DOMXPath($dom);

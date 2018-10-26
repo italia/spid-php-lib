@@ -7,6 +7,7 @@ use Italia\Spid\Spid\Saml\In\BaseResponse;
 use Italia\Spid\Spid\Saml\Settings;
 use Italia\Spid\Spid\Saml\SignatureUtils;
 use Italia\Spid\Spid\Interfaces\SAMLInterface;
+use Italia\Spid\Spid\Session;
 
 class Saml implements SAMLInterface
 {
@@ -14,10 +15,18 @@ class Saml implements SAMLInterface
     private $idps = []; // contains filename -> Idp object array
     private $session; // Session object
 
-    public function __construct(array $settings)
+    public function __construct(array $settings, $autoconfigure = true)
     {
         Settings::validateSettings($settings);
         $this->settings = $settings;
+
+        // Do not attemp autoconfiguration if key and cert values have not been set
+        if (!array_key_exists('sp_key_cert_values', $this->settings)) {
+            $autoconfigure = false;
+        }
+        if ($autoconfigure && !$this->isConfigured()) {
+            $this->configure();
+        }
     }
 
     public function loadIdpFromFile(string $filename)
@@ -229,4 +238,39 @@ XML;
         }
         return $this->session->attributes;
     }
+    
+    // returns true if the SP certificates are found where the settings says they are, and they are valid
+    // (i.e. the library has been configured correctly
+    private function isConfigured() : bool
+    {
+        if (!is_readable($this->settings['sp_key_file'])) {
+            return false;
+        }
+        if (!is_readable($this->settings['sp_cert_file'])) {
+            return false;
+        }
+        $key = file_get_contents($this->settings['sp_key_file']);
+        if (!openssl_get_privatekey($key)) {
+            return false;
+        }
+        $cert = file_get_contents($this->settings['sp_cert_file']);
+        if (!openssl_get_publickey($cert)) {
+            return false;
+        }
+        if (!SignatureUtils::certDNEquals($cert, $this->settings)) {
+            return false;
+        }
+        return true;
+    }
+
+    // Generates with openssl the SP certificates where the settings says they should be
+    // this function should be used with care because it requires write access to the filesystem, and invalidates the metadata
+    private function configure()
+    {
+        $keyCert = SignatureUtils::generateKeyCert($this->settings);
+        file_put_contents($this->settings['sp_key_file'], $keyCert['key']);
+        file_put_contents($this->settings['sp_cert_file'], $keyCert['cert']);
+    }
+
+
 }
