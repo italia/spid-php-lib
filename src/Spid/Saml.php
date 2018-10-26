@@ -161,15 +161,7 @@ XML;
         return $this->baseLogin(Settings::BINDING_POST, ...$args);
     }
 
-    private function baseLogin(
-        $binding,
-        $idpName,
-        $assertId,
-        $attrId,
-        $level = 1,
-        $redirectTo = null,
-        $shouldRedirect = true
-    ) {
+    private function baseLogin($binding, $idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true) {
         if ($this->isAuthenticated()) {
             return false;
         }
@@ -190,11 +182,11 @@ XML;
 
     public function isAuthenticated() : bool
     {
-        $selectedIdp = $_SESSION['idpName'] ?? $_SESSION['spidSession']->idp ?? null;
+        $selectedIdp = $_SESSION['idpName'] ?? $_SESSION['spidSession']['idp'] ?? null;
         if (is_null($selectedIdp)) {
             return false;
         }
-        $idp = $this->loadIdpFromFile($_SESSION['idpName'] ?? $_SESSION['spidSession']->idp);
+        $idp = $this->loadIdpFromFile($selectedIdp);
         $response = new BaseResponse($this);
         if (!empty($idp) && !$response->validate($idp->metadata['idpCertValue'])) {
             return false;
@@ -204,8 +196,11 @@ XML;
             return false;
         }
         if (isset($_SESSION) && isset($_SESSION['spidSession'])) {
-            $this->session = $_SESSION['spidSession'];
-            return true;
+            $session = new Session($_SESSION['spidSession']);
+            if ($session->isValid()) {
+                $this->session = $session;
+                return true;
+            }
         }
         return false;
     }
@@ -236,7 +231,7 @@ XML;
         if ($this->isAuthenticated() === false) {
             return array();
         }
-        return $this->session->attributes;
+        return isset($this->session->attributes) && is_array($this->session->attributes) ? $this->session->attributes : array();
     }
     
     // returns true if the SP certificates are found where the settings says they are, and they are valid
@@ -268,9 +263,15 @@ XML;
     private function configure()
     {
         $keyCert = SignatureUtils::generateKeyCert($this->settings);
+        $dir = dirname($this->settings['sp_key_file']);
+        if (!is_dir($dir)) {
+            throw new \InvalidArgumentException('The directory you selected for sp_key_file does not exist. Please create ' . $dir);
+        }
+        $dir = dirname($this->settings['sp_cert_file']);
+        if (!is_dir($dir)) {
+            throw new \InvalidArgumentException('The directory you selected for sp_cert_file does not exist. Please create ' . $dir);
+        }
         file_put_contents($this->settings['sp_key_file'], $keyCert['key']);
         file_put_contents($this->settings['sp_cert_file'], $keyCert['cert']);
     }
-
-
 }

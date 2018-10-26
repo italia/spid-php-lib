@@ -5,7 +5,7 @@
 [![SPID on forum.italia.it](https://img.shields.io/badge/Forum-SPID-blue.svg)](https://forum.italia.it/c/spid)
 [![Build Status](https://travis-ci.org/italia/spid-php-lib.svg?branch=master)](https://travis-ci.org/italia/spid-php-lib)
 
->  **CURRENT VERSION: v0.20**
+>  **CURRENT VERSION: v0.30**
 
 # spid-php-lib
 PHP package for SPID authentication.
@@ -81,10 +81,12 @@ sudo apt install composer make openssl php-curl php-zip php-xml
 
     ```composer require italia/spid-php-lib```
 
-2. Generate key and certificate files for your Service Provider (SP).
+2. (**OPTIONAL**) Manually generate key and certificate files for your Service Provider (SP).
 
     Example: 
     ```openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -subj "/C=IT/ST=Italy/L=Milan/O=myservice/CN=localhost" -keyout sp.key -out sp.crt```
+
+   This step can be skipped: the library takes care of this step automatically if you decalre the optional `sp_key_cert_values` key in the `settings` array. Check the example in the [Usage](#usage) section for further details.
 
 3. Download the Identity Provider (IdP) metadata files and place them in a directory in your project, for example `idp_metadata`. 
     A convenience tool is provided to download those of the production IdPs: [vendor/italia/spid-php-lib/bin/download_idp_metadata.php](bin/download_idp_metadata.php), example usage:
@@ -133,7 +135,7 @@ $settings = array(
     ],
     'sp_org_name' => 'your organization full name',
     'sp_org_display_name' => 'your organization display name',
-    'sp_key_cert_values' => [
+    'sp_key_cert_values' => [ // Optional: remove this if you want to generate .key & .crt files manually
         'countryName' => 'Your Country',
         'stateOrProvinceName' => 'Your Province or State',
         'localityName' => 'Locality',
@@ -154,6 +156,13 @@ then initialise the main Sp class
 
 ```php
 $sp = new Italia\Spid\Sp($settings);
+```
+
+>*Don't want the library to generate .key and .crt files for you? Then remove the `sp_key_cert_values` key from the `settings` array, or decalre* 
+
+```php
+// $autoconfiguration skips .key/.crt generation if set to false
+$sp = new Italia\Spid\Sp($settings, null, $autoconfiguration = false);
 ```
 
 #### Performing login
@@ -197,6 +206,7 @@ The method will redirect to the IdP Single Logout page, or return false if you a
 
 |**Method**|**Description**|
 |:---|:---|
+|\__contruct($settings, $protocol = null, $autoconfigure = true)|`$settings` should be based on the example provided in the [Usage](#usage) section. `$protocol` represents the protocol used for login. At the moment only `SAML` il supported, and can be selected by either `$protocol = 'saml'` or the default `$protocol = null`. `$autoconfigure` tells the constructor if it should check for .key and .crt files at the specified location from the `$settings` array and generate them in case they are not found. Set this to `false` if you wish to generate those manually.|
 |loadIdpFromFile(string $filename)|loads an `Idp` object by parsing the provided XML at `$filename`|
 |getIdpList() : array|loads all the `Idp` objects from the `idp_metadata_folder` provided in settings|
 |getIdp(string $filename)|alias of `loadIdpFromFile`|
@@ -207,8 +217,6 @@ The method will redirect to the IdP Single Logout page, or return false if you a
 |logoutPost(int $slo, string $redirectTo = null, $shouldRedirect = true)|like logout, but uses POST binding|
 |isAuthenticated() : bool|checks if the user is authenticated. This method **MUST** be caled after login and logout to finalise the operation.|
 |getAttributes() : array|If you requested attributes with an attribute consuming service during login, this method will return them in array format|
-|isConfigured() : bool|Returns true if the SP certificates are found where the settings says they are, and they are valid (i.e. the library has been configured correctly)|
-|configure(string $countryName, string $stateName, string $localityName, string $commonName, string $emailAddress)|Generates the SP key and certificate (validity = 10 years) where the settings says they should be; this function should be used with care because it requires write access to the filessystem, and invalidates the metadata|
 
 ### Example
 
