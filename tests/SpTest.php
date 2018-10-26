@@ -447,5 +447,9 @@ final class SpTest extends PHPUnit\Framework\TestCase
         }
     }
 
-
+    public static function tearDownAfterClass()
+    {
+        unlink(self::$settings['sp_key_file']);
+        unlink(self::$settings['sp_cert_file']);
+    }
 }

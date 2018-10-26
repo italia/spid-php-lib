@@ -263,6 +263,14 @@ XML;
     private function configure()
     {
         $keyCert = SignatureUtils::generateKeyCert($this->settings);
+        $dir = dirname($this->settings['sp_key_file']);
+        if (!is_dir($dir)) {
+            throw new \InvalidArgumentException('The directory you selected for sp_key_file does not exist. Please create ' . $dir);
+        }
+        $dir = dirname($this->settings['sp_cert_file']);
+        if (!is_dir($dir)) {
+            throw new \InvalidArgumentException('The directory you selected for sp_cert_file does not exist. Please create ' . $dir);
+        }
         file_put_contents($this->settings['sp_key_file'], $keyCert['key']);
         file_put_contents($this->settings['sp_cert_file'], $keyCert['cert']);
     }
