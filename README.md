@@ -86,7 +86,7 @@ sudo apt install composer make openssl php-curl php-zip php-xml
     Example: 
     ```openssl req -x509 -nodes -sha256 -days 365 -newkey rsa:2048 -subj "/C=IT/ST=Italy/L=Milan/O=myservice/CN=localhost" -keyout sp.key -out sp.crt```
 
-   This step can be skipped: the library takes care of this step automatically if you decalre the optional `sp_key_cert_values` key in the `settings` array. Check the example in the [Usage](#usage) section for further details.
+   This step can be skipped: the library takes care of this step automatically if you declare the optional `sp_key_cert_values` key in the `settings` array. Check the example in the [Usage](#usage) section for further details.
 
 3. Download the Identity Provider (IdP) metadata files and place them in a directory in your project, for example `idp_metadata`. 
     A convenience tool is provided to download those of the production IdPs: [vendor/italia/spid-php-lib/bin/download_idp_metadata.php](bin/download_idp_metadata.php), example usage:
@@ -106,7 +106,7 @@ sudo apt install composer make openssl php-curl php-zip php-xml
 ### Usage
 
 All classes provided by this package reside in the `Italia\Spid` namespace.
-More detailed documentaion is available in the [SAMLInterface.php](/src/Spid/Interfaces/SAMLInterface.php) file.
+More detailed documentation is available in the [SAMLInterface.php](/src/Spid/Interfaces/SAMLInterface.php) file.
 
 Load them using the composer-generated autoloader:
 ```php
@@ -152,7 +152,7 @@ $settings = array(
 );
 ```
 
-then initialise the main Sp class
+then initialize the main Sp class
 
 ```php
 $sp = new Italia\Spid\Sp($settings);
@@ -206,7 +206,7 @@ The method will redirect to the IdP Single Logout page, or return false if you a
 
 |**Method**|**Description**|
 |:---|:---|
-|\__contruct($settings, $protocol = null, $autoconfigure = true)|`$settings` should be based on the example provided in the [Usage](#usage) section. `$protocol` represents the protocol used for login. At the moment only `SAML` il supported, and can be selected by either `$protocol = 'saml'` or the default `$protocol = null`. `$autoconfigure` tells the constructor if it should check for .key and .crt files at the specified location from the `$settings` array and generate them in case they are not found. Set this to `false` if you wish to generate those manually.|
+|\__contruct($settings, $protocol = null, $autoconfigure = true)|`$settings` should be based on the example provided in the [Usage](#usage) section. `$protocol` represents the protocol used for login. At the moment only `SAML` is supported, and can be selected by either `$protocol = 'saml'` or the default `$protocol = null`. `$autoconfigure` tells the constructor if it should check for .key and .crt files at the specified location from the `$settings` array and generate them in case they are not found. Set this to `false` if you wish to generate those manually.|
 |loadIdpFromFile(string $filename)|loads an `Idp` object by parsing the provided XML at `$filename`|
 |getIdpList() : array|loads all the `Idp` objects from the `idp_metadata_folder` provided in settings|
 |getIdp(string $filename)|alias of `loadIdpFromFile`|
@@ -215,7 +215,7 @@ The method will redirect to the IdP Single Logout page, or return false if you a
 |loginPost(string $idpName, int $ass, int $attr, $level = 1, string $redirectTo = null, $shouldRedirect = true)|like login, but uses POST binding|
 |logout(int $slo, string $redirectTo = null, $shouldRedirect = true)|logout with REDIRECT binding. `$slo` indicates the array index of the `sp_singlelogoutservice` provided in settings. Optional parameters: `$redirectTo` to indicate an url to redirect to after login, `$shouldRedirect` to indicate if the login function should automatically redirect to the IdP or should return the login url as a string|
 |logoutPost(int $slo, string $redirectTo = null, $shouldRedirect = true)|like logout, but uses POST binding|
-|isAuthenticated() : bool|checks if the user is authenticated. This method **MUST** be caled after login and logout to finalise the operation.|
+|isAuthenticated() : bool|checks if the user is authenticated. This method **MUST** be called after login and logout to finalize the operation.|
 |getAttributes() : array|If you requested attributes with an attribute consuming service during login, this method will return them in array format|
 
 ### Example
@@ -265,7 +265,7 @@ A Docker-based demo application is available at [https://github.com/simevo/spid-
 |generation of AuthnRequest XML|✓|
 |HTTP-Redirect binding|✓|
 |HTTP-POST binding|✓|
-|`AssertionConsumerServiceURL` customization|The library uses `AssertionConsumerServiceIndex` customizaton which is preferred|
+|`AssertionConsumerServiceURL` customization|The library uses `AssertionConsumerServiceIndex` customization which is preferred|
 |`AssertionConsumerServiceIndex` customization|✓|
 |`AttributeConsumingServiceIndex` customization|✓|
 |`AuthnContextClassRef` (SPID level) customization|✓|
