@@ -70,7 +70,8 @@ class Saml implements SAMLInterface
             <error>Your SP certificate file is not readable. Please check file permissions.</error>
 XML;
         }
-        $entityID = $this->settings['sp_entityid'];
+        
+        $entityID = htmlspecialchars($this->settings['sp_entityid'], ENT_XML1);
         $id = preg_replace('/[^a-z0-9_-]/', '_', $entityID);
         $cert = Settings::cleanOpenSsl($this->settings['sp_cert_file']);
 
@@ -88,7 +89,8 @@ XML;
         </md:KeyDescriptor>
 XML;
         foreach ($sloLocationArray as $slo) {
-            $location = $slo[0];
+            
+            $location = htmlspecialchars($slo[0], ENT_XML1);
             $binding = $slo[1];
             if (strcasecmp($binding, "POST") === 0 || strcasecmp($binding, "") === 0) {
                 $binding = Settings::BINDING_POST;
@@ -105,9 +107,10 @@ XML;
         <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
 XML;
         for ($i = 0; $i < count($assertcsArray); $i++) {
+            $location = htmlspecialchars($assertcsArray[$i], ENT_XML1);
             $xml .= <<<XML
 
-        <md:AssertionConsumerService index="$i" isDefault="true" Location="$assertcsArray[$i]" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+        <md:AssertionConsumerService index="$i" isDefault="true" Location="$location" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
 XML;
         }
         for ($i = 0; $i < count($attrcsArray); $i++) {
