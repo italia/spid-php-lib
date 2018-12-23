@@ -148,7 +148,10 @@ $settings = array(
         ["fiscalNumber"],
         ["name", "familyName", "fiscalNumber", "email", "spidCode"],
         ...
-    ]
+    ],
+    // Time in seconds of skew that is acceptable between client and server when checking OnBefore and NotOnOrAfter
+    // assertion condition validity timestamps. Default is 0
+    'accepted_clock_skew_seconds' => 3600
 );
 ```
 

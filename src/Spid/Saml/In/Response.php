@@ -18,6 +18,8 @@ class Response implements ResponseInterface
 
     public function validate($xml, $hasAssertion): bool
     {
+        $accepted_clock_skew_seconds = isset($this->saml->settings['accepted_clock_skew_seconds']) ? $this->saml->settings['accepted_clock_skew_seconds'] : 0;
+
         $root = $xml->getElementsByTagName('Response')->item(0);
 
         if ($root->getAttribute('Version') == "") {
@@ -51,9 +53,9 @@ class Response implements ResponseInterface
             }
             if ($xml->getElementsByTagName('Conditions')->length == 0) {
                 throw new \Exception("Missing Conditions attribute");
-            } elseif ($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore') == "" || strtotime($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore')) > strtotime('now')) {
+            } elseif ($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore') == "" || strtotime($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore')) > strtotime('now') + $accepted_clock_skew_seconds) {
                 throw new \Exception("Invalid NotBefore attribute");
-            } elseif ($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter') == "" || strtotime($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter')) < strtotime('now')) {
+            } elseif ($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter') == "" || strtotime($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter')) <= strtotime('now') - $accepted_clock_skew_seconds) {
                 throw new \Exception("Invalid NotOnOrAfter attribute");
             }
             if ($xml->getElementsByTagName('AudienceRestriction')->length == 0) {
@@ -75,7 +77,7 @@ class Response implements ResponseInterface
                 throw new \Exception("Missing SubjectConfirmationData attribute");
             } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('InResponseTo') != $_SESSION['RequestID']) {
                 throw new \Exception("Invalid SubjectConfirmationData attribute, expected " . $_SESSION['RequestID'] . " but received " . $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('InResponseTo'));
-            } elseif (strtotime($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('NotOnOrAfter')) < strtotime('now')) {
+            } elseif (strtotime($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('NotOnOrAfter')) <= strtotime('now') - $accepted_clock_skew_seconds) {
                 throw new \Exception("Invalid NotOnOrAfter attribute");
             } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient') != $_SESSION['acsUrl']) {
                 throw new \Exception("Invalid Recipient attribute, expected " . $_SESSION['acsUrl'] . " but received " . $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient'));
