@@ -28,7 +28,8 @@ class Settings
                 'emailAddress' => self::REQUIRED
             ]
         ],
-        'idp_metadata_folder' => self::REQUIRED
+        'idp_metadata_folder' => self::REQUIRED,
+        'accepted_clock_skew_seconds' => self::NOT_REQUIRED
     ];
 
     private static $validAttributeFields = [
@@ -210,6 +211,14 @@ class Settings
             if (strlen($settings['sp_key_cert_values']['countryName']) != 2) {
                 throw new \Exception('sp_key_cert_values countryName should be a 2 characters country code');
             }
+        }
+        if (isset($settings['accepted_clock_skew_seconds'])) {
+          if (!is_numeric($settings['accepted_clock_skew_seconds'])) {
+            throw new \Exception('accepted_clock_skew_seconds should be a number');
+          }
+          if ($settings['accepted_clock_skew_seconds'] < 0) {
+            throw new \Exception('accepted_clock_skew_seconds should be greater than 0');
+          }
         }
     }
 }
