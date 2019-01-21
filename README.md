@@ -5,7 +5,7 @@
 [![SPID on forum.italia.it](https://img.shields.io/badge/Forum-SPID-blue.svg)](https://forum.italia.it/c/spid)
 [![Build Status](https://travis-ci.org/italia/spid-php-lib.svg?branch=master)](https://travis-ci.org/italia/spid-php-lib)
 
->  **CURRENT VERSION: v0.31**
+>  **CURRENT VERSION: v0.33**
 
 # spid-php-lib
 PHP package for SPID authentication.
