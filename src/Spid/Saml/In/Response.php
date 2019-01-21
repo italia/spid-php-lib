@@ -83,7 +83,7 @@ class Response implements ResponseInterface
                 throw new \Exception("Invalid Recipient attribute, expected " . $_SESSION['acsUrl'] . " but received " . $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient'));
             }
         }
-    
+
         if ($xml->getElementsByTagName('Status')->length <= 0) {
             throw new \Exception("Missing Status element");
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') == 'urn:oasis:names:tc:SAML:2.0:status:Success') {
@@ -110,9 +110,13 @@ class Response implements ResponseInterface
         $session = new Session();
 
         $attributes = array();
-        if ($xml->getElementsByTagName('AttributeStatement')->length > 0) {
-            foreach ($xml->getElementsByTagName('AttributeStatement')->item(0)->childNodes as $attr) {
-                $attributes[$attr->getAttribute('Name')] = $attr->nodeValue;
+        $attributeStatements = $xml->getElementsByTagName('AttributeStatement');
+
+        if ($attributeStatements->length > 0) {
+            foreach ($attributeStatements->item(0)->childNodes as $attr) {
+                if($attr->hasAttributes()) {
+                    $attributes[$attr->attributes->getNamedItem('Name')->value] = trim($attr->nodeValue);
+                }
             }
         }
 
