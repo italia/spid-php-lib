@@ -14,6 +14,7 @@ class Settings
         'sp_entityid' => self::REQUIRED,
         'sp_key_file' => self::REQUIRED,
         'sp_cert_file' => self::REQUIRED,
+        'sp_comparison' => self::NOT_REQUIRED,
         'sp_assertionconsumerservice' => self::REQUIRED,
         'sp_singlelogoutservice' => self::REQUIRED,
         'sp_attributeconsumingservice' => self::NOT_REQUIRED,
@@ -231,6 +232,15 @@ class Settings
             }
             if ($settings['accepted_clock_skew_seconds'] < 0) {
                 throw new \Exception('accepted_clock_skew_seconds should be greater than 0');
+            }
+        }
+        if (isset($settings['sp_comparison'])) {
+            if (strcasecmp($settings['sp_comparison'], "exact") != 0 &&
+                strcasecmp($settings['sp_comparison'], "minimum") != 0 &&
+                strcasecmp($settings['sp_comparison'], "better") != 0 &&
+                strcasecmp($settings['sp_comparison'], "maximum") != 0) {
+                throw new \InvalidArgumentException('sp_comparison value should be one of:' .
+                    '"exact", "minimum", "better" or "maximum"');
             }
         }
     }

@@ -140,6 +140,14 @@ final class SpTest extends PHPUnit\Framework\TestCase
         new Italia\Spid\Sp($settings);  
     }
 
+    public function testSettingsWithInvalidComparison()
+    {
+        $settings = self::$settings;
+        $this->expectException(InvalidArgumentException::class);
+        $settings['sp_comparison'] = "invalid";
+        new Italia\Spid\Sp($settings);
+    }
+
     public function testSettingsWithInvalidSpACS()
     {
         $settings = self::$settings;
