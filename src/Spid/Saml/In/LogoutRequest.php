@@ -61,7 +61,8 @@ class LogoutRequest implements ResponseInterface
         }
         
         if ($sessionIndex->nodeValue != $_SESSION['spidSession']->sessionID) {
-            throw new \Exception("Invalid SessionID, expected " . $_SESSION['spidSession']->sessionID . " but received " . $sessionIndex->nodeValue);
+            throw new \Exception("Invalid SessionID, expected " . $_SESSION['spidSession']->sessionID .
+                " but received " . $sessionIndex->nodeValue);
         }
         $_SESSION['inResponseTo'] = $root->getAttribute('ID');
         return true;

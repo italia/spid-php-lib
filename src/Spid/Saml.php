@@ -81,7 +81,9 @@ XML;
 
         $xml = <<<XML
 <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="$entityID" ID="$id">
-    <md:SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
+    <md:SPSSODescriptor
+        protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"
+        AuthnRequestsSigned="true" WantAssertionsSigned="true">
         <md:KeyDescriptor use="signing">
             <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
                 <ds:X509Data><ds:X509Certificate>$cert</ds:X509Certificate></ds:X509Data>
@@ -89,7 +91,6 @@ XML;
         </md:KeyDescriptor>
 XML;
         foreach ($sloLocationArray as $slo) {
-            
             $location = htmlspecialchars($slo[0], ENT_XML1);
             $binding = $slo[1];
             if (strcasecmp($binding, "POST") === 0 || strcasecmp($binding, "") === 0) {
@@ -110,7 +111,9 @@ XML;
             $location = htmlspecialchars($assertcsArray[$i], ENT_XML1);
             $xml .= <<<XML
 
-        <md:AssertionConsumerService index="$i" isDefault="true" Location="$location" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
+        <md:AssertionConsumerService index="$i"
+            isDefault="true"
+            Location="$location" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"/>
 XML;
         }
         for ($i = 0; $i < count($attrcsArray); $i++) {
@@ -158,13 +161,27 @@ XML;
         return $this->baseLogin(Settings::BINDING_REDIRECT, ...$args);
     }
 
-    public function loginPost(string $idpName, int $assertId, int $attrId, $level = 1, string $redirectTo = null, $shouldRedirect = true)
-    {
+    public function loginPost(
+        string $idpName,
+        int $assertId,
+        int $attrId,
+        $level = 1,
+        string $redirectTo = null,
+        $shouldRedirect = true
+    ) {
         $args = func_get_args();
         return $this->baseLogin(Settings::BINDING_POST, ...$args);
     }
 
-    private function baseLogin($binding, $idpName, $assertId, $attrId, $level = 1, $redirectTo = null, $shouldRedirect = true) {
+    private function baseLogin(
+        $binding,
+        $idpName,
+        $assertId,
+        $attrId,
+        $level = 1,
+        $redirectTo = null,
+        $shouldRedirect = true
+    ) {
         if ($this->isAuthenticated()) {
             return false;
         }
@@ -234,7 +251,8 @@ XML;
         if ($this->isAuthenticated() === false) {
             return array();
         }
-        return isset($this->session->attributes) && is_array($this->session->attributes) ? $this->session->attributes : array();
+        return isset($this->session->attributes) && is_array($this->session->attributes) ? $this->session->attributes :
+            array();
     }
     
     // returns true if the SP certificates are found where the settings says they are, and they are valid
@@ -262,17 +280,20 @@ XML;
     }
 
     // Generates with openssl the SP certificates where the settings says they should be
-    // this function should be used with care because it requires write access to the filesystem, and invalidates the metadata
+    // this function should be used with care because it requires write access to the filesystem,
+    // and invalidates the metadata
     private function configure()
     {
         $keyCert = SignatureUtils::generateKeyCert($this->settings);
         $dir = dirname($this->settings['sp_key_file']);
         if (!is_dir($dir)) {
-            throw new \InvalidArgumentException('The directory you selected for sp_key_file does not exist. Please create ' . $dir);
+            throw new \InvalidArgumentException('The directory you selected for sp_key_file does not exist. ' .
+                'Please create ' . $dir);
         }
         $dir = dirname($this->settings['sp_cert_file']);
         if (!is_dir($dir)) {
-            throw new \InvalidArgumentException('The directory you selected for sp_cert_file does not exist. Please create ' . $dir);
+            throw new \InvalidArgumentException('The directory you selected for sp_cert_file does not exist.' .
+                'Please create ' . $dir);
         }
         file_put_contents($this->settings['sp_key_file'], $keyCert['key']);
         file_put_contents($this->settings['sp_cert_file'], $keyCert['cert']);

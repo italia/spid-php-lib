@@ -24,8 +24,7 @@ class Session
 
     public function isValid()
     {
-        if (
-            empty($this->sessionID) ||
+        if (empty($this->sessionID) ||
             empty($this->idp) ||
             empty($this->idpEntityID) ||
             empty($this->level)
