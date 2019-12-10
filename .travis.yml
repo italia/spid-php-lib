@@ -15,4 +15,5 @@ install:
   - php bin/download_idp_metadata.php ./example/idp_metadata
   
 script:
+  - find . | grep 'php$' | grep -v vendor | grep -v tests | xargs ./vendor/bin/phpcs --standard=PSR2
   - vendor/bin/phpunit --stderr tests
