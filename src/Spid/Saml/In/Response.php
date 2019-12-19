@@ -149,7 +149,10 @@ class Response implements ResponseInterface
             }
 
         }
-
+        $StatusMessage="";
+        if ($xml->getElementsByTagName('StatusMessage')->item(0) != null)  {
+            $StatusMessage = $xml->getElementsByTagName('StatusMessage')->item(0)->nodeValue;
+        }
 
         if ($xml->getElementsByTagName('Status')->length <= 0) {
             throw new \Exception("Missing Status element");
@@ -162,7 +165,7 @@ class Response implements ResponseInterface
                 throw new \Exception("Missing AuthnStatement element");
             }
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') != 'urn:oasis:names:tc:SAML:2.0:status:Success') {
-            throw new \Exception("Missing StatusCode element");
+            throw new \Exception("Missing StatusCode element : ".$StatusMessage);
         } elseif ($xml->getElementsByTagName('StatusCode')->item(1)->getAttribute('Value') == 'urn:oasis:names:tc:SAML:2.0:status:AuthnFailed') {
 
             throw new \Exception("AuthnFailed AuthnStatement element");
