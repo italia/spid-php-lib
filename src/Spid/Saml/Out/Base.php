@@ -33,9 +33,8 @@ class Base
     {
         $compressed = gzdeflate($this->xml);
         $parameters['SAMLRequest'] = base64_encode($compressed);
-        $parameters['RelayState'] = is_null($redirectTo) ? (isset($_SERVER['HTTPS'])
-            && $_SERVER['HTTPS'] === 'on' ? "https" : "http") .
-            "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" : $redirectTo;
+        //$parameters['RelayState'] = is_null($redirectTo) ? (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" : $redirectTo;
+        $parameters['RelayState'] = base64_encode((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}");
         $parameters['SigAlg'] = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
         $parameters['Signature'] = SignatureUtils::signUrl(
             $parameters['SAMLRequest'],
