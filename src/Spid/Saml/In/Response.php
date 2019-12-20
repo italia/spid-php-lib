@@ -29,13 +29,13 @@ class Response implements ResponseInterface
         }
         if ($root->getAttribute('IssueInstant') == "") {
             throw new \Exception("Missing IssueInstant attribute on Response");
-        }elseif(!$this->validateDate($root->getAttribute('IssueInstant'))){
+        } elseif (!$this->validateDate($root->getAttribute('IssueInstant'))) {
             throw new \Exception("Invalid IssueInstant attribute on Response");
         } elseif ($root->getAttribute('IssueInstant') == "" || strtotime($root->getAttribute('IssueInstant')) > strtotime('now') + $accepted_clock_skew_seconds) {
             throw new \Exception("Invalid IssueInstant attribute on Response");
         } elseif ($root->getAttribute('IssueInstant') == "") {
             throw new \Exception("Invalid IssueInstant attribute on Response");
-        } elseif(strtotime($root->getAttribute('IssueInstant')) <= strtotime('now') - $accepted_clock_skew_seconds){
+        } elseif (strtotime($root->getAttribute('IssueInstant')) <= strtotime('now') - $accepted_clock_skew_seconds) {
             throw new \Exception("Invalid IssueInstant attribute on Response");
         }
 
@@ -62,18 +62,17 @@ class Response implements ResponseInterface
         }
 
         if ($hasAssertion) {
-
-            if ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('ID') == "" || $xml->getElementsByTagName('Assertion')->item(0)->getAttribute('ID') == null ) {
+            if ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('ID') == "" || $xml->getElementsByTagName('Assertion')->item(0)->getAttribute('ID') == null) {
                 throw new \Exception("Missing ID attribute on Assertion");
-            }elseif($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('Version') != '2.0'){
+            } elseif ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('Version') != '2.0') {
                 throw new \Exception("Invalid Version attribute on Assertion");
-            }elseif(!$this->validateDate($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant'))){
+            } elseif (!$this->validateDate($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant'))) {
                 throw new \Exception("Invalid IssueInstant attribute on Assertion");
             } elseif ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant') == "" || strtotime($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant')) > strtotime('now') + $accepted_clock_skew_seconds) {
                 throw new \Exception("Invalid IssueInstant attribute on Assertion");
             } elseif ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant') == "") {
                 throw new \Exception("Invalid IssueInstant attribute on Assertion");
-            } elseif(strtotime($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant')) <= strtotime('now') - $accepted_clock_skew_seconds){
+            } elseif (strtotime($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant')) <= strtotime('now') - $accepted_clock_skew_seconds) {
                 throw new \Exception("Invalid IssueInstant attribute on Assertion");
             }
 
@@ -94,9 +93,9 @@ class Response implements ResponseInterface
                 "" || strtotime($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter'))
                 <= strtotime('now') - $accepted_clock_skew_seconds) {
                 throw new \Exception("Invalid NotOnOrAfter attribute");
-            }elseif(!$this->validateDate($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore'))){
+            } elseif (!$this->validateDate($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore'))) {
                 throw new \Exception("Invalid NotBefore attribute");
-            }elseif(!$this->validateDate($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter'))){
+            } elseif (!$this->validateDate($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter'))) {
                 throw new \Exception("Invalid NotOnOrAfter attribute");
             }
 
@@ -137,7 +136,7 @@ class Response implements ResponseInterface
                 throw new \Exception("Invalid NotOnOrAfter attribute");
             } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient') != $_SESSION['acsUrl']) {
                 throw new \Exception("Invalid Recipient attribute, expected " . $_SESSION['acsUrl'] . " but received " . $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient'));
-            }elseif ($xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method') != 'urn:oasis:names:tc:SAML:2.0:cm:bearer') {
+            } elseif ($xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method') != 'urn:oasis:names:tc:SAML:2.0:cm:bearer') {
                 throw new \Exception("Invalid Method attribute, expected 'urn:oasis:names:tc:SAML:2.0:cm:bearer'" . " but received " . $xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method'));
             }
 
@@ -147,10 +146,9 @@ class Response implements ResponseInterface
             if ($xml->getElementsByTagName('AttributeValue')->length == 0) {
                 throw new \Exception("Missing AttributeValue Element");
             }
-
         }
         $StatusMessage="";
-        if ($xml->getElementsByTagName('StatusMessage')->item(0) != null)  {
+        if ($xml->getElementsByTagName('StatusMessage')->item(0) != null) {
             $StatusMessage = $xml->getElementsByTagName('StatusMessage')->item(0)->nodeValue;
         }
 
@@ -167,9 +165,7 @@ class Response implements ResponseInterface
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') != 'urn:oasis:names:tc:SAML:2.0:status:Success') {
             throw new \Exception("Missing StatusCode element : ".$StatusMessage);
         } elseif ($xml->getElementsByTagName('StatusCode')->item(1)->getAttribute('Value') == 'urn:oasis:names:tc:SAML:2.0:status:AuthnFailed') {
-
             throw new \Exception("AuthnFailed AuthnStatement element");
-
         } else {
             // Status code != success
             return false;
@@ -191,7 +187,9 @@ class Response implements ResponseInterface
             $time = gmmktime($parts[4], $parts[5], $parts[6], $parts[2], $parts[3], $parts[1]);
 
             $input_time = strtotime($date);
-            if ($input_time === false) return false;
+            if ($input_time === false) {
+                return false;
+            }
 
             return $input_time == $time;
         } else {

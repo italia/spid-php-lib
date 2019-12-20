@@ -21,7 +21,9 @@ class AuthnRequest extends Base implements RequestInterface
         $force = $level > 1 ? "true" : "false";
         if (isset($this->idp->sp->settings['sp_comparison'])) {
             $comparison = $this->idp->sp->settings['sp_comparison'];
-            if ($comparison == "minimum") {  $force = "true"; }
+            if ($comparison == "minimum") {
+                $force = "true";
+            }
         } else {
             $comparison = "exact";
         }
