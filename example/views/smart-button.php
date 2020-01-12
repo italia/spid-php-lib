@@ -1,4 +1,4 @@
-<?php 
+<?php
 $mapping = $sp->getIdpList();
 ?>
 
@@ -29,9 +29,10 @@ $mapping = $sp->getIdpList();
         // In this case redirect and reuse the provided login example page
         url: '/login',
         fieldName: 'selected_idp',
-        // Usiamo il mapping per stabilire la connessione tra idpEntityID e il nome del file XML che contiene i suoi metadati
+        // Usiamo il mapping per stabilire la connessione tra idpEntityID
+        // e il nome del file XML che contiene i suoi metadati
         mapping: {                    
-            <?php 
+            <?php
             foreach ($mapping as $key => $value) {
                 echo "'" . $value . "': '" . $key . "',";
             }
@@ -39,7 +40,7 @@ $mapping = $sp->getIdpList();
         },
         // At least one supported IdP must be provided
         supported: [
-            <?php 
+            <?php
             foreach ($mapping as $key => $value) {
                 echo "'".$key."',";
             }

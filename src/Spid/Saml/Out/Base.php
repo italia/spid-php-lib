@@ -33,9 +33,16 @@ class Base
     {
         $compressed = gzdeflate($this->xml);
         $parameters['SAMLRequest'] = base64_encode($compressed);
-        $parameters['RelayState'] = is_null($redirectTo) ? (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" : $redirectTo;
+        $parameters['RelayState'] = is_null($redirectTo) ? (isset($_SERVER['HTTPS'])
+            && $_SERVER['HTTPS'] === 'on' ? "https" : "http") .
+            "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" : $redirectTo;
         $parameters['SigAlg'] = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
-        $parameters['Signature'] = SignatureUtils::signUrl($parameters['SAMLRequest'], $parameters['RelayState'], $parameters['SigAlg'], $this->idp->sp->settings['sp_key_file']);
+        $parameters['Signature'] = SignatureUtils::signUrl(
+            $parameters['SAMLRequest'],
+            $parameters['RelayState'],
+            $parameters['SigAlg'],
+            $this->idp->sp->settings['sp_key_file']
+        );
         $query = http_build_query($parameters);
         $url .= '?' . $query;
         return $url;
@@ -45,7 +52,9 @@ class Base
     {
         $SAMLRequest = base64_encode($this->xml);
 
-        $relayState = is_null($redirectTo) ? (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" : $redirectTo;
+        $relayState = is_null($redirectTo) ? (isset($_SERVER['HTTPS']) &&
+            $_SERVER['HTTPS'] === 'on' ? "https" : "http") .
+            "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" : $redirectTo;
         $relayState = null;
         return <<<HTML
 <html>

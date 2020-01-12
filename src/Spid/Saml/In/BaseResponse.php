@@ -92,7 +92,8 @@ class BaseResponse
                 throw new \Exception("Invalid Response. Assertion must be signed");
             }
         }
-        if (!SignatureUtils::validateXmlSignature($responseSignature, $cert) || !SignatureUtils::validateXmlSignature($assertionSignature, $cert)) {
+        if (!SignatureUtils::validateXmlSignature($responseSignature, $cert) ||
+            !SignatureUtils::validateXmlSignature($assertionSignature, $cert)) {
             throw new \Exception("Invalid Response. Signature validation failed");
         }
         return $this->response->validate($this->xml, $hasAssertion);
