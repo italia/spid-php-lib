@@ -33,7 +33,7 @@ XML;
 
     public function redirectUrl($redirectTo = null) : string
     {
-        $location = parent::getBindingLocation(Settings::BINDING_POST, 'SLO');
+        $location = parent::getBindingLocation(Settings::BINDING_REDIRECT, 'SLO');
         if (is_null($this->xml)) {
             $this->generateXml();
         }
