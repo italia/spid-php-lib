@@ -150,8 +150,9 @@ $settings = array(
         ...
     ],
     // Time in seconds of skew that is acceptable between client and server when checking OnBefore and NotOnOrAfter
-    // assertion condition validity timestamps, and IssueInstant response / assertion timestamps. Default is 0
-    'accepted_clock_skew_seconds' => 3600
+    // assertion condition validity timestamps, and IssueInstant response / assertion timestamps. Optional.
+    // Default is 0. Acceptable range: 0-300 (inclusive)
+    'accepted_clock_skew_seconds' => 100
 );
 ```
 

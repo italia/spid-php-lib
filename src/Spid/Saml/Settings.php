@@ -227,10 +227,13 @@ class Settings
         }
         if (isset($settings['accepted_clock_skew_seconds'])) {
             if (!is_numeric($settings['accepted_clock_skew_seconds'])) {
-                throw new \Exception('accepted_clock_skew_seconds should be a number');
+                throw new \InvalidArgumentException('accepted_clock_skew_seconds should be a number');
             }
             if ($settings['accepted_clock_skew_seconds'] < 0) {
-                throw new \Exception('accepted_clock_skew_seconds should be greater than 0');
+                throw new \InvalidArgumentException('accepted_clock_skew_seconds should be at least 0 seconds');
+            }
+            if ($settings['accepted_clock_skew_seconds'] > 300) {
+                throw new \InvalidArgumentException('accepted_clock_skew_seconds should be at most 300 seconds');
             }
         }
     }
