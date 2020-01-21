@@ -392,6 +392,6 @@ Lorenzo Cattaneo and Paolo Greppi, simevo s.r.l.
 
 ## License
 
-Copyright (c) 2018, Developers Italia
+Copyright (c) 2018-2020, Developers Italia
 
 License: BSD 3-Clause, see [LICENSE](LICENSE) file.
