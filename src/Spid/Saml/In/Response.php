@@ -182,7 +182,12 @@ class Response implements ResponseInterface
             }
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
             'urn:oasis:names:tc:SAML:2.0:status:Success') {
-            throw new \Exception("Missing StatusCode element");
+            if ($xml->getElementsByTagName('StatusMessage')->item(0) != null) {
+                $StatusMessage = ' [message: ' . $xml->getElementsByTagName('StatusMessage')->item(0)->nodeValue . ']';
+            } else {
+                $StatusMessage = "";
+            }
+            throw new \Exception("StatusCode is not Success" . $StatusMessage);
         } elseif ($xml->getElementsByTagName('StatusCode')->item(1)->getAttribute('Value') ==
             'urn:oasis:names:tc:SAML:2.0:status:AuthnFailed') {
             throw new \Exception("AuthnFailed AuthnStatement element");
