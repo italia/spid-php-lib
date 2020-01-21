@@ -258,6 +258,30 @@ final class SpTest extends PHPUnit\Framework\TestCase
         new Italia\Spid\Sp($settings);  
     }
 
+    public function testSettingsWithCrapAcss()
+    {
+        $settings = self::$settings;
+        $this->expectException(InvalidArgumentException::class);
+        $settings['accepted_clock_skew_seconds'] = 'zero';
+        new Italia\Spid\Sp($settings);  
+    }
+
+    public function testSettingsWithNegativeAcss()
+    {
+        $settings = self::$settings;
+        $this->expectException(InvalidArgumentException::class);
+        $settings['accepted_clock_skew_seconds'] = -1;
+        new Italia\Spid\Sp($settings);  
+    }
+
+    public function testSettingsWithLudicrousAcss()
+    {
+        $settings = self::$settings;
+        $this->expectException(InvalidArgumentException::class);
+        $settings['accepted_clock_skew_seconds'] = 3000;
+        new Italia\Spid\Sp($settings);  
+    }
+
     public function testCanLoadAllIdpMetadata()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
