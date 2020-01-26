@@ -18,7 +18,12 @@ class AuthnRequest extends Base implements RequestInterface
         $assertID = $this->idp->assertID;
         $attrID = $this->idp->attrID;
         $level = $this->idp->level;
-        $force = $level > 1 ? "true" : "false";
+        if (isset($this->idp->sp->settings['sp_comparison'])) {
+            $comparison = $this->idp->sp->settings['sp_comparison'];
+        } else {
+            $comparison = "exact";
+        }
+        $force = ($level > 1 || $comparison == "minimum") ? "true" : "false";
         
         $authnRequestXml = <<<XML
 <samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
@@ -33,7 +38,7 @@ class AuthnRequest extends Base implements RequestInterface
         NameQualifier="$entityId"
         Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">$entityId</saml:Issuer>
     <samlp:NameIDPolicy Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient" />
-    <samlp:RequestedAuthnContext Comparison="exact">
+    <samlp:RequestedAuthnContext Comparison="$comparison">
         <saml:AuthnContextClassRef>https://www.spid.gov.it/SpidL$level</saml:AuthnContextClassRef>
     </samlp:RequestedAuthnContext>
 </samlp:AuthnRequest>

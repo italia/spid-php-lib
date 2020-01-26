@@ -11,6 +11,7 @@ interface SAMLInterface
     //     'sp_entityid' => SP_BASE_URL, // preferred: https, no trailing slash, example: https://sp.example.com/
     //     'sp_key_file' => '/path/to/sp.key',
     //     'sp_cert_file' => '/path/to/sp.crt',
+    //     'sp_comparison' => 'exact', // one of: 'exact', 'minimum', 'better', 'maximum'
     //     'sp_assertionconsumerservice' => [
     //         // order is important ! the 0-base index in this array will be used as ID in the calls
     //         SP_BASE_URL . '/acs',
