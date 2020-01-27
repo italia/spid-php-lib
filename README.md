@@ -5,7 +5,7 @@
 [![SPID on forum.italia.it](https://img.shields.io/badge/Forum-SPID-blue.svg)](https://forum.italia.it/c/spid)
 [![Build Status](https://travis-ci.org/italia/spid-php-lib.svg?branch=master)](https://travis-ci.org/italia/spid-php-lib)
 
->  **CURRENT VERSION: v0.34**
+>  **CURRENT VERSION: v0.35**
 
 # spid-php-lib
 PHP package for SPID authentication.
@@ -30,26 +30,28 @@ Alternatives for other languages:
 Table of Contents
 =================
 
-* [Repository layout](#repository-layout)
-* [Getting started](#getting-started)
-    * [Prerequisites](#prerequisites)
-    * [Configuring & Installing](#configuring-and-installing)
-    * [Usage](#usage)
-        * [Performing login](#performing-login)
-        * [Performing logout](#performing-logout)
-        * [Complete API](#complete-api)
-    * [Example](#example)
-        * [Demo application](#demo-application)
-* [Features](#features)
-    * [More features](#more-features)
-* [Troubleshooting](#troubleshooting)
-* [Testing](#testing)
-    * [Unit Tests](#unit-tests)
-    * [Linting](#linting)
-* [Contributing](#contributing)
-* [See also](#see-also)
-* [Authors](#authors)
-* [License](#license)
+- [spid-php-lib](#spid-php-lib)
+- [Table of Contents](#table-of-contents)
+  - [Repository layout](#repository-layout)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Configuring and Installing](#configuring-and-installing)
+    - [Usage](#usage)
+      - [Performing login](#performing-login)
+      - [Performing logout](#performing-logout)
+      - [Complete API](#complete-api)
+    - [Example](#example)
+      - [Demo application](#demo-application)
+  - [Features](#features)
+    - [More features](#more-features)
+  - [Troubleshooting](#troubleshooting)
+  - [Testing](#testing)
+    - [Unit tests](#unit-tests)
+    - [Linting](#linting)
+  - [Contributing](#contributing)
+  - [See also](#see-also)
+  - [Authors](#authors)
+  - [License](#license)
 
 
 ## Repository layout
