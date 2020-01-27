@@ -20,6 +20,7 @@ class BaseResponse
 {
     private $response;
     private $xml;
+    private $root;
 
     public function __construct(Saml $saml = null)
     {
@@ -35,10 +36,11 @@ class BaseResponse
         $this->xml = new \DOMDocument();
         $this->xml->loadXML($xmlString);
 
-        $root = $this->xml->documentElement->tagName;
-        
-        switch ($root) {
-            case 'samlp:Response':
+        $ns_samlp = 'urn:oasis:names:tc:SAML:2.0:protocol';
+        $this->root = $this->xml->getElementsByTagNameNS($ns_samlp, '*')->item(0)->localName;
+
+        switch ($this->root) {
+            case 'Response':
                 // When reloading the acs page, POST data is sent again even if login is completed
                 // If login session already exists exit without checking the response again
                 if (isset($_SESSION['spidSession'])) {
@@ -49,10 +51,10 @@ class BaseResponse
                 }
                 $this->response = new Response($saml);
                 break;
-            case 'samlp:LogoutResponse':
+            case 'LogoutResponse':
                 $this->response = new LogoutResponse();
                 break;
-            case 'samlp:LogoutRequest':
+            case 'LogoutRequest':
                 if (is_null($saml)) {
                     return;
                 }
@@ -70,9 +72,11 @@ class BaseResponse
             return true;
         }
         
-        $hasAssertion = $this->xml->getElementsByTagName('Assertion')->length > 0;
+        $ns_saml = 'urn:oasis:names:tc:SAML:2.0:assertion';
+        $hasAssertion = $this->xml->getElementsByTagNameNS($ns_saml, 'Assertion')->length > 0;
 
-        $signatures = $this->xml->getElementsByTagName('Signature');
+        $ns_signature = 'http://www.w3.org/2000/09/xmldsig#';
+        $signatures = $this->xml->getElementsByTagNameNS($ns_signature, 'Signature');
         if ($hasAssertion && $signatures->length == 0) {
             throw new \Exception("Invalid Response. Response must contain at least one signature");
         }
@@ -81,10 +85,10 @@ class BaseResponse
         $assertionSignature = null;
         if ($signatures->length > 0) {
             foreach ($signatures as $key => $item) {
-                if ($item->parentNode->nodeName == 'saml:Assertion') {
+                if ($item->parentNode->localName == 'Assertion') {
                     $assertionSignature = $item;
                 }
-                if ($item->parentNode->nodeName == $this->xml->firstChild->nodeName) {
+                if ($item->parentNode->localName == $this->root) {
                     $responseSignature = $item;
                 }
             }
