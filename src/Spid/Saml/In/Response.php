@@ -8,6 +8,11 @@ use Italia\Spid\Spid\Saml;
 
 class Response implements ResponseInterface
 {
+    private static $authnContextClassRefValues = [
+        'https://www.spid.gov.it/SpidL1',
+        'https://www.spid.gov.it/SpidL2',
+        'https://www.spid.gov.it/SpidL3'
+    ];
 
     private $saml;
 
@@ -186,8 +191,18 @@ class Response implements ResponseInterface
             throw new \Exception("Missing StatusCode element");
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') ==
             'urn:oasis:names:tc:SAML:2.0:status:Success') {
-            if ($hasAssertion && $xml->getElementsByTagName('AuthnStatement')->length <= 0) {
-                throw new \Exception("Missing AuthnStatement element");
+            if ($hasAssertion) {
+                if ($xml->getElementsByTagName('AuthnStatement')->length <= 0) {
+                    throw new \Exception("Missing AuthnStatement element");
+                }
+                if ($xml->getElementsByTagName('AuthnContextClassRef')->length == 0) {
+                    throw new \Exception("Missing AuthnContextClassRef element");
+                } elseif (!$this->validateAuthnContextClassRefValue(
+                    $xml->getElementsByTagName('AuthnContextClassRef')->item(0)->nodeValue
+                )
+                    ) {
+                    throw new \Exception("Invalid AuthnContextClassRef value");
+                }
             }
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
             'urn:oasis:names:tc:SAML:2.0:status:Success') {
@@ -240,6 +255,11 @@ class Response implements ResponseInterface
         }
 
         return false;
+    }
+
+    private function validateAuthnContextClassRefValue($value)
+    {
+        return in_array($value, self::$authnContextClassRefValues);
     }
 
     private function spidSession(\DOMDocument $xml)
