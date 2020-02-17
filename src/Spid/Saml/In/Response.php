@@ -90,6 +90,12 @@ class Response implements ResponseInterface
                 "entity'" . " but received " . $xml->getElementsByTagName('Issuer')->item(1)->getAttribute('Format'));
             }
 
+            if ($xml->getElementsByTagName('Subject')->length == 0) {
+                throw new \Exception("Missing Subject element");
+            } elseif (!$this->validateHasSubElements($xml->getElementsByTagName('Subject')->item(0))) {
+                throw new \Exception("Unspecified Subject element");
+            }
+
             if ($xml->getElementsByTagName('Conditions')->length == 0) {
                 throw new \Exception("Missing Conditions attribute");
             } elseif ($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore') == "") {
@@ -220,6 +226,17 @@ class Response implements ResponseInterface
         } else {
             return false;
         }
+    }
+
+    private function validateHasSubElements($parent)
+    {
+        foreach ($parent->childNodes as $node) {
+            if ($node->nodeType == XML_ELEMENT_NODE) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function spidSession(\DOMDocument $xml)
