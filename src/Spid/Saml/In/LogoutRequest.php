@@ -19,6 +19,9 @@ class LogoutRequest implements ResponseInterface
     {
         $root = $xml->getElementsByTagName('LogoutRequest')->item(0);
 
+        if (!$root) {
+            throw new \Exception("Missing LogoutRequest");
+        }
         if ($xml->getElementsByTagName('Issuer')->length == 0) {
             throw new \Exception("Invalid Response. Missing Issuer element");
         }

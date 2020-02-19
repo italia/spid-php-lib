@@ -10,11 +10,14 @@ class LogoutResponse implements ResponseInterface
     {
         $root = $xml->getElementsByTagName('LogoutResponse')->item(0);
 
+        if (!$root) {
+            throw new \Exception("Missing LogoutResponse");
+        }
         if ($root->getAttribute('ID') == "") {
-            throw new \Exception("missing ID attribute");
+            throw new \Exception("Missing ID attribute");
         }
         if ($root->getAttribute('Version') == "") {
-            throw new \Exception("missing Version attribute");
+            throw new \Exception("Missing Version attribute");
         } elseif ($root->getAttribute('Version') != '2.0') {
             throw new \Exception("Invalid Version attribute");
         }

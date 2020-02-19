@@ -23,6 +23,9 @@ class Response implements ResponseInterface
 
         $root = $xml->getElementsByTagName('Response')->item(0);
 
+        if (!$root) {
+            throw new \Exception("Missing Response");
+        }
         if ($root->getAttribute('Version') == "") {
             throw new \Exception("Missing Version attribute");
         } elseif ($root->getAttribute('Version') != '2.0') {
