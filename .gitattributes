@@ -1,4 +1,5 @@
 /example export-ignore
 /tests export-ignore
+/phpunit.xml export-ignore
 .gitattributes export-ignore
 .gitattributes merge=ours
