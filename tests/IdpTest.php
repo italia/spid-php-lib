@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-require_once(__DIR__ . "/../vendor/autoload.php");
-
 final class IdpTest extends PHPUnit\Framework\TestCase
 {
     private static $settings = [
@@ -22,7 +20,7 @@ final class IdpTest extends PHPUnit\Framework\TestCase
             ["name", "familyName", "fiscalNumber", "email", "spidCode"]
             ]
         ];
-    
+
     private static $idps = [];
 
     public static function setupIdps()
@@ -86,8 +84,8 @@ final class IdpTest extends PHPUnit\Framework\TestCase
         $sp->settings['idp_metadata_folder'] = '/wrong/path/to/metadata/';
 
         $this->expectException(\Exception::class);
-        $loaded = $idp->loadFromXml(self::$idps[0]);
-        
+        $idp->loadFromXml(self::$idps[0]);
+
         $this->assertAttributeNotEmpty(null, $idp);
         $this->assertAttributeNotEmpty(null, $idp);
     }

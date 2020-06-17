@@ -1,0 +1,18 @@
+<phpunit
+	bootstrap="vendor/autoload.php"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	strict="true">
+
+	<testsuite name="spid-php-lib tests">
+		<directory>./tests</directory>
+	</testsuite>
+
+	<filter>
+		<whitelist>
+			<directory suffix=".php">src</directory>
+		</whitelist>
+	</filter>
+
+</phpunit>
