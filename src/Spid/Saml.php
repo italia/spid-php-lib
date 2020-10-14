@@ -80,7 +80,7 @@ XML;
         $attrcsArray = $this->settings['sp_attributeconsumingservice'] ?? array();
 
         $xml = <<<XML
-<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="$entityID" ID="$id">
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:spid="https://spid.gov.it/saml-extensions" entityID="$entityID" ID="$id">
     <md:SPSSODescriptor
         protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"
         AuthnRequestsSigned="true" WantAssertionsSigned="true">
@@ -144,6 +144,26 @@ XML;
 </md:Organization>
 XML;
         }
+
+        $ipaCode = $this->settings['sp_contact_ipa_code'];
+        $emailAddress = $this->settings['sp_contact_email'];
+        $telephoneNumber = $this->settings['sp_contact_phone'] ?? false;
+        $fiscalCode = $this->settings['sp_contact_fiscal_code'] ?? false;
+
+        $xml .= '<md:ContactPerson contactType="other">';
+        $xml .= '<md:Extensions>';
+        $xml .= "<spid:IPACode>$ipaCode</spid:IPACode>";
+        $xml .= '<spid:Public/>';
+        if ($fiscalCode) {
+            $xml .= "<spid:FiscalCode>$fiscalCode</spid:FiscalCode>";
+        }
+        $xml .= '</md:Extensions>';
+        $xml .= "<md:EmailAddress>$emailAddress</md:EmailAddress>";
+        if ($telephoneNumber) {
+            $xml .= "<md:TelephoneNumber>$telephoneNumber</md:TelephoneNumber>";
+        }
+        $xml .= '</md:ContactPerson>';
+
         $xml .= '</md:EntityDescriptor>';
 
         return SignatureUtils::signXml($xml, $this->settings);
