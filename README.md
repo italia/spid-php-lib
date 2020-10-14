@@ -138,6 +138,10 @@ $settings = array(
     ],
     'sp_org_name' => 'your organization full name',
     'sp_org_display_name' => 'your organization display name',
+    'sp_contact_ipa_code' => 'your ipa code',
+    'sp_contact_fiscal_code' => 'contact person fiscal code',
+    'sp_contact_email' => 'contact person email address',
+    'sp_contact_phone' => 'contact person telephone number',
     'sp_key_cert_values' => [ // Optional: remove this if you want to generate .key & .crt files manually
         'countryName' => 'Your Country',
         'stateOrProvinceName' => 'Your Province or State',
