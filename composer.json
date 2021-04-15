@@ -1,5 +1,5 @@
 {
-    "name": "italia/spid-php-lib",
+    "name": "thewave/spid-php-lib",
     "description": "PHP package for SPID authentication",
     "type": "library",
     "license": "BSD-3-Clause",
