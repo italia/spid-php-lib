@@ -10,41 +10,42 @@ permissions:
   contents: read
 
 jobs:
-  runs-on: ${{ matrix.operating-system }}
+  run:
+    runs-on: ${{ matrix.operating-system }}
 
-  strategy:
-    matrix:
-      operating-system: [ubuntu-latest]
-      php-versions: ['7.4', '8.0', '8.1']
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest]
+        php-versions: ['7.4', '8.0', '8.1']
 
-  name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
+    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
 
-  steps:
-    - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-    - name: Setup PHP with PECL extensions
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php-versions }}
-        extensions: json, openssl, xml
+      - name: Setup PHP with PECL extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: json, openssl, xml
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
 
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
 
-    - name: Download production IDPs metadata
-      run: bin/download_idp_metadata.php example/idp_metadata
+      - name: Download production IDPs metadata
+        run: bin/download_idp_metadata.php example/idp_metadata
 
-    - name: Run tests
-      run: ./vendor/bin/phpunit --stderr --testdox tests
+      - name: Run tests
+        run: ./vendor/bin/phpunit --stderr --testdox tests
