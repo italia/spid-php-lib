@@ -55,8 +55,8 @@ final class IdpTest extends PHPUnit\Framework\TestCase
             Italia\Spid\Spid\Saml\Idp::class,
             $loaded
         );
-        $this->assertAttributeNotEmpty('idpFileName', $idp);
-        $this->assertAttributeNotEmpty('metadata', $idp);
+        $this->assertNotEmpty($idp->idpFileName);
+        $this->assertNotEmpty($idp->metadata);
 
         // If IDPs were downloaded for testing purposes, then delete them
         if ($result) {
@@ -73,8 +73,8 @@ final class IdpTest extends PHPUnit\Framework\TestCase
             Italia\Spid\Spid\Saml\Idp::class,
             $loaded
         );
-        $this->assertAttributeNotEmpty('idpFileName', $idp);
-        $this->assertAttributeNotEmpty('metadata', $idp);
+      $this->assertNotEmpty($idp->idpFileName);
+      $this->assertNotEmpty($idp->metadata);
     }
 
     public function testLoadXMLWIthWrongFilePath()
@@ -86,8 +86,8 @@ final class IdpTest extends PHPUnit\Framework\TestCase
         $this->expectException(\Exception::class);
         $idp->loadFromXml(self::$idps[0]);
 
-        $this->assertAttributeNotEmpty(null, $idp);
-        $this->assertAttributeNotEmpty(null, $idp);
+        $this->assertNotEmpty($idp);
+        $this->assertNotEmpty($idp);
     }
 
     // TODO check if logout response should redirect
