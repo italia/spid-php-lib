@@ -31,7 +31,7 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           extensions: json, openssl, xml
 
-      - name: Validate composer.json and composer.lock
+      - name: Validate composer.json
         run: composer validate --strict
 
       - name: Cache Composer packages
