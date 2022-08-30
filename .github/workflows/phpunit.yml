@@ -10,67 +10,41 @@ permissions:
   contents: read
 
 jobs:
-  phpunit_on_php_7_4:
-    runs-on: ubuntu-latest
+  runs-on: ${{ matrix.operating-system }}
 
-    steps:
-      - uses: actions/checkout@v3
+  strategy:
+    matrix:
+      operating-system: [ubuntu-latest]
+      php-versions: ['7.4', '8.0', '8.1']
 
-      - name: Setup PHP with PECL extensions
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-          extensions: json, openssl, xml
+  name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
 
-      - name: Validate composer.json and composer.lock
-        run: composer validate --strict
+  steps:
+    - uses: actions/checkout@v3
 
-      - name: Cache Composer packages
-        id: composer-cache
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
+    - name: Setup PHP with PECL extensions
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
+        extensions: json, openssl, xml
 
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
 
-      - name: Download production IDPs metadata
-        run: bin/download_idp_metadata.php example/idp_metadata
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
 
-      - name: Run tests
-        run: ./vendor/bin/phpunit --stderr --testdox tests
-  phpunit_on_php_8_0:
-    runs-on: ubuntu-latest
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
 
-    steps:
-      - uses: actions/checkout@v3
+    - name: Download production IDPs metadata
+      run: bin/download_idp_metadata.php example/idp_metadata
 
-      - name: Setup PHP with PECL extensions
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.0'
-          extensions: json, openssl, xml
-
-      - name: Validate composer.json and composer.lock
-        run: composer validate --strict
-
-      - name: Cache Composer packages
-        id: composer-cache
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
-
-      - name: Download production IDPs metadata
-        run: bin/download_idp_metadata.php example/idp_metadata
-
-      - name: Run tests
-        run: ./vendor/bin/phpunit --stderr --testdox tests
+    - name: Run tests
+      run: ./vendor/bin/phpunit --stderr --testdox tests
