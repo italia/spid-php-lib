@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  phpunit on php 7.4:
+  phpunit_on_php_7_4:
     runs-on: ubuntu-latest
 
     steps:
@@ -42,7 +42,7 @@ jobs:
 
       - name: Run tests
         run: ./vendor/bin/phpunit --stderr --testdox tests
-  phpunit on php 8.0:
+  phpunit_on_php_8_0:
     runs-on: ubuntu-latest
 
     steps:
