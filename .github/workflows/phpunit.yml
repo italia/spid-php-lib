@@ -13,6 +13,8 @@ jobs:
   run:
     runs-on: ${{ matrix.operating-system }}
 
+    continue-on-error: true
+
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
