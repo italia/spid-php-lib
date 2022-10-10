@@ -2,8 +2,7 @@
 	bootstrap="vendor/autoload.php"
 	convertErrorsToExceptions="true"
 	convertNoticesToExceptions="true"
-	convertWarningsToExceptions="true"
-	strict="true">
+	convertWarningsToExceptions="true">
 
 	<testsuite name="spid-php-lib tests">
 		<directory>./tests</directory>

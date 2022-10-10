@@ -299,11 +299,11 @@ final class SpTest extends PHPUnit\Framework\TestCase
             $host = parse_url($idpEntityId, PHP_URL_HOST);
             $idpSSOArray = $retrievedIdp->metadata['idpSSO'];
             foreach ($idpSSOArray as $key => $idpSSO) {
-                $this->assertContains($host, $idpSSO['location']);
+                $this->assertStringContainsString($host, $idpSSO['location']);
             }
             $idpSLOArray = $retrievedIdp->metadata['idpSLO'];
             foreach ($idpSLOArray as $key => $idpSLO) {
-                $this->assertContains($host, $idpSLO['location']);
+                $this->assertStringContainsString($host, $idpSLO['location']);
             }
         }
         // If IDPs were downloaded for testing purposes, then delete them
@@ -418,14 +418,14 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $this->assertTrue($sp->isAuthenticated());
         // Authentication completed, request attributes
         $sp = new Italia\Spid\Sp(SpTest::$settings);
-        $this->assertInternalType('array', $sp->getAttributes());
+        $this->assertIsArray($sp->getAttributes());
         $this->assertCount(0, $sp->getAttributes());
         //  No test with attributes requested
         $session->attributes = [
             'name' => 'Test'
         ];
         $_SESSION['spidSession'] = (array)$session;
-        $this->assertInternalType('array', $sp->getAttributes());
+        $this->assertIsArray($sp->getAttributes());
         $this->assertCount(1, $sp->getAttributes());
 
         // If IDPs were downloaded for testing purposes, then delete them
@@ -477,7 +477,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         }
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         unlink(self::$settings['sp_key_file']);
         unlink(self::$settings['sp_cert_file']);
