@@ -14,6 +14,10 @@ final class IdpTest extends PHPUnit\Framework\TestCase
         ],
         'sp_org_name' => 'test_simevo',
         'sp_org_display_name' => 'Test Simevo',
+        'sp_contact_ipa_code' => 'test',
+        'sp_contact_fiscal_code' => 'XXXXXX00X00X000X',
+        'sp_contact_email' => 'test@example.com',
+        'sp_contact_phone' => '12345678910',
         'idp_metadata_folder' => './example/idp_metadata/',
         'sp_attributeconsumingservice' => [
             ["name", "familyName", "fiscalNumber", "email"],
