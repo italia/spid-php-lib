@@ -20,13 +20,12 @@ if (count($argv) <= 1) {
 $dir = $argv[1];
 
 $idp_list_url = 'https://registry.spid.gov.it/assets/data/idp.json';
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $idp_list_url);
-curl_setopt($ch, CURLOPT_FAILONERROR, 1);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-echo "Contacting $idp_list_url" . PHP_EOL;
+
+$ch = curl_init(); 
+curl_setopt($ch, CURLOPT_URL, $idp_list_url); 
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
 $json = curl_exec($ch);
 curl_close($ch);
 $idps = json_decode($json);
@@ -36,10 +35,9 @@ foreach ($idps->data as $idp) {
     $ipa_entity_code = $idp->ipa_entity_code;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $metadata_url);
-    curl_setopt($ch, CURLOPT_FAILONERROR, 1);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
     echo "Contacting $metadata_url" . PHP_EOL;
     $xml = curl_exec($ch);
     // $info = curl_getinfo($ch);
