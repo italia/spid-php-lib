@@ -20,6 +20,7 @@ class Settings
         'sp_attributeconsumingservice' => self::NOT_REQUIRED,
         'sp_org_name' => self::NOT_REQUIRED,
         'sp_org_display_name' => self::NOT_REQUIRED,
+        'sp_org_url' => self::NOT_REQUIRED,
         'sp_key_cert_values' => [
             self::NOT_REQUIRED => [
                 'countryName' => self::REQUIRED,
@@ -30,7 +31,20 @@ class Settings
             ]
         ],
         'idp_metadata_folder' => self::REQUIRED,
-        'accepted_clock_skew_seconds' => self::NOT_REQUIRED
+        'accepted_clock_skew_seconds' => self::NOT_REQUIRED,
+        'sp_contact_persons' => [
+            self::NOT_REQUIRED => [
+                'contactType' => self::REQUIRED,
+                'entityType' => self::NOT_REQUIRED,
+                'ipaCode' => self::NOT_REQUIRED,
+                'vatNumber' => self::NOT_REQUIRED,
+                'fiscalCode' => self::NOT_REQUIRED,
+                'emptyTag' => self::REQUIRED,
+                'company' => self::REQUIRED,
+                'emailAddress' => self::NOT_REQUIRED,
+                'telephoneNumber' => self::NOT_REQUIRED
+            ]
+        ]
     ];
 
     private static $validAttributeFields = [
@@ -245,6 +259,65 @@ class Settings
                 throw new \InvalidArgumentException('sp_comparison value should be one of:' .
                     '"exact", "minimum", "better" or "maximum"');
             }
+        }
+        if (isset($settings['sp_contact_persons'])) {
+            if (!is_array($settings['sp_contact_persons'])) {
+                throw new \InvalidArgumentException('sp_contact_persons should be an array');
+            }
+            array_walk($settings['sp_contact_persons'], function ($cp) {
+                if (!is_array($cp)) {
+                    throw new \InvalidArgumentException('sp_contact_persons elements should be an array');
+                }
+                if (count($cp) == 0) {
+                    throw new \InvalidArgumentException(
+                        'sp_contact_persons elements should contain at least one element'
+                    );
+                }
+                if (isset($cp['contactType'])) {
+                    if (strcasecmp($cp['contactType'], "other") != 0 &&
+                        strcasecmp($cp['contactType'], "billing") != 0) {
+                        throw new \InvalidArgumentException('contactType value should be one of:' .
+                            '"other", "billing"');
+                    }
+
+                    if(strcasecmp($cp['contactType'], "other") == 0) {
+                        if (isset($cp['entityType']) && !empty($cp['entityType'])) {
+                            if (strcasecmp($cp['entityType'], "spid:aggregator") != 0 &&
+                                strcasecmp($cp['entityType'], "spid:aggregated") != 0) {
+                                throw new \InvalidArgumentException('entityType value should be one of:' .
+                                    '"spid:aggregator", "spid:aggregated"');
+                            }
+                        }
+                    } else {
+                        if (isset($cp['entityType']) && !empty($cp['entityType'])) {
+                            throw new \InvalidArgumentException('when contactType is equal to "billing", entityType value should be empty');
+                        }
+                    }
+			    } else {
+                    throw new \Exception('Missing settings field: contactType');
+                }
+                
+                if (isset($cp['emptyTag']) && !empty($cp['emptyTag'])) {
+                    if (strcasecmp($cp['emptyTag'], "Public") != 0 &&
+                        strcasecmp($cp['emptyTag'], "Private") != 0 &&
+                        strcasecmp($cp['emptyTag'], "PublicServicesFullAggregator") != 0 &&
+                        strcasecmp($cp['emptyTag'], "PublicServicesLightAggregator") != 0 &&
+                        strcasecmp($cp['emptyTag'], "PrivateServicesFullAggregator") != 0 &&
+                        strcasecmp($cp['emptyTag'], "PrivateServicesLightAggregator") != 0 &&
+                        strcasecmp($cp['emptyTag'], "PublicServicesFullOperator") != 0 &&
+                        strcasecmp($cp['emptyTag'], "PublicServicesLightOperator") != 0) {
+                        throw new \InvalidArgumentException('emptyTag value should be one of:' .
+                            '"Public", "Private", "PublicServicesFullAggregator", "PublicServicesLightAggregator", ' .
+                            '"PrivateServicesFullAggregator", "PrivateServicesLightAggregator", "PublicServicesFullOperator", "PublicServicesLightOperator"');
+                    }
+			    } else {
+                    throw new \Exception('Missing settings field: emptyTag');
+                }
+
+                if (!isset($cp['company']) || empty($cp['company'])) {
+                    throw new \Exception('Missing settings field: company');
+                } 
+            });
         }
     }
 }

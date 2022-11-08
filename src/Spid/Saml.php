@@ -74,13 +74,16 @@ XML;
         $entityID = htmlspecialchars($this->settings['sp_entityid'], ENT_XML1);
         $id = preg_replace('/[^a-z0-9_-]/', '_', $entityID);
         $cert = Settings::cleanOpenSsl($this->settings['sp_cert_file']);
+        if (array_key_exists('sp_org_url', $this->settings)) {
+            $orgUrl = $this->settings['sp_org_url'];
+        }
 
         $sloLocationArray = $this->settings['sp_singlelogoutservice'] ?? array();
         $assertcsArray = $this->settings['sp_assertionconsumerservice'] ?? array();
         $attrcsArray = $this->settings['sp_attributeconsumingservice'] ?? array();
 
         $xml = <<<XML
-<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="$entityID" ID="$id">
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:spid="https://spid.gov.it/saml-extensions" entityID="$entityID" ID="$id">
     <md:SPSSODescriptor
         protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"
         AuthnRequestsSigned="true" WantAssertionsSigned="true">
@@ -136,14 +139,95 @@ XML;
         if (array_key_exists('sp_org_name', $this->settings)) {
             $orgName = $this->settings['sp_org_name'];
             $orgDisplayName = $this->settings['sp_org_display_name'];
-            $xml .= <<<XML
-<md:Organization>
-    <md:OrganizationName xml:lang="it">$orgName</md:OrganizationName>
-    <md:OrganizationDisplayName xml:lang="it">$orgDisplayName</md:OrganizationDisplayName>
-    <md:OrganizationURL xml:lang="it">$entityID</md:OrganizationURL>
-</md:Organization>
+            if(empty($orgUrl)) {
+                $xml .= <<<XML
+                <md:Organization>
+                    <md:OrganizationName xml:lang="it">$orgName</md:OrganizationName>
+                    <md:OrganizationDisplayName xml:lang="it">$orgDisplayName</md:OrganizationDisplayName>
+                    <md:OrganizationURL xml:lang="it">$entityID</md:OrganizationURL>
+                </md:Organization>
 XML;
+            } else {
+                $xml .= <<<XML
+                <md:Organization>
+                    <md:OrganizationName xml:lang="it">$orgName</md:OrganizationName>
+                    <md:OrganizationDisplayName xml:lang="it">$orgDisplayName</md:OrganizationDisplayName>
+                    <md:OrganizationURL xml:lang="it">$orgUrl</md:OrganizationURL>
+                </md:Organization>
+XML;
+            }
         }
+
+        if (array_key_exists('sp_contact_persons', $this->settings)) {
+            $contactPersonsArray = $this->settings['sp_contact_persons'] ?? array();
+        
+            foreach ($contactPersonsArray as $cp) {
+                $contactType = (isset($cp['contactType'])) ? $cp['contactType'] : '';
+                $entityType = (isset($cp['entityType'])) ? $cp['entityType'] : '';
+                $ipaCode = (isset($cp['ipaCode'])) ? $cp['ipaCode'] : '';
+                $vatNumber = (isset($cp['vatNumber'])) ? $cp['vatNumber'] : '';
+                $fiscalCode = (isset($cp['fiscalCode'])) ? $cp['fiscalCode'] : '';
+                $tagVuoto = (isset($cp['emptyTag'])) ? $cp['emptyTag'] : '';
+                $company = (isset($cp['company'])) ? $cp['company'] : '';
+                $emailAddress = (isset($cp['emailAddress'])) ? $cp['emailAddress'] : '';
+                $telephoneNumber = (isset($cp['telephoneNumber'])) ? $cp['telephoneNumber'] : '';
+                
+                if (strcasecmp($entityType, "") !== 0) {
+                    $xml .= <<<XML
+                <md:ContactPerson contactType="$contactType" spid:entityType="$entityType">
+                    <md:Extensions>
+XML;
+                } else {
+                    $xml .= <<<XML
+                <md:ContactPerson contactType="$contactType">
+                    <md:Extensions>
+XML;
+                }
+                
+                if (strcasecmp($ipaCode, "") !== 0) {
+                    $xml .= <<<XML
+                        <spid:IPACode>$ipaCode</spid:IPACode>
+XML;
+                }
+                if (strcasecmp($vatNumber, "") !== 0) {
+                    $xml .= <<<XML
+                        <spid:VATNumber>$vatNumber</spid:VATNumber>
+XML;
+                }
+                if (strcasecmp($fiscalCode, "") !== 0) {
+                    $xml .= <<<XML
+                        <spid:FiscalCode>$fiscalCode</spid:FiscalCode>
+XML;
+                }
+                if (strcasecmp($tagVuoto, "") !== 0) {
+                    $xml .= <<<XML
+                        <spid:$tagVuoto/>
+XML;
+                }
+                $xml .= <<<XML
+                    </md:Extensions>
+XML;
+                if (strcasecmp($company, "") !== 0) {
+                    $xml .= <<<XML
+                        <md:Company>$company</md:Company>
+XML;
+                }
+                if (strcasecmp($emailAddress, "") !== 0) {
+                    $xml .= <<<XML
+                        <md:EmailAddress>$emailAddress</md:EmailAddress>
+XML;
+                }
+                if (strcasecmp($telephoneNumber, "") !== 0) {
+                    $xml .= <<<XML
+                        <md:TelephoneNumber>$telephoneNumber</md:TelephoneNumber>
+XML;
+                }
+                $xml .= <<<XML
+                    </md:ContactPerson>
+XML;
+            }
+        }
+
         $xml .= '</md:EntityDescriptor>';
 
         return SignatureUtils::signXml($xml, $this->settings);
