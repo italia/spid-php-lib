@@ -30,7 +30,18 @@ class Settings
             ]
         ],
         'idp_metadata_folder' => self::REQUIRED,
-        'accepted_clock_skew_seconds' => self::NOT_REQUIRED
+        'accepted_clock_skew_seconds' => self::NOT_REQUIRED,
+        'database' => [
+            self::NOT_REQUIRED => [
+                'type' =>  self::REQUIRED,
+                'host' => self::REQUIRED,
+                'instance' => self::NOT_REQUIRED,
+                'name' => self::REQUIRED,
+                'table_name' => self::REQUIRED,
+                'user' => self::REQUIRED,
+                'password' => self::REQUIRED,
+            ]    
+        ]
     ];
 
     private static $validAttributeFields = [
@@ -244,6 +255,44 @@ class Settings
                 strcasecmp($settings['sp_comparison'], "maximum") != 0) {
                 throw new \InvalidArgumentException('sp_comparison value should be one of:' .
                     '"exact", "minimum", "better" or "maximum"');
+            }
+        }
+
+        if (isset($settings['database'])) {
+            if (!is_array($settings['database'])) {
+                throw new \Exception('database should be an array');
+            }
+            foreach ($settings['database'] as $key => $value) {
+                if (!is_string($value)) {
+                    throw new \Exception(
+                        'database values should be strings. Valued provided for key ' . $key .
+                        ' is not a string'
+                    );
+                }
+            }
+            if (isset($settings['database']['type'])) {
+                if (strcasecmp($settings['database']['type'], "mysql") != 0 &&
+                    strcasecmp($settings['database']['type'], "sqlserver") != 0) {
+                    throw new \InvalidArgumentException('type value should be one of:' .
+                        '"mysql", "sqlserver"');
+                }
+                if (!isset($settings['database']['host']) || empty($settings['database']['host'])) {
+                    throw new \Exception('Missing settings field: host');
+                }
+                if (!isset($settings['database']['name']) || empty($settings['database']['name'])) {
+                    throw new \Exception('Missing settings field: name');
+                }
+                if (!isset($settings['database']['table_name']) || empty($settings['database']['table_name'])) {
+                    throw new \Exception('Missing settings field: table_name');
+                }
+                if (!isset($settings['database']['user']) || empty($settings['database']['user'])) {
+                    throw new \Exception('Missing settings field: user');
+                }
+                if (!isset($settings['database']['password']) || empty($settings['database']['password'])) {
+                    throw new \Exception('Missing settings field: password');
+                }
+            } else {
+                throw new \Exception('Missing settings field: type');
             }
         }
     }

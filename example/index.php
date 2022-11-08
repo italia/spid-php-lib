@@ -33,7 +33,16 @@ $settings = [
     'sp_attributeconsumingservice' => [
         ["name", "familyName", "fiscalNumber", "email"],
         ["name", "familyName", "fiscalNumber", "email", "spidCode"]
-    ]
+    ],
+    /*'database' => [
+        'type' => 'mysql', // sqlserver, mysql
+        'host' => 'localhost', // database host
+        'instance' => '', // database instance
+        'name' => 'databaseName', // database name
+        'table_name' => 'SPID_LOGS', // table name for logging
+        'user' => 'username', // username
+        'password' => 'password' // password
+    ]*/
 ];
 $sp = new Italia\Spid\Sp($settings);
 

@@ -8,6 +8,7 @@ use Italia\Spid\Spid\Saml\Settings;
 use Italia\Spid\Spid\Saml\SignatureUtils;
 use Italia\Spid\Spid\Interfaces\SAMLInterface;
 use Italia\Spid\Spid\Session;
+use Italia\Spid\Db;
 
 class Saml implements SAMLInterface
 {
@@ -219,6 +220,10 @@ XML;
             $session = new Session($_SESSION['spidSession']);
             if ($session->isValid()) {
                 $this->session = $session;
+                if (isset($this->settings['database'])) {
+                    $db = new Db($idp);
+                    $db->updateLogWithResponseData($response);
+                }
                 return true;
             }
         }
