@@ -103,11 +103,12 @@ class BaseResponse
         return $this->response->validate($this->xml, $hasAssertion);
     }
 
-    public function getXml() {
-		if($this->xml) {
-			return $this->xml->getElementsByTagName('Response')->item(0);
-		} else {
-			return '';
-		}
-	}
+    public function getXml()
+    {
+        if($this->xml) {
+            return $this->xml->getElementsByTagName('Response')->item(0);
+        } else {
+            return '';
+        }
+    }
 }

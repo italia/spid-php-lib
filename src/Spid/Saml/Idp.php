@@ -107,7 +107,8 @@ class Idp implements IdpInterface
         exit("");
     }
 
-    public function getAuthn() {
+    public function getAuthn() 
+    {
         return $this->authn;
     }
 
