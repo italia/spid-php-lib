@@ -7,7 +7,6 @@ use Italia\Spid\Spid\Saml\Out\AuthnRequest;
 use Italia\Spid\Spid\Saml\Out\LogoutRequest;
 use Italia\Spid\Spid\Session;
 use Italia\Spid\Spid\Saml\Out\LogoutResponse;
-use Italia\Spid\Db;
 
 class Idp implements IdpInterface
 {
@@ -18,6 +17,7 @@ class Idp implements IdpInterface
     public $attrID;
     public $level = 1;
     public $session;
+    private $authn;
 
     public function __construct($sp)
     {
@@ -88,19 +88,14 @@ class Idp implements IdpInterface
         $this->attrID = $attr;
         $this->level = $level;
 
-        $authn = new AuthnRequest($this);
+        $this->authn = new AuthnRequest($this);
         $url = $binding == Settings::BINDING_REDIRECT ?
-            $authn->redirectUrl($redirectTo) :
-            $authn->httpPost($redirectTo);
-        $_SESSION['RequestID'] = $authn->id;
+            $this->authn->redirectUrl($redirectTo) :
+            $this->authn->httpPost($redirectTo);
+        $_SESSION['RequestID'] = $this->authn->id;
         $_SESSION['idpName'] = $this->idpFileName;
         $_SESSION['idpEntityId'] = $this->metadata['idpEntityId'];
         $_SESSION['acsUrl'] = $this->sp->settings['sp_assertionconsumerservice'][$ass];
-
-        if (isset($this->sp->settings['database'])) {
-            $db = new Db($this);
-            $db->insertAuthnDataIntoLog($authn);
-        }
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
@@ -110,6 +105,10 @@ class Idp implements IdpInterface
         header('Cache-Control: no-cache, must-revalidate');
         header('Location: ' . $url);
         exit("");
+    }
+
+    public function getAuthn() {
+        return $this->authn;
     }
 
     public function logoutRequest(Session $session, $slo, $binding, $redirectTo = null, $shouldRedirect = true) : string

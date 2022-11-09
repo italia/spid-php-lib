@@ -1,11 +1,10 @@
 <?php
 
-namespace Italia\Spid;
-
 use Italia\Spid\Spid\Saml\Idp;
 use Italia\Spid\Spid\Saml\Out\AuthnRequest;
 use Italia\Spid\Spid\Saml\In\BaseResponse;
-use PDO;
+use \PDO;
+use \PDOException;
 
 class Db {
 	
@@ -14,7 +13,7 @@ class Db {
 	private $dbHost;
 	private $dbInstance;
 	private $dbName;
-    private $tableName;
+	private $tableName;
 	private $dbUser;
 	private $dbPassword;
 	private $conn;
@@ -22,7 +21,7 @@ class Db {
 	public function __construct(Idp $idp)
     {
 		$this->idp = $idp;
-        $this->dbType = $this->idp->sp->settings['database']['type'];
+		$this->dbType = $this->idp->sp->settings['database']['type'];
 		$this->dbHost = $this->idp->sp->settings['database']['host'];
 		$this->dbInstance = $this->idp->sp->settings['database']['instance'];
 		$this->dbName = $this->idp->sp->settings['database']['name'];
@@ -68,8 +67,9 @@ class Db {
 		$this->closeConn($conn);
 	}
 	
-	public function insertAuthnDataIntoLog(AuthnRequest $authnReq) {
+	public function insertAuthnDataIntoLog() {
 		$conn = $this->createConn();
+		$authnReq = $this->idp->getAuthn();
 		$authnReqXML = $authnReq->xml;
 		$authnReqID = $authnReq->id;
 		$authnReqIssueIstant = $authnReq->issueInstant;
