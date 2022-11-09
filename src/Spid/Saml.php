@@ -14,6 +14,7 @@ class Saml implements SAMLInterface
     public $settings;
     private $idps = []; // contains filename -> Idp object array
     private $session; // Session object
+    private $response;
 
     public function __construct(array $settings, $autoconfigure = true)
     {
@@ -207,8 +208,8 @@ XML;
             return false;
         }
         $idp = $this->loadIdpFromFile($selectedIdp);
-        $response = new BaseResponse($this);
-        if (!empty($idp) && !$response->validate($idp->metadata['idpCertValue'])) {
+        $this->response = new BaseResponse($this);
+        if (!empty($idp) && !$this->response->validate($idp->metadata['idpCertValue'])) {
             return false;
         }
         if (isset($_SESSION) && isset($_SESSION['inResponseTo'])) {
@@ -223,6 +224,11 @@ XML;
             }
         }
         return false;
+    }
+
+    public function getResponse()
+    {
+        return $this->response;
     }
 
     public function logout(int $slo, string $redirectTo = null, $shouldRedirect = true)
