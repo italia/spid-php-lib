@@ -105,7 +105,7 @@ class BaseResponse
 
     public function getXml()
     {
-        if($this->xml) {
+        if ($this->xml) {
             return $this->xml->getElementsByTagName('Response')->item(0);
         } else {
             return '';

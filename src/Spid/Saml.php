@@ -226,7 +226,7 @@ XML;
         return false;
     }
 
-    public function getResponse() 
+    public function getResponse()
     {
         return $this->response;
     }
