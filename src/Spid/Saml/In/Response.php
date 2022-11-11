@@ -148,32 +148,33 @@ class Response implements ResponseInterface
                 } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier') !=
                     $_SESSION['idpEntityId']) {
                     throw new \Exception("Invalid NameQualifier attribute, expected " . $_SESSION['idpEntityId'] .
-                        " but received " . 
+                        " but received " .
                         $xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier'));
                 }
 
                 if ($xml->getElementsByTagName('SubjectConfirmation')->length > 0) {
                     if ($xml->getElementsByTagName('SubjectConfirmationData')->length == 0) {
                         throw new \Exception("Missing SubjectConfirmationData attribute");
-                    } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('InResponseTo') !=
-                        $_SESSION['RequestID']) {
-                        throw new \Exception("Invalid SubjectConfirmationData attribute, expected " . $_SESSION['RequestID'] .
-                            " but received " .
-                            $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('InResponseTo'));
+                    } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->
+                        getAttribute('InResponseTo') != $_SESSION['RequestID']) {
+                        throw new \Exception("Invalid SubjectConfirmationData attribute, expected "
+                            . $_SESSION['RequestID'] . " but received " .
+                            $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->
+                            getAttribute('InResponseTo'));
                     } elseif (strtotime(
                         $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('NotOnOrAfter')
                     ) <= strtotime('now') - $accepted_clock_skew_seconds) {
                         throw new \Exception("Invalid NotOnOrAfter attribute");
-                    } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient') !=
-                        $_SESSION['acsUrl']) {
+                    } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient')
+                        != $_SESSION['acsUrl']) {
                         throw new \Exception("Invalid Recipient attribute, expected " . $_SESSION['acsUrl'] .
                             " but received " .
                             $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient'));
                     } elseif ($xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method') !=
                         'urn:oasis:names:tc:SAML:2.0:cm:bearer') {
-                        throw new \Exception("Invalid Method attribute, expected 'urn:oasis:names:tc:SAML:2.0:cm:bearer'" .
-                            " but received " .
-                            $xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method'));
+                        throw new \Exception("Invalid Method attribute, expected "
+                            . "'urn:oasis:names:tc:SAML:2.0:cm:bearer' but received "
+                            . $xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method'));
                     }
                 } else { // Check response 52 on demo validator
                     throw new \Exception("Missing SubjectConfirmation Element");
@@ -231,7 +232,8 @@ class Response implements ResponseInterface
             if ($xml->getElementsByTagName('Attribute')->length == 0) {
                 throw new \Exception("Missing Attribute Element");
             } else { // Check response 103 on demo validator
-                $countRequestAttribute = count($this->saml->settings['sp_attributeconsumingservice'][$_SESSION['assertID']]);
+                $countRequestAttribute = 
+                count($this->saml->settings['sp_attributeconsumingservice'][$_SESSION['assertID']]);
                 $countResponseAttribute = count($xml->getElementsByTagName('Attribute'));
                 if ($countRequestAttribute == $countResponseAttribute) {
                     // Check the parameter number requested are equal to the received ones
@@ -240,7 +242,8 @@ class Response implements ResponseInterface
                     foreach ($xml->getElementsByTagName('Attribute') as $responseAttribute) {
                         array_push($arrayResponseAttribute, $responseAttribute->getAttribute('Name'));
                     }
-                    foreach ($this->saml->settings['sp_attributeconsumingservice'][$_SESSION['assertID']] as &$requestAttribute) {
+                    foreach ($this->saml->settings['sp_attributeconsumingservice'][$_SESSION['assertID']]
+                    as &$requestAttribute) {
                         // Check the parameter received are the same requested
                         $isFound = array_search($requestAttribute, $arrayResponseAttribute, false);
                         if ($isFound === false) {
@@ -278,16 +281,17 @@ class Response implements ResponseInterface
             }
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
             'urn:oasis:names:tc:SAML:2.0:status:Success') {
-             if ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
-                'urn:oasis:names:tc:SAML:2.0:status:Requester' && 
+            if ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
+                'urn:oasis:names:tc:SAML:2.0:status:Requester' &&
                 $xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
-                'urn:oasis:names:tc:SAML:2.0:status:Responder' && 
+                'urn:oasis:names:tc:SAML:2.0:status:Responder' &&
                 $xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
                 'urn:oasis:names:tc:SAML:2.0:status:VersionMismatch') {
                     throw new \Exception("StatusCode not valid");
             } else {
                 if ($xml->getElementsByTagName('StatusMessage')->item(0) != null) {
-                    $StatusMessage = ' [message: ' . $xml->getElementsByTagName('StatusMessage')->item(0)->nodeValue . ']';
+                    $StatusMessage = ' [message: '
+                    . $xml->getElementsByTagName('StatusMessage')->item(0)->nodeValue . ']';
                 } else {
                     $StatusMessage = "";
                 }
