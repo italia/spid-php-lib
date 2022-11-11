@@ -23,7 +23,8 @@ class Response implements ResponseInterface
 
         $root = $xml->getElementsByTagName('Response')->item(0);
 
-        if ($root->getAttribute('ID') == null || $root->getAttribute('ID') == "") { // Check response 8 on demo validator
+        if ($root->getAttribute('ID') == null || $root->getAttribute('ID') == "") {
+            // Check response 8 on demo validator
             throw new \Exception("Missing ID attribute");
         }
 
@@ -38,7 +39,8 @@ class Response implements ResponseInterface
             throw new \Exception("Invalid IssueInstant attribute on Response");
         } elseif (strtotime($root->getAttribute('IssueInstant')) > strtotime('now') + $accepted_clock_skew_seconds) {
             throw new \Exception("IssueInstant attribute on Response is in the future");
-        } elseif (strtotime($root->getAttribute('IssueInstant')) < strtotime('now') - $accepted_clock_skew_seconds) { // Check response 14 on demo validator
+        } elseif (strtotime($root->getAttribute('IssueInstant')) < strtotime('now') - $accepted_clock_skew_seconds) {
+            // Check response 14 on demo validator
             throw new \Exception("IssueInstant attribute on Response is in the past");
         }
 
@@ -82,10 +84,12 @@ class Response implements ResponseInterface
             )) {
                 throw new \Exception("Invalid IssueInstant attribute on Assertion");
             } elseif (strtotime($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant')) >
-                strtotime($root->getAttribute('IssueInstant'))) { // The issueInstant of assertion have to compared with issueInstant of the response, not with the current timestamp
+                strtotime($root->getAttribute('IssueInstant'))) {
+                    // The issueInstant of assertion have to compared with issueInstant of the response
                 throw new \Exception("IssueInstant attribute on Assertion is in the future");
-            } elseif (strtotime($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant')) < // Check response 39 on demo validator
-                strtotime($root->getAttribute('IssueInstant'))) { // The issueInstant of assertion have to compared with issueInstant of the response, not with the current timestamp
+            } elseif (strtotime($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant')) <
+                strtotime($root->getAttribute('IssueInstant'))) { // Check response 39 on demo validator
+                // The issueInstant of assertion have to compared with issueInstant of the response
                 throw new \Exception("IssueInstant attribute on Assertion is in the past");
             }
 
@@ -144,7 +148,8 @@ class Response implements ResponseInterface
                 } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier') !=
                     $_SESSION['idpEntityId']) {
                     throw new \Exception("Invalid NameQualifier attribute, expected " . $_SESSION['idpEntityId'] .
-                        " but received " . $xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier'));
+                        " but received " . 
+                        $xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier'));
                 }
 
                 if ($xml->getElementsByTagName('SubjectConfirmation')->length > 0) {
@@ -171,20 +176,21 @@ class Response implements ResponseInterface
                             $xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method'));
                     }
                 } else { // Check response 52 on demo validator
-					throw new \Exception("Missing SubjectConfirmation Element");
-				}
-
+                    throw new \Exception("Missing SubjectConfirmation Element");
+                }
             } else { // Check response 42 on demo validator
                 throw new \Exception("Missing Subject Element");
             }
 
             if ($xml->getElementsByTagName('AuthnStatement')->length > 0) {
                 // Check response 88 on demo validator
-                if ($xml->getElementsByTagName('AuthnContext')->length == 0) { // Check response 91 on demo validator
+                if ($xml->getElementsByTagName('AuthnContext')->length == 0) {
+                    // Check response 91 on demo validator
                     throw new \Exception("Missing AuthnContext element");
                 } else {
                     // Check response 90 on demo validator
-                    if ($xml->getElementsByTagName('AuthnContextClassRef')->length == 0) { // Check response 93 on demo validator
+                    if ($xml->getElementsByTagName('AuthnContextClassRef')->length == 0) {
+                        // Check response 93 on demo validator
                         throw new \Exception("Missing AuthnContextClassRef element");
                     } else {
                         $responseLevel = $xml->getElementsByTagName('AuthnContextClassRef')->item(0)->nodeValue;
@@ -193,7 +199,8 @@ class Response implements ResponseInterface
                             $len = strlen($responseLevel);
                             $responseLevelString = substr($responseLevel, -1 * (abs($len) + 1), -1);
                             if ($responseLevelString == "https://www.spid.gov.it/SpidL") {
-                                if ($responseLevel != "https://www.spid.gov.it/SpidL".$_SESSION['level']) { // Checking response 97 on demo validator
+                                if ($responseLevel != "https://www.spid.gov.it/SpidL".$_SESSION['level']) {
+                                    // Checking response 97 on demo validator
                                     if ($_SESSION['comparison'] == 'exact') {
                                         throw new \Exception("AuthnContextClassRef value inconsistent");
                                     } else {
@@ -218,42 +225,45 @@ class Response implements ResponseInterface
                     }
                 }
             } else { // Check response 89 on demo validator
-				throw new \Exception("Missing AuthnStatement Element");
-			}
+                throw new \Exception("Missing AuthnStatement Element");
+            }
 
             if ($xml->getElementsByTagName('Attribute')->length == 0) {
                 throw new \Exception("Missing Attribute Element");
             } else { // Check response 103 on demo validator
-				$countRequestAttribute = count($this->saml->settings['sp_attributeconsumingservice'][$_SESSION['assertID']]);
-				$countResponseAttribute = count($xml->getElementsByTagName('Attribute'));
-				if ($countRequestAttribute == $countResponseAttribute) { // Check the parameter number requested are equal to the received ones
-					$isFound = false;
-					$arrayResponseAttribute = array();
-					foreach ($xml->getElementsByTagName('Attribute') as $responseAttribute) {
-						array_push($arrayResponseAttribute, $responseAttribute->getAttribute('Name'));
-					}
-					foreach ($this->saml->settings['sp_attributeconsumingservice'][$_SESSION['assertID']] as &$requestAttribute) { // Check the parameter received are the same requested
-						$isFound = array_search($requestAttribute, $arrayResponseAttribute, false);
-						if ($isFound === false) {
+                $countRequestAttribute = count($this->saml->settings['sp_attributeconsumingservice'][$_SESSION['assertID']]);
+                $countResponseAttribute = count($xml->getElementsByTagName('Attribute'));
+                if ($countRequestAttribute == $countResponseAttribute) {
+                    // Check the parameter number requested are equal to the received ones
+                    $isFound = false;
+                    $arrayResponseAttribute = array();
+                    foreach ($xml->getElementsByTagName('Attribute') as $responseAttribute) {
+                        array_push($arrayResponseAttribute, $responseAttribute->getAttribute('Name'));
+                    }
+                    foreach ($this->saml->settings['sp_attributeconsumingservice'][$_SESSION['assertID']] as &$requestAttribute) {
+                        // Check the parameter received are the same requested
+                        $isFound = array_search($requestAttribute, $arrayResponseAttribute, false);
+                        if ($isFound === false) {
                             throw new \Exception("Missing attribute ".$requestAttribute);
-						} else {
-							$isFound = false;
-						}
-					}
-					unset($requestAttribute);
-				} else {
-					throw new \Exception("Parameter number requested are not equal to the received ones");
-				}
+                        } else {
+                            $isFound = false;
+                        }
+                    }
+                    unset($requestAttribute);
+                } else {
+                    throw new \Exception("Parameter number requested are not equal to the received ones");
+                }
                 
                 if ($xml->getElementsByTagName('AttributeValue')->length == 0) {
                     throw new \Exception("Missing AttributeValue Element");
                 }
             }
         } else { // Check response 32 on demo validator
-			if ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') == 'urn:oasis:names:tc:SAML:2.0:status:Success') {
+            if ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') ==
+            'urn:oasis:names:tc:SAML:2.0:status:Success') {
                 throw new \Exception("Missing Assertion Element");
-			}
-		}
+            }
+        }
 
         if ($xml->getElementsByTagName('Status')->length <= 0) {
             throw new \Exception("Missing Status element");
@@ -269,8 +279,10 @@ class Response implements ResponseInterface
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
             'urn:oasis:names:tc:SAML:2.0:status:Success') {
              if ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
-                'urn:oasis:names:tc:SAML:2.0:status:Requester' && $xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
-                'urn:oasis:names:tc:SAML:2.0:status:Responder' && $xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
+                'urn:oasis:names:tc:SAML:2.0:status:Requester' && 
+                $xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
+                'urn:oasis:names:tc:SAML:2.0:status:Responder' && 
+                $xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
                 'urn:oasis:names:tc:SAML:2.0:status:VersionMismatch') {
                     throw new \Exception("StatusCode not valid");
             } else {
@@ -297,7 +309,7 @@ class Response implements ResponseInterface
         unset($_SESSION['idpEntityId']);
         unset($_SESSION['acsUrl']);
         unset($_SESSION['comparison']);
-		unset($_SESSION['level']);
+        unset($_SESSION['level']);
         unset($_SESSION['assertID']);
         return true;
     }

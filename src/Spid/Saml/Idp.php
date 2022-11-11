@@ -96,7 +96,7 @@ class Idp implements IdpInterface
         $_SESSION['idpEntityId'] = $this->metadata['idpEntityId'];
         $_SESSION['acsUrl'] = $this->sp->settings['sp_assertionconsumerservice'][$ass];
         $_SESSION['level'] = $this->level; // For checking response 97 on demo validator
-		$_SESSION['comparison'] = $this->sp->settings['sp_comparison']; // For checking response 97 on demo validator
+        $_SESSION['comparison'] = $this->sp->settings['sp_comparison']; // For checking response 97 on demo validator
         $_SESSION['assertID'] = $this->assertID; // For checking response 103 on demo validator
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
