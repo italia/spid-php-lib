@@ -138,8 +138,8 @@ class Response implements ResponseInterface
             } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format') !=
                 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient') {
                 throw new SpidException("Invalid NameID attribute, expected " .
-                "'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'" . " but received " .
-                $xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format'), $xmlString);
+                    "'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'" . " but received " .
+                    $xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format'), $xmlString);
             } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier') !=
                 $_SESSION['idpEntityId']) {
                 throw new SpidException("Invalid NameQualifier attribute, expected " . $_SESSION['idpEntityId'] .
@@ -155,19 +155,21 @@ class Response implements ResponseInterface
                     " but received " . $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('InResponseTo'),
                     $xmlString);
             } elseif (strtotime(
-                $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('NotOnOrAfter')
-            ) <= strtotime('now') - $accepted_clock_skew_seconds) {
+                    $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('NotOnOrAfter')
+                ) <= strtotime('now') - $accepted_clock_skew_seconds) {
                 throw new SpidException("Invalid NotOnOrAfter attribute", $xmlString);
             } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient') !=
                 $_SESSION['acsUrl']) {
                 throw new SpidException("Invalid Recipient attribute, expected " . $_SESSION['acsUrl'] .
-                    " but received " . $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient'),
-                    $xmlString);
+                    " but received " . $xml->getElementsByTagName('SubjectConfirmationData')->item(0)
+                        ->getAttribute('Recipient'), $xmlString
+                );
             } elseif ($xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method') !=
                 'urn:oasis:names:tc:SAML:2.0:cm:bearer') {
-                throw new SpidException("Invalid Method attribute, expected 'urn:oasis:names:tc:SAML:2.0:cm:bearer'" .
-                    " but received " .
-                    $xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method'), $xmlString);
+                throw new SpidException("Invalid Method attribute, expected 'urn:oasis:names:tc:SAML:2.0:cm:" .
+                    "bearer'but received " . $xml->getElementsByTagName('SubjectConfirmation')->item(0)
+                        ->getAttribute('Method'), $xmlString
+                );
             }
 
             if ($xml->getElementsByTagName('Attribute')->length == 0) {
