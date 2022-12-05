@@ -120,30 +120,46 @@ class BaseResponse
         }
 
         if (is_null($responseSignature)) {
-            throw new SpidException('Invalid Response. responseSignature is empty', $this->xmlString,
-                $this->getErrorCodeFromXml());
+            throw new SpidException(
+                'Invalid Response. responseSignature is empty',
+                $this->xmlString,
+                $this->getErrorCodeFromXml()
+            );
         }
 
         if (is_null($assertionSignature)) {
-            throw new SpidException('Invalid Response. assertionSignature is empty', $this->xmlString,
-                $this->getErrorCodeFromXml());
+            throw new SpidException(
+                'Invalid Response. assertionSignature is empty',
+                $this->xmlString,
+                $this->getErrorCodeFromXml()
+            );
         }
 
         if (!SignatureUtils::validateXmlSignature($responseSignature, $cert)) {
-            throw new SpidException('Invalid Response. responseSignature validation failed', $this->xmlString,
-                $this->getErrorCodeFromXml());
+            throw new SpidException(
+                'Invalid Response. responseSignature validation failed',
+                $this->xmlString,
+                $this->getErrorCodeFromXml()
+            );
         }
 
         if (!SignatureUtils::validateXmlSignature($assertionSignature, $cert)) {
-            throw new SpidException('Invalid Response. assertionSignature validation failed', $this->xmlString,
-                $this->getErrorCodeFromXml());
+            throw new SpidException(
+                'Invalid Response. assertionSignature validation failed',
+                $this->xmlString,
+                $this->getErrorCodeFromXml()
+            );
         }
 
         try {
             return $this->response->validate($this->xml, $hasAssertion);
         } catch (\Exception $e) {
-            throw new SpidException('Invalid Response. response validation failed with exception: ' . $e->getMessage(),
-                $this->xmlString, $this->getErrorCodeFromXml(), $e);
+            throw new SpidException(
+                'Invalid Response. response validation failed with exception: ' . $e->getMessage(),
+                $this->xmlString,
+                $this->getErrorCodeFromXml(),
+                $e
+            );
         }
     }
 
