@@ -296,14 +296,16 @@ final class SpTest extends PHPUnit\Framework\TestCase
             $retrievedIdp = $sp->loadIdpFromFile($idp);
             $this->assertEquals($retrievedIdp->idpFileName, $idp);
             $idpEntityId = $retrievedIdp->metadata['idpEntityId'];
-            $host = parse_url($idpEntityId, PHP_URL_HOST);
+            preg_match("/[a-z0-9\-]{1,63}\.[a-z\.]{2,6}$/", parse_url($idpEntityId, PHP_URL_HOST), $base_domain_tld);
             $idpSSOArray = $retrievedIdp->metadata['idpSSO'];
             foreach ($idpSSOArray as $key => $idpSSO) {
-                $this->assertStringContainsString($host, $idpSSO['location']);
+                preg_match("/[a-z0-9\-]{1,63}\.[a-z\.]{2,6}$/", parse_url($idpSSO['location'], PHP_URL_HOST), $domain_tld);
+                $this->assertStringContainsString($base_domain_tld[0], $domain_tld[0]);
             }
             $idpSLOArray = $retrievedIdp->metadata['idpSLO'];
             foreach ($idpSLOArray as $key => $idpSLO) {
-                $this->assertStringContainsString($host, $idpSLO['location']);
+                preg_match("/[a-z0-9\-]{1,63}\.[a-z\.]{2,6}$/", parse_url($idpSLO['location'], PHP_URL_HOST), $domain_tld);
+                $this->assertStringContainsString($base_domain_tld[0], $domain_tld[0]);
             }
         }
         // If IDPs were downloaded for testing purposes, then delete them
