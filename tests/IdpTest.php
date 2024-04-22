@@ -1,5 +1,8 @@
 <?php
+
 declare(strict_types=1);
+
+require_once __DIR__ . "/LoggerMock.php";
 
 final class IdpTest extends PHPUnit\Framework\TestCase
 {
@@ -37,8 +40,8 @@ final class IdpTest extends PHPUnit\Framework\TestCase
 
     public function testCanBeCreatedFromValidSP()
     {
-       $sp = new Italia\Spid\Sp(IdpTest::$settings);
-       $this->assertInstanceOf(
+        $sp = new Italia\Spid\Sp(new LoggerMock(), IdpTest::$settings);
+        $this->assertInstanceOf(
             Italia\Spid\Spid\Saml\Idp::class,
             new Italia\Spid\Spid\Saml\Idp($sp)
         );
@@ -48,7 +51,7 @@ final class IdpTest extends PHPUnit\Framework\TestCase
     {
         $result = self::setupIdps();
 
-        $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
+        $sp = new Italia\Spid\Spid\Saml(new LoggerMock(), IdpTest::$settings);
         $idp = new Italia\Spid\Spid\Saml\Idp($sp);
         $loaded = $idp->loadFromXml(self::$idps[0]);
         $this->assertInstanceOf(
@@ -66,20 +69,20 @@ final class IdpTest extends PHPUnit\Framework\TestCase
 
     public function testCanLoadFromValidXMLFullPath()
     {
-        $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
+        $sp = new Italia\Spid\Spid\Saml(new LoggerMock(), IdpTest::$settings);
         $idp = new Italia\Spid\Spid\Saml\Idp($sp);
         $loaded = $idp->loadFromXml(self::$idps[0]);
         $this->assertInstanceOf(
             Italia\Spid\Spid\Saml\Idp::class,
             $loaded
         );
-      $this->assertNotEmpty($idp->idpFileName);
-      $this->assertNotEmpty($idp->metadata);
+        $this->assertNotEmpty($idp->idpFileName);
+        $this->assertNotEmpty($idp->metadata);
     }
 
     public function testLoadXMLWIthWrongFilePath()
     {
-        $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
+        $sp = new Italia\Spid\Spid\Saml(new LoggerMock(), IdpTest::$settings);
         $idp = new Italia\Spid\Spid\Saml\Idp($sp);
         $sp->settings['idp_metadata_folder'] = '/wrong/path/to/metadata/';
 

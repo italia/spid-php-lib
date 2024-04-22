@@ -2,12 +2,27 @@
 
 namespace Italia\Spid\Spid\Saml\Out;
 
+use Exception;
+use Italia\Spid\Spid\Interfaces\LoggerSelector;
 use Italia\Spid\Spid\Interfaces\RequestInterface;
+use Italia\Spid\Spid\Saml\Idp;
 use Italia\Spid\Spid\Saml\Settings;
 use Italia\Spid\Spid\Saml\SignatureUtils;
+use SimpleXMLElement;
 
 class AuthnRequest extends Base implements RequestInterface
 {
+    private $logger;
+
+    public function __construct(Idp $idp, LoggerSelector $logger)
+    {
+        parent::__construct($idp);
+        $this->logger = $logger;
+    }
+
+    /**
+     * @throws Exception
+     */
     public function generateXml()
     {
         $id = $this->generateID();
@@ -18,13 +33,9 @@ class AuthnRequest extends Base implements RequestInterface
         $assertID = $this->idp->assertID;
         $attrID = $this->idp->attrID;
         $level = $this->idp->level;
-        if (isset($this->idp->sp->settings['sp_comparison'])) {
-            $comparison = $this->idp->sp->settings['sp_comparison'];
-        } else {
-            $comparison = "exact";
-        }
+        $comparison = $this->idp->sp->settings['sp_comparison'] ?? "exact";
         $force = ($level > 1 || $comparison == "minimum") ? "true" : "false";
-        
+
         $authnRequestXml = <<<XML
 <samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
     xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
@@ -44,15 +55,25 @@ class AuthnRequest extends Base implements RequestInterface
 </samlp:AuthnRequest>
 XML;
 
-        $xml = new \SimpleXMLElement($authnRequestXml);
+        $xml = new SimpleXMLElement($authnRequestXml);
 
         if (!is_null($attrID)) {
             $xml->addAttribute('AttributeConsumingServiceIndex', $attrID);
         }
         $this->xml = $xml->asXML();
+        $logger = $this->logger->getPermanentLogger();
+        if ($logger) {
+            $logger->info('AuthnRequest', [
+                'xml' => $this->xml,
+                'schema' => 'AuthnRequest'
+            ]);
+        }
     }
 
-    public function redirectUrl($redirectTo = null) : string
+    /**
+     * @throws Exception
+     */
+    public function redirectUrl($redirectTo = null): string
     {
         $location = parent::getBindingLocation(Settings::BINDING_REDIRECT);
         if (is_null($this->xml)) {
@@ -61,7 +82,10 @@ XML;
         return parent::redirect($location, $redirectTo);
     }
 
-    public function httpPost($redirectTo = null) : string
+    /**
+     * @throws Exception
+     */
+    public function httpPost($redirectTo = null): string
     {
         $location = parent::getBindingLocation(Settings::BINDING_POST);
         if (is_null($this->xml)) {

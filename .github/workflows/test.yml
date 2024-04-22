@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
-        php-versions: ['7.4', '8.0', '8.1']
+        php-versions: ['7.1', '8.2']
 
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
 
@@ -50,7 +50,10 @@ jobs:
         run: bin/download_idp_metadata.php example/idp_metadata
 
       - name: Coding standard
-        run: find . | grep 'php$' | grep -v vendor | grep -v tests | xargs ./vendor/bin/phpcs --standard=PSR2
+        run: composer code-style
+
+      - name: Coding quality
+        run: composer static-analysis
 
       - name: Run tests
         run: ./vendor/bin/phpunit --stderr --testdox tests

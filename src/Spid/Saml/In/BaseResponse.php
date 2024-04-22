@@ -2,18 +2,21 @@
 
 namespace Italia\Spid\Spid\Saml\In;
 
+use DOMDocument;
+use Exception;
+use Italia\Spid\Spid\Exceptions\SpidException;
 use Italia\Spid\Spid\Saml\SignatureUtils;
 use Italia\Spid\Spid\Saml;
 
 /*
 * Generates the proper response object at runtime by reading the input XML.
 * Validates the response and the signature
-* Specific response may complete other tasks upon succesful validation
+* Specific response may complete other tasks upon successful validation
 * such as creating a login session for Response, or destroying the session
-* for Logout resposnes.
+* for Logout response.
 
 * The only case in which a Request is validated instead of a response is
-* for Idp Initiated Logout. In this case the input is not a response to a requese
+* for Idp Initiated Logout. In this case the input is not a response to a request
 * to a request sent by the SP, but rather a request started by the Idp
 */
 class BaseResponse
@@ -21,20 +24,26 @@ class BaseResponse
     private $response;
     private $xml;
     private $root;
+    private $xmlString;
+    private $logger;
 
-    public function __construct(Saml $saml = null)
+    /**
+     * @throws SpidException
+     */
+    public function __construct(?Saml $saml = null)
     {
-        if ((!isset($_POST) || !isset($_POST['SAMLResponse'])) &&
-            (!isset($_GET) || !isset($_GET['SAMLResponse']))
-        ) {
+        if (!isset($_POST['SAMLResponse']) && !isset($_GET['SAMLResponse'])) {
             return;
         }
-        $xmlString = isset($_GET['SAMLResponse']) ?
+
+        $this->logger = $saml->getLogger();
+
+        $this->xmlString = isset($_GET['SAMLResponse']) ?
             gzinflate(base64_decode($_GET['SAMLResponse'])) :
             base64_decode($_POST['SAMLResponse']);
-        
-        $this->xml = new \DOMDocument();
-        $this->xml->loadXML($xmlString);
+
+        $this->xml = new DOMDocument();
+        $this->xml->loadXML($this->xmlString);
 
         $ns_samlp = 'urn:oasis:names:tc:SAML:2.0:protocol';
         $this->root = $this->xml->getElementsByTagNameNS($ns_samlp, '*')->item(0)->localName;
@@ -61,30 +70,43 @@ class BaseResponse
                 $this->response = new LogoutRequest($saml);
                 break;
             default:
-                throw new \Exception('No valid response found');
-                break;
+                $printable = <<<LOG
+No valid response found:
+ - RequestID: {$_SESSION['RequestID']}
+ - idpName: {$_SESSION['idpName']}
+ - idpEntityId: {$_SESSION['idpEntityId']}
+ - acsUrl: {$_SESSION['acsUrl']}
+LOG;
+                $this->logger->logAndThrow($this->xml, $printable);
         }
     }
 
-    public function validate($cert) : bool
+    /**
+     * @throws SpidException
+     * @throws Exception
+     */
+    public function validate($cert): bool
     {
         if (is_null($this->response)) {
             return true;
         }
-        
+
         $ns_saml = 'urn:oasis:names:tc:SAML:2.0:assertion';
         $hasAssertion = $this->xml->getElementsByTagNameNS($ns_saml, 'Assertion')->length > 0;
 
         $ns_signature = 'http://www.w3.org/2000/09/xmldsig#';
         $signatures = $this->xml->getElementsByTagNameNS($ns_signature, 'Signature');
         if ($hasAssertion && $signatures->length == 0) {
-            throw new \Exception("Invalid Response. Response must contain at least one signature");
+            $this->logger->logAndThrow(
+                $this->xml,
+                'Invalid Response. Response must contain at least one signature'
+            );
         }
 
         $responseSignature = null;
         $assertionSignature = null;
         if ($signatures->length > 0) {
-            foreach ($signatures as $key => $item) {
+            foreach ($signatures as $item) {
                 if ($item->parentNode->localName == 'Assertion') {
                     $assertionSignature = $item;
                 }
@@ -93,13 +115,25 @@ class BaseResponse
                 }
             }
             if ($hasAssertion && is_null($assertionSignature)) {
-                throw new \Exception("Invalid Response. Assertion must be signed");
+                $this->logger->logAndThrow($this->xml, 'Invalid Response. Assertion must be signed');
             }
         }
-        if (!SignatureUtils::validateXmlSignature($responseSignature, $cert) ||
-            !SignatureUtils::validateXmlSignature($assertionSignature, $cert)) {
-            throw new \Exception("Invalid Response. Signature validation failed");
+
+        if (is_null($responseSignature)) {
+            $this->logger->logAndThrow($this->xml, 'Invalid Response. responseSignature is empty');
         }
+        if (is_null($assertionSignature)) {
+            $this->logger->logAndThrow($this->xml, 'Invalid Response. assertionSignature is empty');
+        }
+
+        if (!SignatureUtils::validateXmlSignature($responseSignature, $cert, $this->logger)) {
+            $this->logger->logAndThrow($this->xml, 'Invalid Response. responseSignature validation failed');
+        }
+
+        if (!SignatureUtils::validateXmlSignature($assertionSignature, $cert, $this->logger)) {
+            $this->logger->logAndThrow($this->xml, 'Invalid Response. assertionSignature validation failed');
+        }
+
         return $this->response->validate($this->xml, $hasAssertion);
     }
 }

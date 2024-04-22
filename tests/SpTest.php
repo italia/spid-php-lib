@@ -1,5 +1,8 @@
 <?php
+
 declare(strict_types=1);
+
+require_once __DIR__ . "/LoggerMock.php";
 
 final class SpTest extends PHPUnit\Framework\TestCase
 {
@@ -46,7 +49,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     {
         $this->assertInstanceOf(
             Italia\Spid\Sp::class,
-            new Italia\Spid\Sp(SpTest::$settings)
+            new Italia\Spid\Sp(new LoggerMock(), SpTest::$settings)
         );
         $this->assertIsReadable(self::$settings['sp_key_file']);
         $this->assertIsReadable(self::$settings['sp_cert_file']);
@@ -62,7 +65,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings['sp_cert_file'] = './some/location/sp.crt';
         $this->assertInstanceOf(
             Italia\Spid\Sp::class,
-            new Italia\Spid\Sp(SpTest::$settings, null, false)
+            new Italia\Spid\Sp(new LoggerMock(), SpTest::$settings, null, false)
         );
         $this->assertFalse(is_readable($settings['sp_key_file']));
         $this->assertFalse(is_readable($settings['sp_cert_file']));
@@ -77,7 +80,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
 
     public function testMetatadaValid()
     {
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(), SpTest::$settings);
         $metadata = $sp->getSPMetadata();
         $this->validateXml($metadata, "./tests/schemas/saml-schema-metadata-SPID-SP.xsd");
     }
@@ -87,7 +90,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings1 = SpTest::$settings;
         unset($settings1['sp_entityid']);
         $this->expectException(\Exception::class);
-        $sp = new Italia\Spid\Sp($settings1);
+        $sp = new Italia\Spid\Sp(new LoggerMock(), $settings1);
     }
 
     public function testSettingsWithoutSpKeyFile()
@@ -95,7 +98,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings1 = SpTest::$settings;
         unset($settings1['sp_key_file']);
         $this->expectException(\Exception::class);
-        $sp = new Italia\Spid\Sp($settings1);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),  $settings1);
     }
 
     public function testSettingsWithoutSpCertFile()
@@ -103,7 +106,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings1 = SpTest::$settings;
         unset($settings1['sp_cert_file']);
         $this->expectException(\Exception::class);
-        $sp = new Italia\Spid\Sp($settings1);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),  $settings1);
     }
 
     public function testSettingsWithoutAssertionConsumerService()
@@ -111,7 +114,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings1 = SpTest::$settings;
         unset($settings1['sp_assertionconsumerservice']);
         $this->expectException(\Exception::class);
-        $sp = new Italia\Spid\Sp($settings1);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),  $settings1);
     }
 
     public function testSettingsWithoutSingleLogoutService()
@@ -119,7 +122,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings1 = SpTest::$settings;
         unset($settings1['sp_singlelogoutservice']);
         $this->expectException(\Exception::class);
-        $sp = new Italia\Spid\Sp($settings1);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),  $settings1);
     }
 
     public function testSettingsWithoutIdpMetadataFolder()
@@ -127,7 +130,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings1 = SpTest::$settings;
         unset($settings1['idp_metadata_folder']);
         $this->expectException(\Exception::class);
-        $sp = new Italia\Spid\Sp($settings1);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),  $settings1);
     }
 
     public function testSettingsWithInvalidSPEntityid()
@@ -135,7 +138,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $this->expectException(InvalidArgumentException::class);
         $settings = self::$settings;
         $settings['sp_entityid'] = "htp:/simevo";
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
     }
 
     public function testSettingsWithInvalidComparison()
@@ -143,7 +146,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings = self::$settings;
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_comparison'] = "invalid";
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
     }
 
     public function testSettingsWithInvalidSpACS()
@@ -151,17 +154,17 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings = self::$settings;
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_assertionconsumerservice'] = "not an array";
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_assertionconsumerservice'] = [];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_assertionconsumerservice'] = [
             'http://wrong.url.com/acs'
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
     }
 
     public function testSettingsWithInvalidSpSLO()
@@ -169,43 +172,43 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings = self::$settings;
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_singlelogoutservice'] = "not an array";
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_singlelogoutservice'] = [
             'not an array'
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_singlelogoutservice'] = [
             []
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_singlelogoutservice'] = [
             ['too', 'many', 'elements']
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_singlelogoutservice'] = [
             ['both elements should be strings', 1]
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_singlelogoutservice'] = [
             ['http://wrong.url.com', '']
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_singlelogoutservice'] = [
             ['http://sp3.simevo.com/slo', 'invalid binding']
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
     }
 
     public function testSettingsWithInvalidSpAttrCS()
@@ -213,31 +216,31 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings = self::$settings;
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_attributeconsumingservice'] = "not an array";
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_attributeconsumingservice'] = [
             'not an array'
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_attributeconsumingservice'] = [
             'not an array'
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(), $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_attributeconsumingservice'] = [
             []
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(), $settings);
 
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_attributeconsumingservice'] = [
             ['invalid name']
         ];
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(), $settings);
     }
 
     public function testSettingsWithInvalidKey()
@@ -245,7 +248,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings = self::$settings;
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_key_file'] = "/invalid/path/sp.key";
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
     }
 
     public function testSettingsWithInvalidCert()
@@ -253,7 +256,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings = self::$settings;
         $this->expectException(InvalidArgumentException::class);
         $settings['sp_cert_file'] = "/invalid/path/sp.cert";
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
     }
 
     public function testSettingsWithInvalidIdpMetaFolder()
@@ -261,7 +264,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings = self::$settings;
         $this->expectException(InvalidArgumentException::class);
         $settings['idp_metadata_folder'] = "/invalid/path/idp_metadata";
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
     }
 
     public function testSettingsWithCrapAcss()
@@ -269,7 +272,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings = self::$settings;
         $this->expectException(InvalidArgumentException::class);
         $settings['accepted_clock_skew_seconds'] = 'zero';
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),  $settings);
     }
 
     public function testSettingsWithNegativeAcss()
@@ -277,7 +280,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings = self::$settings;
         $this->expectException(InvalidArgumentException::class);
         $settings['accepted_clock_skew_seconds'] = -1;
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(), $settings);
     }
 
     public function testSettingsWithLudicrousAcss()
@@ -285,25 +288,30 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $settings = self::$settings;
         $this->expectException(InvalidArgumentException::class);
         $settings['accepted_clock_skew_seconds'] = 3000;
-        new Italia\Spid\Sp($settings);
+        new Italia\Spid\Sp(new LoggerMock(),$settings);
     }
 
     public function testCanLoadAllIdpMetadata()
     {
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),SpTest::$settings);
         $result = self::setupIdps();
         foreach (self::$idps as $idp) {
             $retrievedIdp = $sp->loadIdpFromFile($idp);
             $this->assertEquals($retrievedIdp->idpFileName, $idp);
             $idpEntityId = $retrievedIdp->metadata['idpEntityId'];
             $host = parse_url($idpEntityId, PHP_URL_HOST);
+            $host = implode('.', array_slice(explode('.', $host), -2, 2));
             $idpSSOArray = $retrievedIdp->metadata['idpSSO'];
-            foreach ($idpSSOArray as $key => $idpSSO) {
-                $this->assertStringContainsString($host, $idpSSO['location']);
+            foreach ($idpSSOArray as $idpSSO) {
+                $location = parse_url($idpSSO['location'], PHP_URL_HOST);
+                $location = implode('.', array_slice(explode('.', $location), -2, 2));
+                $this->assertStringContainsString($host, $location);
             }
             $idpSLOArray = $retrievedIdp->metadata['idpSLO'];
-            foreach ($idpSLOArray as $key => $idpSLO) {
-                $this->assertStringContainsString($host, $idpSLO['location']);
+            foreach ($idpSLOArray as $idpSLO) {
+                $location = parse_url($idpSLO['location'], PHP_URL_HOST);
+                $location = implode('.', array_slice(explode('.', $location), -2, 2));
+                $this->assertStringContainsString($host, $location);
             }
         }
         // If IDPs were downloaded for testing purposes, then delete them
@@ -314,14 +322,14 @@ final class SpTest extends PHPUnit\Framework\TestCase
 
     public function testIsAuthenticatedNoIDP()
     {
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),SpTest::$settings);
         $this->assertFalse($sp->isAuthenticated());
     }
 
     public function testIsAuthenticatedInvalidIDP()
     {
         unset($_SESSION);
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),SpTest::$settings);
         $_SESSION['idpName'] = null;
         $this->assertFalse($sp->isAuthenticated());
     }
@@ -331,7 +339,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         unset($_SESSION);
         $result = self::setupIdps();
 
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),SpTest::$settings);
         $session = new Italia\Spid\Spid\Session();
         $session->idp = self::$idps[0];
         // IF these values are not set, the session is invalid
@@ -350,7 +358,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testIsAuthenticatedInvalidResponse()
     {
         unset($_SESSION);
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),SpTest::$settings);
         $_POST['SAMLResponse'] = "";
         $this->assertFalse($sp->isAuthenticated());
         unset($_POST['SAMLResponse']);
@@ -361,7 +369,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         unset($_SESSION);
         $result = self::setupIdps();
 
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(),SpTest::$settings);
         $_SESSION['idpName'] = self::$idps[0];
         $_SESSION['inResponseTo'] = "PROVA";
         $this->assertFalse($sp->isAuthenticated());
@@ -377,7 +385,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         unset($_SESSION);
         $result = self::setupIdps();
 
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(), SpTest::$settings);
         $session = new Italia\Spid\Spid\Session();
         $session->idp = self::$idps[0];
         $session->idpEntityID = 'https:/sp.example.com/';
@@ -395,7 +403,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testGetAttributesNoAuth()
     {
         unset($_SESSION);
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(), SpTest::$settings);
         $this->assertFalse($sp->isAuthenticated());
         $this->assertEquals([], $sp->getAttributes());
     }
@@ -407,7 +415,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $result = self::setupIdps();
 
         // Authenticate first
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(), SpTest::$settings);
         $session = new Italia\Spid\Spid\Session();
         $session->idp = self::$idps[0];
         $session->idpEntityID = 'https:/sp.example.com/';
@@ -417,7 +425,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $_SESSION['spidSession'] = (array)$session;
         $this->assertTrue($sp->isAuthenticated());
         // Authentication completed, request attributes
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(), SpTest::$settings);
         $this->assertIsArray($sp->getAttributes());
         $this->assertCount(0, $sp->getAttributes());
         //  No test with attributes requested
@@ -439,7 +447,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         unset($_SESSION);
         $result = self::setupIdps();
 
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(), SpTest::$settings);
 
         $this->expectException(\Exception::class);
         $sp->login(self::$idps[0], 12, 0);
@@ -450,7 +458,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         unset($_SESSION);
         $result = self::setupIdps();
 
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(), SpTest::$settings);
 
         $this->expectException(\Exception::class);
         $sp->login(self::$idps[0], 0, 12);
@@ -461,7 +469,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
         unset($_SESSION);
         $result = self::setupIdps();
 
-        $sp = new Italia\Spid\Sp(SpTest::$settings);
+        $sp = new Italia\Spid\Sp(new LoggerMock(), SpTest::$settings);
         $session = new Italia\Spid\Spid\Session();
         $session->idp = self::$idps[0];
         $session->idpEntityID = 'https:/sp.example.com/';

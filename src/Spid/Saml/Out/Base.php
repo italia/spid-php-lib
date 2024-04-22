@@ -2,6 +2,7 @@
 
 namespace Italia\Spid\Spid\Saml\Out;
 
+use Exception;
 use Italia\Spid\Spid\Saml\Idp;
 use Italia\Spid\Spid\Saml\SignatureUtils;
 
@@ -17,7 +18,10 @@ class Base
         $this->idp = $idp;
     }
 
-    public function generateID()
+    /**
+     * @throws Exception
+     */
+    public function generateID(): string
     {
         $this->id = '_' . bin2hex(random_bytes(16));
         return $this->id;
@@ -29,13 +33,18 @@ class Base
         return $this->issueInstant;
     }
 
-    public function redirect($url, $redirectTo = null)
+    /**
+     * @throws Exception
+     */
+    public function redirect($url, $redirectTo = null): string
     {
         $compressed = gzdeflate($this->xml);
         $parameters['SAMLRequest'] = base64_encode($compressed);
-        $parameters['RelayState'] = is_null($redirectTo) ? (isset($_SERVER['HTTPS'])
-            && $_SERVER['HTTPS'] === 'on' ? "https" : "http") .
-            "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" : $redirectTo;
+        $schema = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+        $relayState = is_null($redirectTo)
+            ? "{$schema}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}"
+            : $redirectTo;
+        $parameters['RelayState'] = base64_encode($relayState);
         $parameters['SigAlg'] = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
         $parameters['Signature'] = SignatureUtils::signUrl(
             $parameters['SAMLRequest'],
@@ -48,14 +57,15 @@ class Base
         return $url;
     }
 
-    public function postForm($url, $redirectTo = null)
+    public function postForm($url, $redirectTo = null): string
     {
         $SAMLRequest = base64_encode($this->xml);
 
-        $relayState = is_null($redirectTo) ? (isset($_SERVER['HTTPS']) &&
-            $_SERVER['HTTPS'] === 'on' ? "https" : "http") .
-            "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" : $redirectTo;
-        $relayState = null;
+        $schema = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+        $relayState = is_null($redirectTo)
+            ? "{$schema}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}"
+            : $redirectTo;
+        $relayState = base64_encode($relayState);
         return <<<HTML
 <html>
     <body onload="javascript:document.forms[0].submit()">
@@ -68,6 +78,9 @@ class Base
 HTML;
     }
 
+    /**
+     * @throws Exception
+     */
     protected function getBindingLocation($binding, $service = 'SSO')
     {
         $location = null;
@@ -78,7 +91,7 @@ HTML;
             }
         });
         if (is_null($location)) {
-            throw new \Exception("No location found for binding " . $binding);
+            throw new Exception("No location found for binding " . $binding);
         }
         return $location;
     }

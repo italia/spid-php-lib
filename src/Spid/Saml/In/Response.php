@@ -2,13 +2,14 @@
 
 namespace Italia\Spid\Spid\Saml\In;
 
+use DOMDocument;
+use Italia\Spid\Spid\Exceptions\SpidException;
 use Italia\Spid\Spid\Interfaces\ResponseInterface;
 use Italia\Spid\Spid\Session;
 use Italia\Spid\Spid\Saml;
 
 class Response implements ResponseInterface
 {
-
     private $saml;
 
     public function __construct(Saml $saml)
@@ -16,184 +17,218 @@ class Response implements ResponseInterface
         $this->saml = $saml;
     }
 
-    public function validate($xml, $hasAssertion): bool
+    /**
+     * @throws SpidException
+     */
+    public function validate(DOMDocument $xml, $hasAssertion): bool
     {
-        $accepted_clock_skew_seconds = isset($this->saml->settings['accepted_clock_skew_seconds']) ?
-            $this->saml->settings['accepted_clock_skew_seconds'] : 0;
+        $logger = $this->saml->getLogger();
+
+        $acceptedClockSkewSeconds = $this->saml->settings['accepted_clock_skew_seconds'] ?? 0;
+        $minTime = strtotime('now') - $acceptedClockSkewSeconds;
+        $maxTime = strtotime('now') + $acceptedClockSkewSeconds;
+        $samlUrn = 'urn:oasis:names:tc:SAML:2.0:';
 
         $root = $xml->getElementsByTagName('Response')->item(0);
 
         if ($root->getAttribute('Version') == "") {
-            throw new \Exception("Missing Version attribute");
+            $logger->logAndThrow($xml, "Missing Version attribute");
         } elseif ($root->getAttribute('Version') != '2.0') {
-            throw new \Exception("Invalid Version attribute");
-        }
-        if ($root->getAttribute('IssueInstant') == "") {
-            throw new \Exception("Missing IssueInstant attribute on Response");
-        } elseif (!$this->validateDate($root->getAttribute('IssueInstant'))) {
-            throw new \Exception("Invalid IssueInstant attribute on Response");
-        } elseif (strtotime($root->getAttribute('IssueInstant')) > strtotime('now') + $accepted_clock_skew_seconds) {
-            throw new \Exception("IssueInstant attribute on Response is in the future");
+            $logger->logAndThrow($xml, "Invalid Version attribute");
         }
 
-        if ($root->getAttribute('InResponseTo') == "" || !isset($_SESSION['RequestID'])) {
-            throw new \Exception("Missing InResponseTo attribute, or request ID was not saved correctly " .
-                "for comparison");
-        } elseif ($root->getAttribute('InResponseTo') != $_SESSION['RequestID']) {
-            throw new \Exception("Invalid InResponseTo attribute, expected " . $_SESSION['RequestID'] .
-                " but received " . $root->getAttribute('InResponseTo'));
+        $issueInstant = $root->getAttribute('IssueInstant');
+        if ($issueInstant == "") {
+            $logger->logAndThrow($xml, "Missing IssueInstant attribute on Response");
+        } elseif (!$this->validateDate($issueInstant)) {
+            $logger->logAndThrow($xml, "Invalid IssueInstant attribute on Response");
+        } elseif (strtotime($issueInstant) > strtotime('now') + $acceptedClockSkewSeconds) {
+            $logger->logAndThrow($xml, "IssueInstant attribute on Response is in the future");
         }
 
-        if ($root->getAttribute('Destination') == "") {
-            throw new \Exception("Missing Destination attribute");
-        } elseif ($root->getAttribute('Destination') != $_SESSION['acsUrl']) {
-            throw new \Exception("Invalid Destination attribute, expected " . $_SESSION['acsUrl'] .
-                " but received " . $root->getAttribute('Destination'));
+        $inResponseTo = $root->getAttribute('InResponseTo');
+        if ($inResponseTo == "" || !isset($_SESSION['RequestID'])) {
+            $logger->logAndThrow(
+                $xml,
+                "Missing InResponseTo attribute, or request ID was not saved correctly for comparison"
+            );
+        } elseif ($inResponseTo != $_SESSION['RequestID']) {
+            $logger->logAndThrow(
+                $xml,
+                "Invalid InResponseTo attribute, expected {$_SESSION['RequestID']} but received " . $inResponseTo
+            );
         }
 
-        if ($xml->getElementsByTagName('Issuer')->length == 0) {
-            throw new \Exception("Missing Issuer attribute");
+        $destination = $root->getAttribute('Destination');
+        if ($destination == "") {
+            $logger->logAndThrow($xml, "Missing Destination attribute");
+        } elseif ($destination != $_SESSION['acsUrl']) {
+            $logger->logAndThrow(
+                $xml,
+                "Invalid Destination attribute, expected {$_SESSION['acsUrl']} but received " . $destination
+            );
+        }
+
+        $issuer = $xml->getElementsByTagName('Issuer');
+        if ($issuer->length == 0) {
+            $logger->logAndThrow($xml, "Missing Issuer attribute");
             //check item 0, this the Issuer element child of Response
-        } elseif ($xml->getElementsByTagName('Issuer')->item(0)->nodeValue != $_SESSION['idpEntityId']) {
-            throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] .
-                " but received " . $xml->getElementsByTagName('Issuer')->item(0)->nodeValue);
-        } elseif ($xml->getElementsByTagName('Issuer')->item(0)->getAttribute('Format') !=
-            'urn:oasis:names:tc:SAML:2.0:nameid-format:entity') {
-            throw new \Exception("Invalid Issuer attribute, expected 'urn:oasis:names:tc:SAML:2.0:nameid-format:" .
-                "entity'" . " but received " . $xml->getElementsByTagName('Issuer')->item(0)->getAttribute('Format'));
+        } elseif ($issuer->item(0)->nodeValue != $_SESSION['idpEntityId']) {
+            $logger->logAndThrow(
+                $xml,
+                "Invalid Issuer attribute, expected {$_SESSION['idpEntityId']} but received " .
+                $issuer->item(0)->nodeValue
+            );
+        } elseif (
+            $issuer->item(0)->hasAttribute('Format')
+            && $issuer->item(0)->getAttribute('Format') != $samlUrn . 'nameid-format:entity'
+        ) {
+            $logger->logAndThrow(
+                $xml,
+                "Invalid Issuer attribute, expected '{$samlUrn}nameid-format:entity' but received " .
+                $issuer->item(0)->getAttribute('Format')
+            );
         }
 
         if ($hasAssertion) {
-            if ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('ID') == "" ||
-                $xml->getElementsByTagName('Assertion')->item(0)->getAttribute('ID') == null) {
-                throw new \Exception("Missing ID attribute on Assertion");
-            } elseif ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('Version') != '2.0') {
-                throw new \Exception("Invalid Version attribute on Assertion");
-            } elseif ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant') == "") {
-                throw new \Exception("Invalid IssueInstant attribute on Assertion");
-            } elseif (!$this->validateDate(
-                $xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant')
-            )) {
-                throw new \Exception("Invalid IssueInstant attribute on Assertion");
-            } elseif (strtotime($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant')) >
-                strtotime('now') + $accepted_clock_skew_seconds) {
-                throw new \Exception("IssueInstant attribute on Assertion is in the future");
+            $assertion = $xml->getElementsByTagName('Assertion')->item(0);
+            if ($assertion->getAttribute('ID') == "" || $assertion->getAttribute('ID') == null) {
+                $logger->logAndThrow($xml, "Missing ID attribute on Assertion");
+            } elseif ($assertion->getAttribute('Version') != '2.0') {
+                $logger->logAndThrow($xml, "Invalid Version attribute on Assertion");
+            } elseif ($assertion->getAttribute('IssueInstant') == "") {
+                $logger->logAndThrow($xml, "Invalid IssueInstant attribute on Assertion");
+            } elseif (!$this->validateDate($assertion->getAttribute('IssueInstant'))) {
+                $logger->logAndThrow($xml, "Invalid IssueInstant attribute on Assertion");
+            } elseif (strtotime($assertion->getAttribute('IssueInstant')) > $maxTime) {
+                $logger->logAndThrow($xml, "IssueInstant attribute on Assertion is in the future");
             }
 
             // check item 1, this must be the Issuer element child of Assertion
-            if ($hasAssertion && $xml->getElementsByTagName('Issuer')->item(1)->nodeValue != $_SESSION['idpEntityId']) {
-                throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] .
-                    " but received " . $xml->getElementsByTagName('Issuer')->item(1)->nodeValue);
-            } elseif ($xml->getElementsByTagName('Issuer')->item(1)->getAttribute('Format') !=
-                'urn:oasis:names:tc:SAML:2.0:nameid-format:entity') {
-                throw new \Exception("Invalid Issuer attribute, expected 'urn:oasis:names:tc:SAML:2.0:nameid-format:" .
-                "entity'" . " but received " . $xml->getElementsByTagName('Issuer')->item(1)->getAttribute('Format'));
+            if ($issuer->item(1)->nodeValue != $_SESSION['idpEntityId']) {
+                $logger->logAndThrow(
+                    $xml,
+                    "Invalid Issuer attribute, expected {$_SESSION['idpEntityId']} but received " .
+                    $issuer->item(1)->nodeValue
+                );
+            } elseif ($issuer->item(1)->getAttribute('Format') != $samlUrn . 'nameid-format:entity') {
+                $logger->logAndThrow(
+                    $xml,
+                    "Invalid Issuer attribute, expected '{$samlUrn}nameid-format:entity'" .
+                     ' but received ' . $issuer->item(1)->getAttribute('Format')
+                );
             }
 
-            if ($xml->getElementsByTagName('Conditions')->length == 0) {
-                throw new \Exception("Missing Conditions attribute");
-            } elseif ($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore') == "") {
-                throw new \Exception("Missing NotBefore attribute");
-            } elseif (!$this->validateDate(
-                $xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore')
-            )) {
-                throw new \Exception("Invalid NotBefore attribute");
-            } elseif (strtotime($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotBefore')) >
-                strtotime('now') + $accepted_clock_skew_seconds) {
-                throw new \Exception("NotBefore attribute is in the future");
-            } elseif ($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter') == "") {
-                throw new \Exception("Missing NotOnOrAfter attribute");
-            } elseif (!$this->validateDate(
-                $xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter')
-            )) {
-                throw new \Exception("Invalid NotOnOrAfter attribute");
-            } elseif (strtotime($xml->getElementsByTagName('Conditions')->item(0)->getAttribute('NotOnOrAfter')) <=
-                strtotime('now') - $accepted_clock_skew_seconds) {
-                throw new \Exception("NotOnOrAfter attribute is in the past");
+            $conditions = $xml->getElementsByTagName('Conditions');
+            if ($conditions->length == 0) {
+                $logger->logAndThrow($xml, "Missing Conditions attribute");
+            } elseif ($conditions->item(0)->getAttribute('NotBefore') == "") {
+                $logger->logAndThrow($xml, "Missing NotBefore attribute");
+            } elseif (!$this->validateDate($conditions->item(0)->getAttribute('NotBefore'))) {
+                $logger->logAndThrow($xml, "Invalid NotBefore attribute");
+            } elseif (strtotime($conditions->item(0)->getAttribute('NotBefore')) > $maxTime) {
+                $logger->logAndThrow($xml, "NotBefore attribute is in the future");
+            } elseif ($conditions->item(0)->getAttribute('NotOnOrAfter') == "") {
+                $logger->logAndThrow($xml, "Missing NotOnOrAfter attribute");
+            } elseif (!$this->validateDate($conditions->item(0)->getAttribute('NotOnOrAfter'))) {
+                $logger->logAndThrow($xml, "Invalid NotOnOrAfter attribute");
+            } elseif (strtotime($conditions->item(0)->getAttribute('NotOnOrAfter')) <= $minTime) {
+                $logger->logAndThrow($xml, "NotOnOrAfter attribute is in the past");
             }
 
             if ($xml->getElementsByTagName('AudienceRestriction')->length == 0) {
-                throw new \Exception("Missing AudienceRestriction attribute");
+                $logger->logAndThrow($xml, "Missing AudienceRestriction attribute");
             }
 
-            if ($xml->getElementsByTagName('Audience')->length == 0) {
-                throw new \Exception("Missing Audience attribute");
-            } elseif ($xml->getElementsByTagName('Audience')->item(0)->nodeValue !=
-                $this->saml->settings['sp_entityid']) {
-                throw new \Exception("Invalid Audience attribute, expected " . $this->saml->settings['sp_entityid'] .
-                    " but received " . $xml->getElementsByTagName('Audience')->item(0)->nodeValue);
+            $audience = $xml->getElementsByTagName('Audience');
+            if ($audience->length == 0) {
+                $logger->logAndThrow($xml, "Missing Audience attribute");
+            } elseif ($audience->item(0)->nodeValue != $this->saml->settings['sp_entityid']) {
+                $logger->logAndThrow(
+                    $xml,
+                    "Invalid Audience attribute, expected " . $this->saml->settings['sp_entityid'] .
+                    " but received " . $audience->item(0)->nodeValue
+                );
             }
 
-            if ($xml->getElementsByTagName('NameID')->length == 0) {
-                throw new \Exception("Missing NameID attribute");
-            } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format') !=
-                'urn:oasis:names:tc:SAML:2.0:nameid-format:transient') {
-                throw new \Exception("Invalid NameID attribute, expected " .
-                "'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'" . " but received " .
-                $xml->getElementsByTagName('NameID')->item(0)->getAttribute('Format'));
-            } elseif ($xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier') !=
-                $_SESSION['idpEntityId']) {
-                throw new \Exception("Invalid NameQualifier attribute, expected " . $_SESSION['idpEntityId'] .
-                    " but received " . $xml->getElementsByTagName('NameID')->item(0)->getAttribute('NameQualifier'));
+            $nameId = $xml->getElementsByTagName('NameID');
+            if ($nameId->length == 0) {
+                $logger->logAndThrow($xml, "Missing NameID attribute");
+            } elseif ($nameId->item(0)->getAttribute('Format') != $samlUrn . 'nameid-format:transient') {
+                $logger->logAndThrow(
+                    $xml,
+                    "Invalid NameID attribute, expected '{$samlUrn}nameid-format:transient'" .
+                    " but received " . $nameId->item(0)->getAttribute('Format')
+                );
+            } elseif ($nameId->item(0)->getAttribute('NameQualifier') != $_SESSION['idpEntityId']) {
+                $logger->logAndThrow(
+                    $xml,
+                    "Invalid NameQualifier attribute, expected {$_SESSION['idpEntityId']} but received " .
+                    $nameId->item(0)->getAttribute('NameQualifier')
+                );
             }
 
-            if ($xml->getElementsByTagName('SubjectConfirmationData')->length == 0) {
-                throw new \Exception("Missing SubjectConfirmationData attribute");
-            } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('InResponseTo') !=
-                $_SESSION['RequestID']) {
-                throw new \Exception("Invalid SubjectConfirmationData attribute, expected " . $_SESSION['RequestID'] .
-                    " but received " .
-                    $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('InResponseTo'));
-            } elseif (strtotime(
-                $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('NotOnOrAfter')
-            ) <= strtotime('now') - $accepted_clock_skew_seconds) {
-                throw new \Exception("Invalid NotOnOrAfter attribute");
-            } elseif ($xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient') !=
-                $_SESSION['acsUrl']) {
-                throw new \Exception("Invalid Recipient attribute, expected " . $_SESSION['acsUrl'] .
-                    " but received " .
-                    $xml->getElementsByTagName('SubjectConfirmationData')->item(0)->getAttribute('Recipient'));
-            } elseif ($xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method') !=
-                'urn:oasis:names:tc:SAML:2.0:cm:bearer') {
-                throw new \Exception("Invalid Method attribute, expected 'urn:oasis:names:tc:SAML:2.0:cm:bearer'" .
-                    " but received " .
-                    $xml->getElementsByTagName('SubjectConfirmation')->item(0)->getAttribute('Method'));
+            $subjectConfirmation = $xml->getElementsByTagName('SubjectConfirmation')->item(0);
+            $subjectConfirmationData = $subjectConfirmation->getElementsByTagName('SubjectConfirmationData');
+            if ($subjectConfirmationData->length == 0) {
+                $logger->logAndThrow($xml, "Missing SubjectConfirmationData attribute");
+            } elseif ($subjectConfirmationData->item(0)->getAttribute('InResponseTo') != $_SESSION['RequestID']) {
+                $logger->logAndThrow(
+                    $xml,
+                    "Invalid SubjectConfirmationData attribute, expected {$_SESSION['RequestID']} but received " .
+                    $subjectConfirmationData->item(0)->getAttribute('InResponseTo')
+                );
+            } elseif (strtotime($subjectConfirmationData->item(0)->getAttribute('NotOnOrAfter')) <= $minTime) {
+                $logger->logAndThrow($xml, "Invalid NotOnOrAfter attribute");
+            } elseif ($subjectConfirmationData->item(0)->getAttribute('Recipient') != $_SESSION['acsUrl']) {
+                $logger->logAndThrow(
+                    $xml,
+                    "Invalid Recipient attribute, expected {$_SESSION['acsUrl']} but received " .
+                    $subjectConfirmationData->item(0)->getAttribute('Recipient')
+                );
+            } elseif ($subjectConfirmation->getAttribute('Method') != $samlUrn . 'cm:bearer') {
+                $logger->logAndThrow(
+                    $xml,
+                    "Invalid Method attribute, expected '{$samlUrn}cm:bearer' but received " .
+                    $subjectConfirmation->getAttribute('Method')
+                );
             }
 
             if ($xml->getElementsByTagName('Attribute')->length == 0) {
-                throw new \Exception("Missing Attribute Element");
+                $logger->logAndThrow($xml, "Missing Attribute Element");
             }
 
             if ($xml->getElementsByTagName('AttributeValue')->length == 0) {
-                throw new \Exception("Missing AttributeValue Element");
+                $logger->logAndThrow($xml, "Missing AttributeValue Element");
             }
         }
 
-        if ($xml->getElementsByTagName('Status')->length <= 0) {
-            throw new \Exception("Missing Status element");
-        } elseif ($xml->getElementsByTagName('Status')->item(0) == null) {
-            throw new \Exception("Missing Status element");
-        } elseif ($xml->getElementsByTagName('StatusCode')->item(0) == null) {
-            throw new \Exception("Missing StatusCode element");
-        } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') ==
-            'urn:oasis:names:tc:SAML:2.0:status:Success') {
+        $status = $xml->getElementsByTagName('Status');
+        if ($status->length <= 0) {
+            $logger->logAndThrow($xml, "Missing Status element");
+        } elseif ($status->item(0) == null) {
+            $logger->logAndThrow($xml, "Missing Status element");
+        }
+
+        $statusCode = $xml->getElementsByTagName('StatusCode');
+        if ($statusCode->item(0) == null) {
+            $logger->logAndThrow($xml, "Missing StatusCode element");
+        } elseif ($statusCode->item(0)->getAttribute('Value') == $samlUrn . 'status:Success') {
             if ($hasAssertion && $xml->getElementsByTagName('AuthnStatement')->length <= 0) {
-                throw new \Exception("Missing AuthnStatement element");
+                $logger->logAndThrow($xml, "Missing AuthnStatement element");
             }
-        } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
-            'urn:oasis:names:tc:SAML:2.0:status:Success') {
+        } elseif ($statusCode->item(0)->getAttribute('Value') != $samlUrn . 'status:Success') {
             if ($xml->getElementsByTagName('StatusMessage')->item(0) != null) {
-                $StatusMessage = ' [message: ' . $xml->getElementsByTagName('StatusMessage')->item(0)->nodeValue . ']';
+                $errorString = $xml->getElementsByTagName('StatusMessage')->item(0)->nodeValue;
+                $logger->logAndThrow($xml, "StatusCode is not Success [message: {$errorString}]");
             } else {
-                $StatusMessage = "";
+                $logger->logAndThrow($xml, "StatusCode is not Success");
             }
-            throw new \Exception("StatusCode is not Success" . $StatusMessage);
-        } elseif ($xml->getElementsByTagName('StatusCode')->item(1)->getAttribute('Value') ==
-            'urn:oasis:names:tc:SAML:2.0:status:AuthnFailed') {
-            throw new \Exception("AuthnFailed AuthnStatement element");
+        } elseif ($statusCode->item(1)->getAttribute('Value') == $samlUrn . 'status:AuthnFailed') {
+            $logger->logAndThrow($xml, "AuthnFailed AuthnStatement element");
         } else {
             // Status code != success
-            return false;
+            $logger->logAndThrow($xml, "Generic error");
         }
 
         // Response OK
@@ -206,9 +241,9 @@ class Response implements ResponseInterface
         return true;
     }
 
-    private function validateDate($date)
+    private function validateDate($date): bool
     {
-        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?Z$/', $date, $parts) == true) {
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?Z$/', $date, $parts)) {
             $time = gmmktime($parts[4], $parts[5], $parts[6], $parts[2], $parts[3], $parts[1]);
 
             $input_time = strtotime($date);
@@ -222,17 +257,17 @@ class Response implements ResponseInterface
         }
     }
 
-    private function spidSession(\DOMDocument $xml)
+    private function spidSession(DOMDocument $xml): Session
     {
         $session = new Session();
 
-        $attributes = array();
+        $attributes = [];
         $attributeStatements = $xml->getElementsByTagName('AttributeStatement');
 
         if ($attributeStatements->length > 0) {
             foreach ($attributeStatements->item(0)->childNodes as $attr) {
                 if ($attr->hasAttributes()) {
-                    $attributes[$attr->attributes->getNamedItem('Name')->value] = trim($attr->nodeValue);
+                    $attributes[$attr->attributes->getNamedItem('Name')->nodeValue] = trim($attr->nodeValue);
                 }
             }
         }

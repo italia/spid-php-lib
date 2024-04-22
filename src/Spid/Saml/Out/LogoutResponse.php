@@ -2,14 +2,16 @@
 
 namespace Italia\Spid\Spid\Saml\Out;
 
+use Exception;
 use Italia\Spid\Spid\Interfaces\RequestInterface;
 use Italia\Spid\Spid\Saml\Settings;
-use Italia\Spid\Spid\Saml\Idp;
-use Italia\Spid\Spid\Saml\In\LogoutRequest;
 use Italia\Spid\Spid\Saml\SignatureUtils;
 
 class LogoutResponse extends Base implements RequestInterface
 {
+    /**
+     * @throws Exception
+     */
     public function generateXml()
     {
         $id = $this->generateID();
@@ -31,7 +33,10 @@ XML;
         $this->xml = $xml;
     }
 
-    public function redirectUrl($redirectTo = null) : string
+    /**
+     * @throws Exception
+     */
+    public function redirectUrl($redirectTo = null): string
     {
         $location = parent::getBindingLocation(Settings::BINDING_REDIRECT, 'SLO');
         if (is_null($this->xml)) {
@@ -40,7 +45,10 @@ XML;
         return parent::redirect($location, $redirectTo);
     }
 
-    public function httpPost($redirectTo = null) : string
+    /**
+     * @throws Exception
+     */
+    public function httpPost($redirectTo = null): string
     {
         $location = parent::getBindingLocation(Settings::BINDING_POST, 'SLO');
         if (is_null($this->xml)) {

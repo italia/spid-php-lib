@@ -2,26 +2,33 @@
 
 namespace Italia\Spid\Spid\Saml;
 
+use DOMDocument;
+use DOMXPath;
+use Exception;
+use Italia\Spid\Spid\Interfaces\LoggerSelector;
+use RobRichards\XMLSecLibs\XMLSecEnc;
 use RobRichards\XMLSecLibs\XMLSecurityDSig;
 use RobRichards\XMLSecLibs\XMLSecurityKey;
-use RobRichards\XMLSecLibs\XMLSecEnc;
 
 class SignatureUtils
 {
-    public static function signXml($xml, $settings) : string
+    /**
+     * @throws Exception
+     */
+    public static function signXml($xml, $settings): string
     {
         if (!is_readable($settings['sp_key_file'])) {
-            throw new \Exception('Your SP key file is not readable. Please check file permissions.');
+            throw new Exception('Your SP key file is not readable. Please check file permissions.');
         }
         if (!is_readable($settings['sp_cert_file'])) {
-            throw new \Exception('Your SP certificate file is not readable. Please check file permissions.');
+            throw new Exception('Your SP certificate file is not readable. Please check file permissions.');
         }
         $key = file_get_contents($settings['sp_key_file']);
         $key = openssl_get_privatekey($key, "");
         $cert = file_get_contents($settings['sp_cert_file']);
-        $dom = new \DOMDocument();
+        $dom = new DOMDocument();
         $dom->loadXML($xml);
-    
+
         $objKey = new XMLSecurityKey('http://www.w3.org/2001/04/xmldsig-more#rsa-sha256', array('type' => 'private'));
         $objKey->loadKey($key, false);
 
@@ -40,7 +47,7 @@ class SignatureUtils
         $insertBefore = $rootNode->firstChild;
         $messageTypes = array('AuthnRequest', 'Response', 'LogoutRequest', 'LogoutResponse');
         if (in_array($rootNode->localName, $messageTypes)) {
-            $issuerNodes = self::query($dom, '/' . $rootNode->tagName . '/saml:Issuer');
+            $issuerNodes = self::query($dom, '/' . $rootNode->localName . '/saml:Issuer');
             if ($issuerNodes->length == 1) {
                 $insertBefore = $issuerNodes->item(0)->nextSibling;
             }
@@ -50,10 +57,13 @@ class SignatureUtils
         return $dom->saveXML();
     }
 
-    public static function signUrl($samlRequest, $relayState, $signatureAlgo, $keyFile)
+    /**
+     * @throws Exception
+     */
+    public static function signUrl($samlRequest, $relayState, $signatureAlgo, $keyFile): string
     {
         if (!is_readable($keyFile)) {
-            throw new \Exception('Your SP key file is not readable. Please check file permissions.');
+            throw new Exception('Your SP key file is not readable. Please check file permissions.');
         }
         $key = file_get_contents($keyFile);
         $key = openssl_get_privatekey($key, "");
@@ -68,7 +78,10 @@ class SignatureUtils
         return base64_encode($signature);
     }
 
-    public static function validateXmlSignature($xml, $cert) : bool
+    /**
+     * @throws Exception
+     */
+    public static function validateXmlSignature($xml, $cert, LoggerSelector $logger): bool
     {
         if (is_null($xml)) {
             return true;
@@ -81,6 +94,19 @@ class SignatureUtils
             true
         );
         if ($signCertFingerprint != $certFingerprint) {
+            $logger = $logger->getTemporaryLogger();
+            if ($logger) {
+                $errorMessage = <<<LOG
+Invalid certificate fingerprint:
+ - signCertFingerPrint: {signCertFingerprint}
+ - certFingerPrint: {certFingerprint}
+LOG;
+
+                $logger->error($errorMessage, [
+                    'signCertFingerprint' => var_export($signCertFingerprint, true),
+                    'certFingerprint' => var_export($certFingerprint, true)
+                ]);
+            }
             return false;
         }
 
@@ -92,14 +118,10 @@ class SignatureUtils
 
         $objXMLSecDSig->canonicalizeSignedInfo();
 
-        try {
-            $retVal = $objXMLSecDSig->validateReference();
-        } catch (Exception $e) {
-            throw $e;
-        }
+        $objXMLSecDSig->validateReference();
 
         XMLSecEnc::staticLocateKeyInfo($objKey, $objDSig);
-        
+
         $objKey->loadKey($cert, false, true);
         if ($objXMLSecDSig->verify($objKey) === 1) {
             return true;
@@ -107,12 +129,12 @@ class SignatureUtils
         return false;
     }
 
-    public static function certDNEquals($cert, $settings)
+    public static function certDNEquals($cert, $settings): bool
     {
         $parsed = openssl_x509_parse($cert);
         $dn = $parsed['subject'];
 
-        $newDN = array();
+        $newDN = [];
         $newDN[] = $settings['sp_org_name'] ?? [];
         $newDN[] = $settings['sp_org_display_name'] ?? [];
         $newDN = array_merge($newDN, $settings['sp_key_cert_values'] ?? []);
@@ -125,7 +147,7 @@ class SignatureUtils
         return false;
     }
 
-    public static function generateKeyCert($settings) : array
+    public static function generateKeyCert($settings): array
     {
         $numberofdays = 3652 * 2;
         $privkey = openssl_pkey_new(array(
@@ -136,7 +158,7 @@ class SignatureUtils
             "countryName" => $settings['sp_key_cert_values']['countryName'],
             "stateOrProvinceName" => $settings['sp_key_cert_values']['stateOrProvinceName'],
             "localityName" => $settings['sp_key_cert_values']['localityName'],
-            "organizationName" => $orgName = $settings['sp_org_name'],
+            "organizationName" => $settings['sp_org_name'],
             "organizationalUnitName" => $settings['sp_org_display_name'],
             "commonName" => $settings['sp_key_cert_values']['commonName'],
             "emailAddress" => $settings['sp_key_cert_values']['emailAddress']
@@ -145,17 +167,17 @@ class SignatureUtils
         $myserial = (int) hexdec(bin2hex(openssl_random_pseudo_bytes(8)));
         $configArgs = array("digest_alg" => "sha256");
         $sscert = openssl_csr_sign($csr, null, $privkey, $numberofdays, $configArgs, $myserial);
-        openssl_x509_export($sscert, $publickey);
-        openssl_pkey_export($privkey, $privatekey);
+        openssl_x509_export($sscert, $publicKey);
+        openssl_pkey_export($privkey, $privateKey);
         return [
-            'key' => $privatekey,
-            'cert' => $publickey
+            'key' => $privateKey,
+            'cert' => $publicKey
         ];
     }
 
-    private static function query(\DOMDocument $dom, $query, \DOMElement $context = null)
+    private static function query(DOMDocument $dom, $query)
     {
-        $xpath = new \DOMXPath($dom);
+        $xpath = new DOMXPath($dom);
 
         $xpath->registerNamespace('samlp', 'urn:oasis:names:tc:SAML:2.0:protocol');
         $xpath->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
@@ -164,12 +186,6 @@ class SignatureUtils
         $xpath->registerNamespace('xsi', 'http://www.w3.org/2001/XMLSchema-instance');
         $xpath->registerNamespace('xs', 'http://www.w3.org/2001/XMLSchema');
         $xpath->registerNamespace('md', 'urn:oasis:names:tc:SAML:2.0:metadata');
-
-        if (isset($context)) {
-            $res = $xpath->query($query, $context);
-        } else {
-            $res = $xpath->query($query);
-        }
-        return $res;
+        return $xpath->query($query);
     }
 }
