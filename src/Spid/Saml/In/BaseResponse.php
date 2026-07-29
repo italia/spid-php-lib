@@ -32,7 +32,6 @@ class BaseResponse
         $xmlString = isset($_GET['SAMLResponse']) ?
             gzinflate(base64_decode($_GET['SAMLResponse'])) :
             base64_decode($_POST['SAMLResponse']);
-        
         $this->xml = new \DOMDocument();
         $this->xml->loadXML($xmlString);
 
@@ -71,9 +70,15 @@ class BaseResponse
         if (is_null($this->response)) {
             return true;
         }
-        
+
         $ns_saml = 'urn:oasis:names:tc:SAML:2.0:assertion';
-        $hasAssertion = $this->xml->getElementsByTagNameNS($ns_saml, 'Assertion')->length > 0;
+        $assertions = $this->xml->getElementsByTagNameNS($ns_saml, 'Assertion');
+        $hasAssertion = $assertions->length > 0;
+        if ($assertions->length > 1) {
+            throw new \Exception(
+                "Invalid Response. A Response must not contain more than one Assertion element"
+            );
+        }
 
         $ns_signature = 'http://www.w3.org/2000/09/xmldsig#';
         $signatures = $this->xml->getElementsByTagNameNS($ns_signature, 'Signature');

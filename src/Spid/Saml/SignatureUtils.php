@@ -21,7 +21,7 @@ class SignatureUtils
         $cert = file_get_contents($settings['sp_cert_file']);
         $dom = new \DOMDocument();
         $dom->loadXML($xml);
-    
+
         $objKey = new XMLSecurityKey('http://www.w3.org/2001/04/xmldsig-more#rsa-sha256', array('type' => 'private'));
         $objKey->loadKey($key, false);
 
@@ -73,7 +73,13 @@ class SignatureUtils
         if (is_null($xml)) {
             return true;
         }
-        $dom = clone $xml->ownerDocument;
+        $signedNode = $xml->parentNode;
+        if (is_null($signedNode)) {
+            return false;
+        }
+
+        $dom = new \DOMDocument();
+        $dom->appendChild($dom->importNode($signedNode, true));
 
         $certFingerprint = Settings::cleanOpenSsl($cert, true);
         $signCertFingerprint = Settings::cleanOpenSsl(
@@ -88,6 +94,9 @@ class SignatureUtils
         $objXMLSecDSig->idKeys = array('ID');
 
         $objDSig = $objXMLSecDSig->locateSignature($dom);
+        if (is_null($objDSig)) {
+            return false;
+        }
         $objKey = $objXMLSecDSig->locateKey();
 
         $objXMLSecDSig->canonicalizeSignedInfo();
@@ -99,7 +108,7 @@ class SignatureUtils
         }
 
         XMLSecEnc::staticLocateKeyInfo($objKey, $objDSig);
-        
+
         $objKey->loadKey($cert, false, true);
         if ($objXMLSecDSig->verify($objKey) === 1) {
             return true;
