@@ -5,6 +5,11 @@
 [![SPID on forum.italia.it](https://img.shields.io/badge/Forum-SPID-blue.svg)](https://forum.italia.it/c/spid)
 [![Build Status](https://travis-ci.org/italia/spid-php-lib.svg?branch=master)](https://travis-ci.org/italia/spid-php-lib)
 
+> [!WARNING]
+> **Libreria non più mantenuta — se ne sconsiglia l’uso.**
+>
+> Questa libreria non è più attivamente mantenuta e non riceve più aggiornamenti, correzioni di bug o patch di sicurezza. **Se ne sconsiglia l’uso in nuovi progetti** e, per i progetti esistenti, si raccomanda di valutare al più presto una migrazione verso alternative supportate.
+
 >  **CURRENT VERSION: v0.35**
 
 # spid-php-lib
