@@ -28,7 +28,7 @@ jobs:
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup PHP with PECL extensions
         uses: shivammathur/setup-php@v2
@@ -41,12 +41,15 @@ jobs:
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          # there is no composer.lock in this repository, so hashFiles() used to return the empty
+          # string: every matrix leg shared the literal key "Linux-php-" and restored whichever
+          # vendor tree the first leg happened to resolve, for any PHP version
+          key: ${{ runner.os }}-php${{ matrix.php-versions }}-${{ hashFiles('composer.json') }}
           restore-keys: |
-            ${{ runner.os }}-php-
+            ${{ runner.os }}-php${{ matrix.php-versions }}-
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
@@ -70,7 +73,7 @@ jobs:
     name: SPID registry smoke test
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup PHP with PECL extensions
         uses: shivammathur/setup-php@v2
