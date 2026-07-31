@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  entityID="https://idp.intesigroup.com">
+  <md:IDPSSODescriptor WantAuthnRequestsSigned="true"
+    protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo>
+        <ds:X509Data>
+        <ds:X509Certificate>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</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://spid.intesigroup.com/saml/public/logout"/>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://spid.intesigroup.com/saml/public/logout"/>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://spid.intesigroup.com/saml/public/income"/>
+      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://spid.intesigroup.com/saml/public/income"/>
+  </md:IDPSSODescriptor>
+</md:EntityDescriptor>
