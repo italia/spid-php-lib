@@ -22,7 +22,7 @@ class BaseResponse
     private $xml;
     private $root;
 
-    public function __construct(Saml $saml = null)
+    public function __construct(?Saml $saml = null)
     {
         if ((!isset($_POST) || !isset($_POST['SAMLResponse'])) &&
             (!isset($_GET) || !isset($_GET['SAMLResponse']))

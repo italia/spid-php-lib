@@ -154,7 +154,7 @@ XML;
         int $assertId,
         int $attrId,
         $level = 1,
-        string $redirectTo = null,
+        ?string $redirectTo = null,
         $shouldRedirect = true
     ) {
         $args = func_get_args();
@@ -166,7 +166,7 @@ XML;
         int $assertId,
         int $attrId,
         $level = 1,
-        string $redirectTo = null,
+        ?string $redirectTo = null,
         $shouldRedirect = true
     ) {
         $args = func_get_args();
@@ -225,13 +225,13 @@ XML;
         return false;
     }
 
-    public function logout(int $slo, string $redirectTo = null, $shouldRedirect = true)
+    public function logout(int $slo, ?string $redirectTo = null, $shouldRedirect = true)
     {
         $args = func_get_args();
         return $this->baseLogout(Settings::BINDING_REDIRECT, ...$args);
     }
 
-    public function logoutPost(int $slo, string $redirectTo = null, $shouldRedirect = true)
+    public function logoutPost(int $slo, ?string $redirectTo = null, $shouldRedirect = true)
     {
         $args = func_get_args();
         return $this->baseLogout(Settings::BINDING_POST, ...$args);

@@ -142,7 +142,10 @@ class SignatureUtils
             "emailAddress" => $settings['sp_key_cert_values']['emailAddress']
         );
         $csr = openssl_csr_new($dn, $privkey, array('digest_alg' => 'sha256'));
-        $myserial = (int) hexdec(bin2hex(openssl_random_pseudo_bytes(8)));
+        // eight random bytes overflow PHP_INT_MAX about half of the time, so casting the
+        // resulting float back to int silently truncated the serial number; on PHP 8.5 the
+        // same cast raises "The float ... is not representable as an int, cast occurred"
+        $myserial = random_int(1, PHP_INT_MAX);
         $configArgs = array("digest_alg" => "sha256");
         $sscert = openssl_csr_sign($csr, null, $privkey, $numberofdays, $configArgs, $myserial);
         openssl_x509_export($sscert, $publickey);
@@ -153,7 +156,7 @@ class SignatureUtils
         ];
     }
 
-    private static function query(\DOMDocument $dom, $query, \DOMElement $context = null)
+    private static function query(\DOMDocument $dom, $query, ?\DOMElement $context = null)
     {
         $xpath = new \DOMXPath($dom);
 

@@ -10,7 +10,7 @@ class Session
     public $level; // Login level (1,2,3)
     public $attributes; // array, requested user attributes during login. attribute name -> value
 
-    public function __construct(array $values = null)
+    public function __construct(?array $values = null)
     {
         if (is_null($values)) {
             return;

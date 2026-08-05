@@ -21,7 +21,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
             'commonName' => 'Name',
             'emailAddress' => 'test@test.com',
         ],
-        'idp_metadata_folder' => './example/idp_metadata/',
+        'idp_metadata_folder' => './tests/fixtures/idp_metadata/',
         'sp_attributeconsumingservice' => [
             ["name", "familyName", "fiscalNumber", "email"],
             ["name", "familyName", "fiscalNumber", "email", "spidCode"]
@@ -30,16 +30,15 @@ final class SpTest extends PHPUnit\Framework\TestCase
 
     private static $idps = [];
 
+    // Loads the IdP metadata committed under tests/fixtures/. The suite deliberately does NOT
+    // download the production metadata from the SPID registry: doing so made the whole test run
+    // depend on the availability and on the payload format of registry.spid.gov.it, and on the
+    // DNS choices of the individual Identity Providers. The registry is exercised separately by
+    // the "registry-smoke" CI job.
     public static function setupIdps()
     {
         self::$idps = glob(SpTest::$settings['idp_metadata_folder'] . "*.xml");
-        // If no IDP is found, download production IDPs for tests
-        if (count(self::$idps) == 0) {
-            exec('php ./bin/download_idp_metadata.php ./example/idp_metadata/');
-            self::$idps = glob(SpTest::$settings['idp_metadata_folder'] . "*.xml");
-            return true;
-        }
-        return false;
+        return self::$idps;
     }
 
     public function testCanBeCreatedFromValidSettings()
@@ -291,24 +290,37 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testCanLoadAllIdpMetadata()
     {
         $sp = new Italia\Spid\Sp(SpTest::$settings);
-        $result = self::setupIdps();
+        self::setupIdps();
+        $this->assertNotEmpty(
+            self::$idps,
+            'no IdP metadata found in ' . SpTest::$settings['idp_metadata_folder']
+        );
+
+        $validBindings = [
+            Italia\Spid\Spid\Saml\Settings::BINDING_POST,
+            Italia\Spid\Spid\Saml\Settings::BINDING_REDIRECT,
+        ];
+
         foreach (self::$idps as $idp) {
             $retrievedIdp = $sp->loadIdpFromFile($idp);
             $this->assertEquals($retrievedIdp->idpFileName, $idp);
-            $idpEntityId = $retrievedIdp->metadata['idpEntityId'];
-            $host = parse_url($idpEntityId, PHP_URL_HOST);
-            $idpSSOArray = $retrievedIdp->metadata['idpSSO'];
-            foreach ($idpSSOArray as $key => $idpSSO) {
-                $this->assertStringContainsString($host, $idpSSO['location']);
+
+            $metadata = $retrievedIdp->metadata;
+
+            // The entityID is an opaque identifier: SAML does not require it to share the host of
+            // the SSO/SLO endpoints, and at least one production IdP legitimately does not (see
+            // issue #148). Assert that the metadata parsed into something usable instead.
+            $this->assertNotEmpty($metadata['idpEntityId']);
+            $this->assertNotEmpty($metadata['idpSSO']);
+            $this->assertNotEmpty($metadata['idpSLO']);
+
+            foreach (array_merge($metadata['idpSSO'], $metadata['idpSLO']) as $service) {
+                $this->assertNotFalse(filter_var($service['location'], FILTER_VALIDATE_URL));
+                $this->assertStringStartsWith('https://', $service['location']);
+                $this->assertContains($service['binding'], $validBindings);
             }
-            $idpSLOArray = $retrievedIdp->metadata['idpSLO'];
-            foreach ($idpSLOArray as $key => $idpSLO) {
-                $this->assertStringContainsString($host, $idpSLO['location']);
-            }
-        }
-        // If IDPs were downloaded for testing purposes, then delete them
-        if ($result) {
-            array_map('unlink', self::$idps);
+
+            $this->assertNotFalse(openssl_x509_read($metadata['idpCertValue']));
         }
     }
 
@@ -329,7 +341,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testIsAuthenticatedInvalidSession()
     {
         unset($_SESSION);
-        $result = self::setupIdps();
+        self::setupIdps();
 
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $session = new Italia\Spid\Spid\Session();
@@ -341,10 +353,6 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $_SESSION['spidSession'] = (array)$session;
         $this->assertFalse($sp->isAuthenticated());
 
-        // If IDPs were downloaded for testing purposes, then delete them
-        if ($result) {
-            array_map('unlink', self::$idps);
-        }
     }
 
     public function testIsAuthenticatedInvalidResponse()
@@ -359,23 +367,19 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testIsAuthenticatedLogoutResponse()
     {
         unset($_SESSION);
-        $result = self::setupIdps();
+        self::setupIdps();
 
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $_SESSION['idpName'] = self::$idps[0];
         $_SESSION['inResponseTo'] = "PROVA";
         $this->assertFalse($sp->isAuthenticated());
 
-        // If IDPs were downloaded for testing purposes, then delete them
-        if ($result) {
-            array_map('unlink', self::$idps);
-        }
     }
 
     public function testIsAuthenticated()
     {
         unset($_SESSION);
-        $result = self::setupIdps();
+        self::setupIdps();
 
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $session = new Italia\Spid\Spid\Session();
@@ -386,10 +390,6 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $_SESSION['spidSession'] = (array)$session;
         $this->assertTrue($sp->isAuthenticated());
 
-        // If IDPs were downloaded for testing purposes, then delete them
-        if ($result) {
-            array_map('unlink', self::$idps);
-        }
     }
 
     public function testGetAttributesNoAuth()
@@ -404,7 +404,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     {
 
         unset($_SESSION);
-        $result = self::setupIdps();
+        self::setupIdps();
 
         // Authenticate first
         $sp = new Italia\Spid\Sp(SpTest::$settings);
@@ -428,16 +428,12 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $this->assertIsArray($sp->getAttributes());
         $this->assertCount(1, $sp->getAttributes());
 
-        // If IDPs were downloaded for testing purposes, then delete them
-        if ($result) {
-            array_map('unlink', self::$idps);
-        }
     }
 
     public function testLoginInvalidACS()
     {
         unset($_SESSION);
-        $result = self::setupIdps();
+        self::setupIdps();
 
         $sp = new Italia\Spid\Sp(SpTest::$settings);
 
@@ -448,7 +444,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testLoginInvalidAttrCS()
     {
         unset($_SESSION);
-        $result = self::setupIdps();
+        self::setupIdps();
 
         $sp = new Italia\Spid\Sp(SpTest::$settings);
 
@@ -459,7 +455,7 @@ final class SpTest extends PHPUnit\Framework\TestCase
     public function testLoginAlreadyAuthenticated()
     {
         unset($_SESSION);
-        $result = self::setupIdps();
+        self::setupIdps();
 
         $sp = new Italia\Spid\Sp(SpTest::$settings);
         $session = new Italia\Spid\Spid\Session();
@@ -471,10 +467,6 @@ final class SpTest extends PHPUnit\Framework\TestCase
         $this->assertTrue($sp->isAuthenticated());
 
         $this->assertFalse($sp->login(self::$idps[0], 0, 0));
-        // If IDPs were downloaded for testing purposes, then delete them
-        if ($result) {
-            array_map('unlink', self::$idps);
-        }
     }
 
     public static function tearDownAfterClass(): void

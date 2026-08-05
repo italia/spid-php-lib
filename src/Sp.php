@@ -13,7 +13,7 @@ class Sp
     */
     private $protocol;
 
-    public function __construct(array $settings, String $protocol = null, $autoconfigure = true)
+    public function __construct(array $settings, ?String $protocol = null, $autoconfigure = true)
     {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();

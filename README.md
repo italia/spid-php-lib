@@ -34,6 +34,7 @@ Table of Contents
 - [Table of Contents](#table-of-contents)
   - [Repository layout](#repository-layout)
   - [Getting Started](#getting-started)
+    - [PHP compatibility](#php-compatibility)
     - [Prerequisites](#prerequisites)
     - [Configuring and Installing](#configuring-and-installing)
     - [Usage](#usage)
@@ -63,9 +64,33 @@ Table of Contents
 
 ## Getting Started
 
-Tested on: amd64 Debian 9.5 (stretch, current stable) with PHP 7.0.
+### PHP compatibility
 
-Supports PHP 7.0, 7.1 and 7.2.
+The constraint declared in [composer.json](composer.json) is `"php": "^7.4 || ^8.0"`, that is
+PHP 7.4 and every 8.x release. The table below reports what has actually been verified by
+running the whole CI pipeline (`composer validate --strict`, `composer install`,
+`phpcs --standard=PSR2`, `phpunit`) on each release, against the production IdP metadata
+downloaded from the SPID registry. End-of-life dates are the ones published on
+[php.net/supported-versions](https://www.php.net/supported-versions.php) and
+[php.net/eol](https://www.php.net/eol.php).
+
+| PHP | Security support until | Upstream status | `composer install` | Library code | Test suite | In the CI matrix |
+|:---|:---|:---|:---|:---|:---|:---|
+| 7.4 | 28 Nov 2022 | end of life | yes | works | passes | yes |
+| 8.0 | 26 Nov 2023 | end of life | yes | works | passes | yes |
+| 8.1 | 31 Dec 2025 | end of life | yes | works | passes | yes |
+| 8.2 | 31 Dec 2026 | security fixes only | yes | works | passes | yes |
+| 8.3 | 31 Dec 2027 | security fixes only | yes | works | passes | yes |
+| 8.4 | 31 Dec 2028 | active support | yes | works | passes | yes |
+| 8.5 | 31 Dec 2029 | active support | yes | works | passes | yes |
+
+Notes:
+
+* PHP 7.4, 8.0 and 8.1 have reached end of life upstream and receive no security fixes. They are
+  kept in the matrix for backward compatibility only: new deployments should target PHP 8.4 or 8.5.
+* No deprecation notice is emitted by the library on any of these releases. In particular every
+  implicitly nullable parameter (`Type $x = null`, deprecated since 8.4 and an error in PHP 9.0)
+  has been made explicit.
 
 ### Prerequisites
 
@@ -96,6 +121,24 @@ sudo apt install composer make openssl php-curl php-zip php-xml
     mkdir idp_metadata
     php vendor/italia/spid-php-lib/bin/download_idp_metadata.php ./idp_metadata
     ```
+
+    **How the tool gets the metadata, and what that means for you.** The SPID registry used to
+    publish, for every IdP, the URL of the metadata document the IdP itself signs and serves; the
+    tool downloaded that document verbatim. That endpoint is gone, and the registry no longer
+    exposes a per-IdP metadata URL: it returns the entityID, the SSO/SLO endpoints and the signing
+    certificates as JSON. The tool now rebuilds the metadata from that payload, which means the
+    files it writes are **not signed** and are trusted on the strength of the TLS connection to
+    `registry.spid.gov.it` alone. This library never verified the metadata signature anyway, so its
+    own behaviour is unchanged — but if your deployment or your compliance process verifies the
+    stored metadata against the AgID trust anchor, that check is no longer possible on these files
+    and you should keep fetching each IdP's own document instead.
+
+    The tool also writes only the signing certificates that are currently valid: the registry lists
+    expired ones too, sometimes first, and this library reads only the first certificate of the
+    document. Re-run the tool when a certificate is about to expire; it warns on stderr about any
+    file in the destination directory that it did not write, which is what you get for an IdP that
+    has left the registry, and for the files of an older version of the tool, whose naming scheme
+    followed the old registry payload.
 
     *TEST ENVIRONMENT: If you are using [spid-testenv2](https://github.com/italia/spid-testenv2), manually download the IdP metadata and place it in your `idp_metadata` folder*
 
@@ -361,16 +404,24 @@ cd vendor/italia/spid-php-lib
 
 ### Unit tests
 
-Install prerequisites with composer, generate key and certificate for the SP and download the metadata for all current production IdPs with:
+Install the prerequisites with composer:
 ```sh
 composer install
-bin/download_idp_metadata.php example/idp_metadata
 ```
 
 then launch the unit tests with PHPunit:
 ```sh
 ./vendor/bin/phpunit --stderr --testdox tests
 ```
+
+The suite runs against the IdP metadata committed under
+[tests/fixtures/idp_metadata/](tests/fixtures/idp_metadata/), so it needs no network access and its
+result does not depend on the SPID registry being reachable. To exercise the registry itself, run
+the downloader by hand:
+```sh
+bin/download_idp_metadata.php example/idp_metadata
+```
+which is what the nightly `registry-smoke` CI job does.
 
 ### Linting
 
