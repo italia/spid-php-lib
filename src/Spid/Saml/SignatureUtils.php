@@ -71,13 +71,12 @@ class SignatureUtils
     public static function validateXmlSignature($xml, $cert) : bool
     {
         if (is_null($xml)) {
-            return true;
+            return false;
         }
         $signedNode = $xml->parentNode;
         if (is_null($signedNode)) {
             return false;
         }
-
         $dom = new \DOMDocument();
         $dom->appendChild($dom->importNode($signedNode, true));
 

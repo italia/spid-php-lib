@@ -25,11 +25,28 @@ class Idp implements IdpInterface
 
     public function loadFromXml($xmlFile)
     {
-        if (strpos($xmlFile, $this->sp->settings['idp_metadata_folder']) !== false) {
-            $fileName = $xmlFile;
-        } else {
-            $fileName = $this->sp->settings['idp_metadata_folder'] . $xmlFile . ".xml";
+        $safeName = basename($xmlFile);
+        if (substr($safeName, -4) === '.xml') {
+            $safeName = substr($safeName, 0, -4);
         }
+        if ($safeName === '' || !preg_match('/^[A-Za-z0-9_-]+$/', $safeName)) {
+            throw new \Exception("Invalid Idp identifier '$xmlFile'. Only letters, digits, '-' and '_' are allowed.", 1);
+        }
+
+        $baseDir = realpath($this->sp->settings['idp_metadata_folder']);
+        if ($baseDir === false) {
+            throw new \Exception("Idp metadata folder does not exist or is not readable.", 1);
+        }
+
+        $candidate = $baseDir . DIRECTORY_SEPARATOR . $safeName . '.xml';
+        $fileName = realpath($candidate);
+
+        if ($fileName === false ||
+            strncmp($fileName, $baseDir . DIRECTORY_SEPARATOR, strlen($baseDir) + 1) !== 0 ||
+            !is_file($fileName)) {
+            throw new \Exception("Metadata file for Idp '$safeName' not found", 1);
+        }
+        $xmlFile = $safeName;
         if (!file_exists($fileName)) {
             throw new \Exception("Metadata file $fileName not found", 1);
         }
@@ -83,6 +100,10 @@ class Idp implements IdpInterface
     }
     public function authnRequest($ass, $attr, $binding, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
     {
+        if (!in_array((int)$level, [1, 2, 3], true)) {
+            throw new \Exception("Invalid SPID level requested: $level. Allowed values are 1, 2, 3.");
+        }
+
         $this->assertID = $ass;
         $this->attrID = $attr;
         $this->level = $level;
@@ -95,6 +116,9 @@ class Idp implements IdpInterface
         $_SESSION['idpName'] = $this->idpFileName;
         $_SESSION['idpEntityId'] = $this->metadata['idpEntityId'];
         $_SESSION['acsUrl'] = $this->sp->settings['sp_assertionconsumerservice'][$ass];
+        $_SESSION['requestedAuthnLevel'] = (int)$level;
+        $_SESSION['requestedAuthnComparison'] = isset($this->sp->settings['sp_comparison']) ?
+            $this->sp->settings['sp_comparison'] : 'exact';
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;

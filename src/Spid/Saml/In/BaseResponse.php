@@ -72,12 +72,24 @@ class BaseResponse
         }
 
         $ns_saml = 'urn:oasis:names:tc:SAML:2.0:assertion';
+        $ns_samlp = 'urn:oasis:names:tc:SAML:2.0:protocol';
+
         $assertions = $this->xml->getElementsByTagNameNS($ns_saml, 'Assertion');
         $hasAssertion = $assertions->length > 0;
         if ($assertions->length > 1) {
             throw new \Exception(
                 "Invalid Response. A Response must not contain more than one Assertion element"
             );
+        }
+        if ($this->root === 'Response') {
+            $statusCodes = $this->xml->getElementsByTagNameNS($ns_samlp, 'StatusCode');
+            $isSuccess = $statusCodes->length > 0 &&
+                $statusCodes->item(0)->getAttribute('Value') === 'urn:oasis:names:tc:SAML:2.0:status:Success';
+            if ($isSuccess && !$hasAssertion) {
+                throw new \Exception(
+                    "Invalid Response. A successful Response must contain exactly one Assertion"
+                );
+            }
         }
 
         $ns_signature = 'http://www.w3.org/2000/09/xmldsig#';
@@ -101,8 +113,14 @@ class BaseResponse
                 throw new \Exception("Invalid Response. Assertion must be signed");
             }
         }
-        if (!SignatureUtils::validateXmlSignature($responseSignature, $cert) ||
-            !SignatureUtils::validateXmlSignature($assertionSignature, $cert)) {
+        if (in_array($this->root, ['LogoutResponse', 'LogoutRequest'], true) && is_null($responseSignature)) {
+            throw new \Exception("Invalid $this->root. Message must be signed");
+        }
+
+        if (!is_null($responseSignature) && !SignatureUtils::validateXmlSignature($responseSignature, $cert)) {
+            throw new \Exception("Invalid Response. Signature validation failed");
+        }
+        if (!is_null($assertionSignature) && !SignatureUtils::validateXmlSignature($assertionSignature, $cert)) {
             throw new \Exception("Invalid Response. Signature validation failed");
         }
         return $this->response->validate($this->xml, $hasAssertion);

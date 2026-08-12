@@ -13,7 +13,7 @@
         }
     ],
     "require": {
-        "robrichards/xmlseclibs": "^3.0",
+        "robrichards/xmlseclibs": "^3.1.5",
         "php": "^7.4 || ^8.0"
     },
     "require-dev": {

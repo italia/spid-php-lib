@@ -198,11 +198,17 @@ class Response implements ResponseInterface
 
         // Response OK
         $session = $this->spidSession($xml);
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
+
         $_SESSION['spidSession'] = (array)$session;
         unset($_SESSION['RequestID']);
         unset($_SESSION['idpName']);
         unset($_SESSION['idpEntityId']);
         unset($_SESSION['acsUrl']);
+        unset($_SESSION['requestedAuthnLevel']);
+        unset($_SESSION['requestedAuthnComparison']);
         return true;
     }
 
@@ -241,7 +247,44 @@ class Response implements ResponseInterface
         $session->idp = $_SESSION['idpName'];
         $session->idpEntityID = $xml->getElementsByTagName('Issuer')->item(0)->nodeValue;
         $session->attributes = $attributes;
-        $session->level = substr($xml->getElementsByTagName('AuthnContextClassRef')->item(0)->nodeValue, -1);
+
+        $levelUri = $xml->getElementsByTagName('AuthnContextClassRef')->item(0) != null ?
+            $xml->getElementsByTagName('AuthnContextClassRef')->item(0)->nodeValue : null;
+        $levelMap = [
+            'https://www.spid.gov.it/SpidL1' => 1,
+            'https://www.spid.gov.it/SpidL2' => 2,
+            'https://www.spid.gov.it/SpidL3' => 3,
+        ];
+        if (!isset($levelMap[$levelUri])) {
+            throw new \Exception("Invalid or missing AuthnContextClassRef value: " . var_export($levelUri, true));
+        }
+        $session->level = $levelMap[$levelUri];
+
+        if (isset($_SESSION['requestedAuthnLevel'])) {
+            $requested = (int) $_SESSION['requestedAuthnLevel'];
+            $comparison = strtolower($_SESSION['requestedAuthnComparison'] ?? 'exact');
+            switch ($comparison) {
+                case 'minimum':
+                case 'better':
+                    $satisfied = $session->level >= $requested;
+                    break;
+                case 'maximum':
+                    $satisfied = $session->level <= $requested;
+                    break;
+                case 'exact':
+                default:
+                    // 'exact' and any unrecognized value: fail-closed, require an exact match.
+                    $satisfied = $session->level === $requested;
+                    break;
+            }
+            if (!$satisfied) {
+                throw new \Exception(
+                    "Invalid AuthnContextClassRef level. Requested SpidL$requested ($comparison), " .
+                    "received SpidL{$session->level}"
+                );
+            }
+        }
+
         return $session;
     }
 }
