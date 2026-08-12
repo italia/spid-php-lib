@@ -57,6 +57,12 @@ jobs:
       - name: Coding standard
         run: find . | grep 'php$' | grep -v vendor | grep -v tests | xargs ./vendor/bin/phpcs --standard=PSR2
 
+      # The signature validation is only as good as the XML security library
+      # underneath it, so a known advisory on a resolved dependency has to fail
+      # the build rather than wait to be noticed.
+      - name: Audit dependencies
+        run: composer audit
+
       # the suite runs against the metadata committed under tests/fixtures/, so it never depends
       # on the SPID registry being reachable or on its payload format staying the same
       - name: Run tests

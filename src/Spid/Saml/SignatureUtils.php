@@ -81,7 +81,11 @@ class SignatureUtils
     public static function validateXmlSignature($xml, $cert) : bool
     {
         if (is_null($xml)) {
-            return true;
+            // An absent signature is never a verified one. Which messages need a
+            // signature is decided by the caller, per message type; turning a
+            // missing signature into a successful verification here is what let a
+            // response simply omit its signature to skip the check altogether.
+            return false;
         }
 
         $signedNode = $xml->parentNode;

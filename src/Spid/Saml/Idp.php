@@ -25,17 +25,8 @@ class Idp implements IdpInterface
 
     public function loadFromXml($xmlFile)
     {
-        if (strpos($xmlFile, $this->sp->settings['idp_metadata_folder']) !== false) {
-            $fileName = $xmlFile;
-        } else {
-            $fileName = $this->sp->settings['idp_metadata_folder'] . $xmlFile . ".xml";
-        }
-        if (!file_exists($fileName)) {
-            throw new \Exception("Metadata file $fileName not found", 1);
-        }
-        if (!is_readable($fileName)) {
-            throw new \Exception("Metadata file $fileName is not readable. Please check file permissions.", 1);
-        }
+        $identifier = $this->idpIdentifier($xmlFile);
+        $fileName = $this->metadataFile($identifier);
         $xml = simplexml_load_file($fileName);
 
         $xml->registerXPathNamespace('md', 'urn:oasis:names:tc:SAML:2.0:metadata');
@@ -59,9 +50,77 @@ class Idp implements IdpInterface
         $metadata['idpSLO'] = $idpSLO;
         $metadata['idpCertValue'] = self::formatCert($xml->xpath('//ds:X509Certificate')[0]->__toString());
 
-        $this->idpFileName = $xmlFile;
+        $this->idpFileName = $identifier;
         $this->metadata = $metadata;
         return $this;
+    }
+
+    // Reduces whatever the caller passed to the bare name of an Identity Provider.
+    //
+    // The certificate found in this metadata is the trust anchor used later to
+    // validate the SAML Response, so whoever chooses the file chooses who may
+    // authenticate users. The previous implementation used the value as a file name
+    // as soon as it contained the configured folder anywhere inside it, which let a
+    // caller pass an absolute path, a traversal, a URL or a PHP stream wrapper and
+    // supply their own metadata, and therefore their own signing certificate.
+    // Any directory component is dropped here on purpose: an Identity Provider is
+    // named, never located, by the caller.
+    private function idpIdentifier($xmlFile) : string
+    {
+        if (!is_string($xmlFile) || $xmlFile === '' || strpos($xmlFile, "\0") !== false) {
+            throw new \Exception("Invalid Identity Provider identifier", 1);
+        }
+        // No URL and no PHP stream wrapper, whatever the rest of the value looks
+        // like: metadata is read from the local metadata folder, never fetched.
+        if (preg_match('#^[a-zA-Z][a-zA-Z0-9+.-]*://#', $xmlFile) === 1) {
+            throw new \Exception("Invalid Identity Provider identifier: a URL is not accepted", 1);
+        }
+
+        $normalized = str_replace('\\', '/', $xmlFile);
+        if (strpos($normalized, '/') !== false) {
+            // A path was supplied rather than a bare name. It is honoured only when
+            // it genuinely points at a file sitting directly in the configured
+            // folder, which is what getIdpList() passes; anything else, traversal
+            // and symbolic links out of the folder included, is refused here.
+            $folder = realpath($this->sp->settings['idp_metadata_folder']);
+            $resolved = realpath($normalized);
+            if ($folder === false || $resolved === false ||
+                dirname($resolved) !== $folder || !is_file($resolved)
+            ) {
+                throw new \Exception("Invalid Identity Provider identifier: " .
+                    "the metadata path is outside the configured folder", 1);
+            }
+        }
+
+        $identifier = basename($normalized, '.xml');
+        if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]*$/', $identifier) || strpos($identifier, '..') !== false) {
+            throw new \Exception("Invalid Identity Provider identifier", 1);
+        }
+        return $identifier;
+    }
+
+    // Resolves the identifier to a regular, readable file proven to sit directly
+    // inside the configured metadata folder, symbolic links included.
+    private function metadataFile(string $identifier) : string
+    {
+        $folder = realpath($this->sp->settings['idp_metadata_folder']);
+        if ($folder === false) {
+            throw new \Exception("The configured idp_metadata_folder does not exist", 1);
+        }
+        $fileName = realpath($folder . DIRECTORY_SEPARATOR . $identifier . '.xml');
+        if ($fileName === false) {
+            throw new \Exception("Metadata file $identifier not found", 1);
+        }
+        if (dirname($fileName) !== $folder) {
+            throw new \Exception("Metadata file $identifier is outside the configured metadata folder", 1);
+        }
+        if (!is_file($fileName)) {
+            throw new \Exception("Metadata file $identifier is not a regular file", 1);
+        }
+        if (!is_readable($fileName)) {
+            throw new \Exception("Metadata file $identifier is not readable. Please check file permissions.", 1);
+        }
+        return $fileName;
     }
 
     private static function formatCert($cert, $heads = true)
@@ -83,9 +142,18 @@ class Idp implements IdpInterface
     }
     public function authnRequest($ass, $attr, $binding, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
     {
+        // Reject a level the SPID rules do not define before it is interpolated
+        // into the AuthnRequest (thanks to @VinsMach, italia/spid-php-lib#157).
+        // Comparing against the exact accepted values, rather than casting first,
+        // keeps something like "2; anything" from reaching the request as
+        // SpidL2; anything: only the normalised integer is kept.
+        if (!in_array($level, [1, 2, 3, '1', '2', '3'], true)) {
+            throw new \Exception("Invalid SPID level requested. Allowed values are 1, 2, 3.");
+        }
+
         $this->assertID = $ass;
         $this->attrID = $attr;
-        $this->level = $level;
+        $this->level = (int) $level;
 
         $authn = new AuthnRequest($this);
         $url = $binding == Settings::BINDING_REDIRECT ?
@@ -95,6 +163,10 @@ class Idp implements IdpInterface
         $_SESSION['idpName'] = $this->idpFileName;
         $_SESSION['idpEntityId'] = $this->metadata['idpEntityId'];
         $_SESSION['acsUrl'] = $this->sp->settings['sp_assertionconsumerservice'][$ass];
+        // Remember what was actually asked for: without it the response validation
+        // has nothing to compare the level the Identity Provider returns against.
+        $_SESSION['requestedLevel'] = $level;
+        $_SESSION['requestedComparison'] = $this->sp->settings['sp_comparison'] ?? 'exact';
 
         if (!$shouldRedirect || $binding == Settings::BINDING_POST) {
             return $url;
@@ -140,8 +212,12 @@ class Idp implements IdpInterface
         $url = ($binding == Settings::BINDING_REDIRECT) ?
             $logoutResponse->redirectUrl($redirectTo) :
             $logoutResponse->httpPost($redirectTo);
-        unset($_SESSION);
-        
+        // unset($_SESSION) only dropped this function's own reference to the
+        // superglobal, leaving the authenticated session intact after an Identity
+        // Provider initiated logout.
+        $_SESSION = array();
+        session_unset();
+
         if ($binding == Settings::BINDING_POST) {
             return $url;
             exit;

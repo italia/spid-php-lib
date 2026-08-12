@@ -6,9 +6,9 @@ use Italia\Spid\Spid\Interfaces\ResponseInterface;
 
 class LogoutResponse implements ResponseInterface
 {
-    public function validate($xml, $hasAssertion) : bool
+    public function validate($xml, $assertion) : bool
     {
-        $root = $xml->getElementsByTagName('LogoutResponse')->item(0);
+        $root = $xml->documentElement;
 
         if ($root->getAttribute('ID') == "") {
             throw new \Exception("missing ID attribute");
@@ -37,7 +37,7 @@ class LogoutResponse implements ResponseInterface
             throw new \Exception("Missing Issuer attribute");
         } elseif ($xml->getElementsByTagName('Issuer')->item(0)->nodeValue != $_SESSION['idpEntityId']) {
             throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] .
-                " but received " . $xml->getElementsByTagName('Response')->item(0)->nodeValue);
+                " but received " . $xml->getElementsByTagName('Issuer')->item(0)->nodeValue);
         }
         if ($xml->getElementsByTagName('Status')->length <= 0) {
             throw new \Exception("Missing Status element");
@@ -46,6 +46,9 @@ class LogoutResponse implements ResponseInterface
             // Status code != success
             return false;
         }
+        // The message has been authenticated by BaseResponse before reaching here,
+        // so tearing the session down is a decision taken on verified input.
+        $_SESSION = array();
         session_unset();
         return true;
     }
