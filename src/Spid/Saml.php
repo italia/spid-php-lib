@@ -18,6 +18,15 @@ class Saml implements SAMLInterface
     public function __construct(array $settings, $autoconfigure = true)
     {
         Settings::validateSettings($settings);
+        if (isset($settings['sp_comparison'])) {
+            // The setting is validated case-insensitively, but the SAML schema
+            // defines Comparison as a lowercase enumeration and every use of the
+            // value compares it literally: the AuthnRequest attribute, the
+            // ForceAuthn decision, and the level check on the way back. Normalising
+            // here once keeps a configured "Minimum" from silently behaving as
+            // "exact" and rejecting a legitimate response.
+            $settings['sp_comparison'] = strtolower($settings['sp_comparison']);
+        }
         $this->settings = $settings;
 
         // Do not attemp autoconfiguration if key and cert values have not been set
