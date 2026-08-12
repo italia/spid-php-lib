@@ -278,7 +278,9 @@ class Response implements ResponseInterface
             return $returned;
         }
         $requested = (int)$_SESSION['requestedLevel'];
-        $comparison = $_SESSION['requestedComparison'] ?? 'exact';
+        // Normalised when the settings are read, lowered again here so a session
+        // written by an older release still compares as intended.
+        $comparison = strtolower($_SESSION['requestedComparison'] ?? 'exact');
         if (!$this->levelSatisfies($returned, $requested, $comparison)) {
             throw new \Exception("Invalid Response. The Identity Provider returned SPID level " . $returned .
                 ", which does not satisfy the requested level " . $requested .

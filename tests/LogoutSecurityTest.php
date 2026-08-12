@@ -121,6 +121,47 @@ final class LogoutSecurityTest extends TestCase
         $this->assertArrayNotHasKey('spidSession', $_SESSION);
     }
 
+    // The signed octet string has to be taken from the raw query string. An Identity
+    // Provider that form-encodes RelayState signs "RelayState=abc+def"; rebuilding
+    // it by re-encoding the value PHP already decoded yields "abc%20def" and rejects
+    // a perfectly good message.
+    public function testRedirectLogoutResponseWithFormEncodedRelayStateIsAccepted(): void
+    {
+        $this->assertFalse(self::$f->redirect(
+            $this->logoutSession(),
+            self::$f->logoutResponse(),
+            'SAMLResponse',
+            self::$f->idpKey,
+            ['rawRelayState' => 'abc+def']
+        ));
+        $this->assertArrayNotHasKey('spidSession', $_SESSION);
+    }
+
+    public function testRedirectLogoutResponseWithLowercasePercentEscapesIsAccepted(): void
+    {
+        $this->assertFalse(self::$f->redirect(
+            $this->logoutSession(),
+            self::$f->logoutResponse(),
+            'SAMLResponse',
+            self::$f->idpKey,
+            ['rawRelayState' => 'a%2fb']
+        ));
+        $this->assertArrayNotHasKey('spidSession', $_SESSION);
+    }
+
+    // RelayState is covered by the signature: changing it after signing must fail.
+    public function testRedirectLogoutResponseWithTamperedRelayStateIsRejected(): void
+    {
+        $this->expectException(\Exception::class);
+        self::$f->redirect(
+            $this->logoutSession(),
+            self::$f->logoutResponse(),
+            'SAMLResponse',
+            self::$f->idpKey,
+            ['RelayState' => 'https://sp.example.com/home', 'swapRelayState' => 'https://attacker.example/']
+        );
+    }
+
     public function testRedirectLogoutResponseWithoutSignatureIsRejected(): void
     {
         $this->expectException(\Exception::class);

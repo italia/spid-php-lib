@@ -260,18 +260,14 @@ class BaseResponse
         if (!isset($_GET['Signature']) || !isset($_GET['SigAlg'])) {
             throw new \Exception("Invalid Response. Missing Signature or SigAlg on the query string");
         }
-        $this->assertNoDuplicateQueryParameters();
+        $raw = $this->rawQueryParameters();
 
         $sigAlg = $_GET['SigAlg'];
         if (!array_key_exists($sigAlg, self::REDIRECT_SIGNATURE_ALGOS)) {
             throw new \Exception("Invalid Response. Signature algorithm " . $sigAlg . " is not accepted");
         }
 
-        $signed = $this->messageParam . '=' . rawurlencode($_GET[$this->messageParam]);
-        if (isset($_GET['RelayState'])) {
-            $signed .= '&RelayState=' . rawurlencode($_GET['RelayState']);
-        }
-        $signed .= '&SigAlg=' . rawurlencode($sigAlg);
+        $signed = $this->signedQueryString($raw, $sigAlg);
 
         $signature = base64_decode($_GET['Signature'], true);
         if ($signature === false) {
@@ -286,25 +282,61 @@ class BaseResponse
         }
     }
 
-    // PHP keeps only the last occurrence of a repeated query parameter, so a
-    // duplicate would let the signature be verified over a different value than
-    // the one the rest of the code reads.
-    private function assertNoDuplicateQueryParameters()
+    // Rebuilds the octet string the Identity Provider actually signed.
+    //
+    // The bytes have to be taken from the raw query string. $_GET has already been
+    // percent-decoded, so re-encoding it amounts to guessing how the sender encoded
+    // the value in the first place: an Identity Provider that form-encodes a space
+    // in RelayState as "+", or uses lowercase percent escapes, signs a string that
+    // rawurlencode() does not reproduce, and a legitimate message gets rejected.
+    private function signedQueryString(?array $raw, string $sigAlg) : string
+    {
+        if (is_null($raw)) {
+            // No raw query string from this SAPI: fall back to re-encoding the
+            // decoded values, which is correct for an RFC 3986 encoded sender.
+            $signed = $this->messageParam . '=' . rawurlencode($_GET[$this->messageParam]);
+            if (isset($_GET['RelayState'])) {
+                $signed .= '&RelayState=' . rawurlencode($_GET['RelayState']);
+            }
+            return $signed . '&SigAlg=' . rawurlencode($sigAlg);
+        }
+
+        if (!array_key_exists($this->messageParam, $raw) || !array_key_exists('SigAlg', $raw)) {
+            throw new \Exception("Invalid Response. The query string does not carry the signed parameters");
+        }
+        // The binding fixes the order: message, then the optional RelayState, then
+        // SigAlg. Anything else in the query is not covered by the signature.
+        $parts = [$this->messageParam . '=' . $raw[$this->messageParam]];
+        if (array_key_exists('RelayState', $raw)) {
+            $parts[] = 'RelayState=' . $raw['RelayState'];
+        }
+        $parts[] = 'SigAlg=' . $raw['SigAlg'];
+        return implode('&', $parts);
+    }
+
+    // Splits the raw query string into name => still-encoded value, refusing any
+    // repeated parameter: PHP keeps only the last occurrence in $_GET, so a
+    // duplicate would let the signature be verified over a different value than the
+    // one the rest of the code reads. Returns null when the SAPI exposes no raw
+    // query string.
+    private function rawQueryParameters() : ?array
     {
         if (!isset($_SERVER['QUERY_STRING']) || $_SERVER['QUERY_STRING'] === '') {
-            return;
+            return null;
         }
-        $seen = [];
+        $raw = [];
         foreach (explode('&', $_SERVER['QUERY_STRING']) as $pair) {
             if ($pair === '') {
                 continue;
             }
-            $name = rawurldecode(explode('=', $pair, 2)[0]);
-            if (isset($seen[$name])) {
+            $split = explode('=', $pair, 2);
+            $name = rawurldecode($split[0]);
+            if (array_key_exists($name, $raw)) {
                 throw new \Exception("Invalid Response. Duplicate " . $name . " parameter on the query string");
             }
-            $seen[$name] = true;
+            $raw[$name] = $split[1] ?? '';
         }
+        return $raw;
     }
 
     // Rejects the response if any identity-bearing element exists outside the

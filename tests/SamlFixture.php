@@ -284,22 +284,40 @@ class SamlFixture
         $message = base64_encode(gzdeflate($xml));
         $sigAlg = $tamper['SigAlg'] ?? 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
 
-        $_GET = [$param => $message, 'SigAlg' => $sigAlg];
-        if (isset($tamper['RelayState'])) {
-            $_GET['RelayState'] = $tamper['RelayState'];
+        // Build the query string the way an Identity Provider would and sign exactly
+        // those bytes, so the test exercises the real reconstruction path.
+        // 'rawRelayState' injects an already-encoded value, which is how a sender
+        // that form-encodes (a space as '+') would put it on the wire.
+        $pairs = [$param . '=' . rawurlencode($message)];
+        if (isset($tamper['rawRelayState'])) {
+            $pairs[] = 'RelayState=' . $tamper['rawRelayState'];
+        } elseif (isset($tamper['RelayState'])) {
+            $pairs[] = 'RelayState=' . rawurlencode($tamper['RelayState']);
         }
+        $pairs[] = 'SigAlg=' . rawurlencode($sigAlg);
+        $signed = implode('&', $pairs);
+
+        $query = $signed;
         if (!is_null($key)) {
-            $signed = $param . '=' . rawurlencode($message);
-            if (isset($tamper['RelayState'])) {
-                $signed .= '&RelayState=' . rawurlencode($tamper['RelayState']);
-            }
-            $signed .= '&SigAlg=' . rawurlencode($sigAlg);
             openssl_sign($signed, $raw, openssl_get_privatekey(file_get_contents($key)), OPENSSL_ALGO_SHA256);
-            $_GET['Signature'] = $tamper['Signature'] ?? base64_encode($raw);
+            $signature = $tamper['Signature'] ?? base64_encode($raw);
+            $query .= '&Signature=' . rawurlencode($signature);
+        }
+        // Replaces RelayState after the signature was computed over the original.
+        if (isset($tamper['swapRelayState'])) {
+            $query = preg_replace(
+                '/RelayState=[^&]*/',
+                'RelayState=' . rawurlencode($tamper['swapRelayState']),
+                $query
+            );
         }
         if (isset($tamper['QUERY_STRING'])) {
-            $_SERVER['QUERY_STRING'] = $tamper['QUERY_STRING'];
+            $query = $tamper['QUERY_STRING'];
         }
+
+        $_SERVER['QUERY_STRING'] = $query;
+        $_GET = [];
+        parse_str($query, $_GET);
         try {
             return $sp->isAuthenticated();
         } finally {

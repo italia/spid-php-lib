@@ -250,6 +250,34 @@ final class ResponseSecurityTest extends TestCase
         $this->assertSame(3, $_SESSION['spidSession']['level']);
     }
 
+    // Settings::validateSettings() accepts sp_comparison case-insensitively, so a
+    // deployment may legitimately configure "Minimum". Every use of the value
+    // compares it literally, and the SAML schema wants it lowercase, so it is
+    // normalised when the settings are read: otherwise "Minimum" silently behaved
+    // as "exact" and a genuine SpidL3 answer to a minimum-L2 request was refused.
+    /**
+     * @dataProvider comparisonSpellings
+     */
+    public function testComparisonIsCaseInsensitive(string $spelling): void
+    {
+        $settings = array_merge(self::$f->settings, ['sp_comparison' => $spelling]);
+        $saml = new Italia\Spid\Spid\Saml($settings, false);
+        $this->assertSame('minimum', $saml->settings['sp_comparison']);
+
+        $response = self::$f->response(
+            self::$f->signedAssertion(['authnContextClassRef' => 'https://www.spid.gov.it/SpidL3'])
+        );
+        $session = $this->session(['requestedLevel' => 2, 'requestedComparison' => $spelling]);
+
+        $this->assertTrue(self::$f->post($session, $response));
+        $this->assertSame(3, $_SESSION['spidSession']['level']);
+    }
+
+    public function comparisonSpellings(): array
+    {
+        return [['minimum'], ['Minimum'], ['MINIMUM']];
+    }
+
     public function testBetterComparisonRejectsAnEqualLevel(): void
     {
         $response = self::$f->response(self::$f->signedAssertion());
