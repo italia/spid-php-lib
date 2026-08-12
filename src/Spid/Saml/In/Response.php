@@ -8,6 +8,16 @@ use Italia\Spid\Spid\Saml;
 
 class Response implements ResponseInterface
 {
+    const NS_SAML = 'urn:oasis:names:tc:SAML:2.0:assertion';
+    const NS_SAMLP = 'urn:oasis:names:tc:SAML:2.0:protocol';
+
+    // The only AuthnContextClassRef values a SPID IdP may assert, and the level
+    // each one stands for.
+    const SPID_LEVELS = [
+        'https://www.spid.gov.it/SpidL1' => 1,
+        'https://www.spid.gov.it/SpidL2' => 2,
+        'https://www.spid.gov.it/SpidL3' => 3,
+    ];
 
     private $saml;
 
@@ -16,12 +26,12 @@ class Response implements ResponseInterface
         $this->saml = $saml;
     }
 
-    public function validate($xml, $hasAssertion): bool
+    public function validate($xml, $assertion): bool
     {
         $accepted_clock_skew_seconds = isset($this->saml->settings['accepted_clock_skew_seconds']) ?
             $this->saml->settings['accepted_clock_skew_seconds'] : 0;
 
-        $root = $xml->getElementsByTagName('Response')->item(0);
+        $root = $xml->documentElement;
 
         if ($root->getAttribute('Version') == "") {
             throw new \Exception("Missing Version attribute");
@@ -51,43 +61,47 @@ class Response implements ResponseInterface
                 " but received " . $root->getAttribute('Destination'));
         }
 
-        if ($xml->getElementsByTagName('Issuer')->length == 0) {
+        // The Issuer of the message itself, read as a direct child of the root so
+        // that no nested copy can be mistaken for it.
+        $responseIssuer = $this->query($root, './saml:Issuer')->item(0);
+        if (is_null($responseIssuer)) {
             throw new \Exception("Missing Issuer attribute");
-            //check item 0, this the Issuer element child of Response
-        } elseif ($xml->getElementsByTagName('Issuer')->item(0)->nodeValue != $_SESSION['idpEntityId']) {
+        } elseif ($responseIssuer->nodeValue != $_SESSION['idpEntityId']) {
             throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] .
-                " but received " . $xml->getElementsByTagName('Issuer')->item(0)->nodeValue);
-        } elseif ($xml->getElementsByTagName('Issuer')->item(0)->getAttribute('Format') !=
+                " but received " . $responseIssuer->nodeValue);
+        } elseif ($responseIssuer->getAttribute('Format') !=
             'urn:oasis:names:tc:SAML:2.0:nameid-format:entity') {
             throw new \Exception("Invalid Issuer attribute, expected 'urn:oasis:names:tc:SAML:2.0:nameid-format:" .
-                "entity'" . " but received " . $xml->getElementsByTagName('Issuer')->item(0)->getAttribute('Format'));
+                "entity'" . " but received " . $responseIssuer->getAttribute('Format'));
         }
 
-        if ($hasAssertion) {
-            if ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('ID') == "" ||
-                $xml->getElementsByTagName('Assertion')->item(0)->getAttribute('ID') == null) {
+        if (!is_null($assertion)) {
+            if ($assertion->getAttribute('ID') == "" ||
+                $assertion->getAttribute('ID') == null) {
                 throw new \Exception("Missing ID attribute on Assertion");
-            } elseif ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('Version') != '2.0') {
+            } elseif ($assertion->getAttribute('Version') != '2.0') {
                 throw new \Exception("Invalid Version attribute on Assertion");
-            } elseif ($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant') == "") {
+            } elseif ($assertion->getAttribute('IssueInstant') == "") {
                 throw new \Exception("Invalid IssueInstant attribute on Assertion");
-            } elseif (!$this->validateDate(
-                $xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant')
-            )) {
+            } elseif (!$this->validateDate($assertion->getAttribute('IssueInstant'))) {
                 throw new \Exception("Invalid IssueInstant attribute on Assertion");
-            } elseif (strtotime($xml->getElementsByTagName('Assertion')->item(0)->getAttribute('IssueInstant')) >
+            } elseif (strtotime($assertion->getAttribute('IssueInstant')) >
                 strtotime('now') + $accepted_clock_skew_seconds) {
                 throw new \Exception("IssueInstant attribute on Assertion is in the future");
             }
 
-            // check item 1, this must be the Issuer element child of Assertion
-            if ($hasAssertion && $xml->getElementsByTagName('Issuer')->item(1)->nodeValue != $_SESSION['idpEntityId']) {
+            // The Issuer of the assertion, again as a direct child of the element
+            // it belongs to rather than by position in a document wide list.
+            $assertionIssuer = $this->query($assertion, './saml:Issuer')->item(0);
+            if (is_null($assertionIssuer)) {
+                throw new \Exception("Missing Issuer element on Assertion");
+            } elseif ($assertionIssuer->nodeValue != $_SESSION['idpEntityId']) {
                 throw new \Exception("Invalid Issuer attribute, expected " . $_SESSION['idpEntityId'] .
-                    " but received " . $xml->getElementsByTagName('Issuer')->item(1)->nodeValue);
-            } elseif ($xml->getElementsByTagName('Issuer')->item(1)->getAttribute('Format') !=
+                    " but received " . $assertionIssuer->nodeValue);
+            } elseif ($assertionIssuer->getAttribute('Format') !=
                 'urn:oasis:names:tc:SAML:2.0:nameid-format:entity') {
                 throw new \Exception("Invalid Issuer attribute, expected 'urn:oasis:names:tc:SAML:2.0:nameid-format:" .
-                "entity'" . " but received " . $xml->getElementsByTagName('Issuer')->item(1)->getAttribute('Format'));
+                "entity'" . " but received " . $assertionIssuer->getAttribute('Format'));
             }
 
             if ($xml->getElementsByTagName('Conditions')->length == 0) {
@@ -177,7 +191,12 @@ class Response implements ResponseInterface
             throw new \Exception("Missing StatusCode element");
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') ==
             'urn:oasis:names:tc:SAML:2.0:status:Success') {
-            if ($hasAssertion && $xml->getElementsByTagName('AuthnStatement')->length <= 0) {
+            // A successful Response always carries a validated assertion: BaseResponse
+            // refuses one that does not, so reaching here without it is impossible.
+            if (is_null($assertion)) {
+                throw new \Exception("Missing Assertion element");
+            }
+            if ($xml->getElementsByTagName('AuthnStatement')->length <= 0) {
                 throw new \Exception("Missing AuthnStatement element");
             }
         } elseif ($xml->getElementsByTagName('StatusCode')->item(0)->getAttribute('Value') !=
@@ -197,12 +216,23 @@ class Response implements ResponseInterface
         }
 
         // Response OK
-        $session = $this->spidSession($xml);
+        $level = $this->validateLevel($assertion);
+        $session = $this->spidSession($assertion, $level);
+
+        // Session fixation: the identifier used while unauthenticated must not
+        // carry over into the authenticated session. Regenerating it before the
+        // authenticated state is written means the old identifier never holds it.
+        if (session_status() === PHP_SESSION_ACTIVE && !headers_sent()) {
+            session_regenerate_id(true);
+        }
+
         $_SESSION['spidSession'] = (array)$session;
         unset($_SESSION['RequestID']);
         unset($_SESSION['idpName']);
         unset($_SESSION['idpEntityId']);
         unset($_SESSION['acsUrl']);
+        unset($_SESSION['requestedLevel']);
+        unset($_SESSION['requestedComparison']);
         return true;
     }
 
@@ -222,26 +252,89 @@ class Response implements ResponseInterface
         }
     }
 
-    private function spidSession(\DOMDocument $xml)
+    // The level the IdP actually asserted has to be a real SPID level, and it has
+    // to satisfy the level the SP asked for. Deriving it from the last character of
+    // the AuthnContextClassRef accepted any URI that happened to end with the right
+    // digit, and the value was never compared with the requested level at all, so
+    // an IdP could answer SpidL1 to a request for SpidL2 and be believed.
+    private function validateLevel(\DOMElement $assertion) : int
+    {
+        $refs = $this->query($assertion, './saml:AuthnStatement/saml:AuthnContext/saml:AuthnContextClassRef');
+        if ($refs->length != 1) {
+            throw new \Exception("Invalid Response. Exactly one AuthnContextClassRef is required, found " .
+                $refs->length);
+        }
+        $uri = trim($refs->item(0)->nodeValue);
+        if (!array_key_exists($uri, self::SPID_LEVELS)) {
+            throw new \Exception("Invalid Response. Unknown AuthnContextClassRef " . $uri);
+        }
+        $returned = self::SPID_LEVELS[$uri];
+
+        if (!isset($_SESSION['requestedLevel'])) {
+            // No requested level was recorded for this transaction, so the session
+            // was not opened through this library's login(). The asserted URI has
+            // still been checked against the allowed set; there is simply nothing
+            // to compare it against.
+            return $returned;
+        }
+        $requested = (int)$_SESSION['requestedLevel'];
+        $comparison = $_SESSION['requestedComparison'] ?? 'exact';
+        if (!$this->levelSatisfies($returned, $requested, $comparison)) {
+            throw new \Exception("Invalid Response. The Identity Provider returned SPID level " . $returned .
+                ", which does not satisfy the requested level " . $requested .
+                " with comparison " . $comparison);
+        }
+        return $returned;
+    }
+
+    // SAML 2.0 core, RequestedAuthnContext/@Comparison semantics.
+    private function levelSatisfies(int $returned, int $requested, string $comparison) : bool
+    {
+        switch ($comparison) {
+            case 'minimum':
+                return $returned >= $requested;
+            case 'better':
+                return $returned > $requested;
+            case 'maximum':
+                return $returned <= $requested;
+            case 'exact':
+            default:
+                return $returned === $requested;
+        }
+    }
+
+    // Builds the authenticated session out of the validated assertion only. Reading
+    // the whole document here is what made a forged element planted outside the
+    // assertion end up in the session.
+    private function spidSession(\DOMElement $assertion, int $level)
     {
         $session = new Session();
 
         $attributes = array();
-        $attributeStatements = $xml->getElementsByTagName('AttributeStatement');
-
-        if ($attributeStatements->length > 0) {
-            foreach ($attributeStatements->item(0)->childNodes as $attr) {
-                if ($attr->hasAttributes()) {
-                    $attributes[$attr->attributes->getNamedItem('Name')->value] = trim($attr->nodeValue);
-                }
+        foreach ($this->query($assertion, './saml:AttributeStatement/saml:Attribute') as $attr) {
+            $name = $attr->getAttribute('Name');
+            if ($name === '') {
+                continue;
             }
+            $attributes[$name] = trim($attr->nodeValue);
         }
 
         $session->sessionID = $_SESSION['RequestID'];
         $session->idp = $_SESSION['idpName'];
-        $session->idpEntityID = $xml->getElementsByTagName('Issuer')->item(0)->nodeValue;
+        // Validated above against the Issuer of both the message and the assertion.
+        $session->idpEntityID = $_SESSION['idpEntityId'];
         $session->attributes = $attributes;
-        $session->level = substr($xml->getElementsByTagName('AuthnContextClassRef')->item(0)->nodeValue, -1);
+        $session->level = $level;
         return $session;
+    }
+
+    // Namespace aware lookup, evaluated relative to $context so that a result can
+    // only ever come from inside the element it is meant to describe.
+    private function query(\DOMElement $context, string $path)
+    {
+        $xpath = new \DOMXPath($context->ownerDocument);
+        $xpath->registerNamespace('saml', self::NS_SAML);
+        $xpath->registerNamespace('samlp', self::NS_SAMLP);
+        return $xpath->query($path, $context);
     }
 }

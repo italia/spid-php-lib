@@ -13,11 +13,11 @@
         }
     ],
     "require": {
-        "robrichards/xmlseclibs": "^3.0",
+        "robrichards/xmlseclibs": "^3.1.5",
         "php": "^7.4 || ^8.0"
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "^3.3",
+        "squizlabs/php_codesniffer": "^3.13.6",
         "phpunit/phpunit": "^9.5"
     },
     "autoload": {

@@ -375,6 +375,36 @@ A Docker-based demo application is available at [https://github.com/simevo/spid-
 
 * [x] Generation of SPID button markup
 
+## Security requirements for integrators
+
+Some of the security properties of a SPID login depend on the application around
+this library, not only on the library itself.
+
+- **Select the Identity Provider by name, from a server-side list.** `login()` and
+  `loginPost()` take the identifier of an IdP whose metadata is in
+  `idp_metadata_folder`; the certificate in that metadata is the trust anchor used
+  to validate the Response. The library resolves the identifier inside the
+  configured folder and refuses paths, URLs and stream wrappers, but the
+  application should still validate the value against `getIdpList()` before passing
+  it on, as `example/views/login.php` does. Never pass a request parameter straight
+  to `login()`.
+- **Keep the metadata folder trustworthy.** Every `*.xml` in it is a trust anchor.
+  Only the IdP metadata your deployment has verified belongs there, and the
+  directory should not be writable by the web server. `bin/download_idp_metadata.php`
+  refreshes it from the SPID registry.
+- **Configure PHP sessions properly.** The library regenerates the session id when
+  the login completes, but the surrounding settings are the application's:
+  `session.use_strict_mode=1` and `session.use_only_cookies=1`, cookies marked
+  `Secure` and `HttpOnly` with an explicit `SameSite`, and HTTPS throughout.
+- **Check the level you get.** The level asserted by the IdP is validated against
+  the one requested in the AuthnRequest, following
+  `RequestedAuthnContext/@Comparison` (`sp_comparison`, `exact` by default). Read
+  `getAttributes()` and the session level rather than assuming the requested level
+  was honoured.
+- **Keep the dependencies current.** `robrichards/xmlseclibs` must be at least
+  3.1.5. Update `composer.lock` too, not just `composer.json`, and run
+  `composer audit` as part of your release.
+
 ## Troubleshooting
 
 It is advised to install a browser plugin to trace SAML messages:

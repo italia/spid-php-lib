@@ -56,6 +56,12 @@ class Base
             $_SERVER['HTTPS'] === 'on' ? "https" : "http") .
             "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" : $redirectTo;
         $relayState = null;
+        // Everything interpolated below lands inside an HTML attribute, so it is
+        // escaped for that context: the action URL comes from Identity Provider
+        // metadata and must not be able to close the attribute and inject markup.
+        $url = htmlspecialchars($url, ENT_QUOTES);
+        $SAMLRequest = htmlspecialchars($SAMLRequest, ENT_QUOTES);
+        $relayState = htmlspecialchars((string) $relayState, ENT_QUOTES);
         return <<<HTML
 <html>
     <body onload="javascript:document.forms[0].submit()">

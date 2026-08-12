@@ -303,7 +303,9 @@ final class SpTest extends PHPUnit\Framework\TestCase
 
         foreach (self::$idps as $idp) {
             $retrievedIdp = $sp->loadIdpFromFile($idp);
-            $this->assertEquals($retrievedIdp->idpFileName, $idp);
+            // idpFileName is the canonical Identity Provider identifier, not the
+            // path the caller happened to pass in.
+            $this->assertEquals(basename($idp, '.xml'), $retrievedIdp->idpFileName);
 
             $metadata = $retrievedIdp->metadata;
 
