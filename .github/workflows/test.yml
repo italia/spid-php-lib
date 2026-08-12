@@ -5,6 +5,10 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  schedule:
+    # the registry smoke test only: see the job condition below
+    - cron: '0 4 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,44 +17,111 @@ jobs:
   run:
     runs-on: ${{ matrix.operating-system }}
 
-    continue-on-error: true
-
     strategy:
+      # keep every version in the matrix running: a failure on one PHP release
+      # should not hide the result of the others
+      fail-fast: false
       matrix:
         operating-system: [ubuntu-latest]
-        php-versions: ['7.4', '8.0', '8.1']
+        php-versions: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
 
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Setup PHP with PECL extensions
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          extensions: json, openssl, xml
+          extensions: curl, json, openssl, xml
 
       - name: Validate composer.json
         run: composer validate --strict
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          # there is no composer.lock in this repository, so hashFiles() used to return the empty
+          # string: every matrix leg shared the literal key "Linux-php-" and restored whichever
+          # vendor tree the first leg happened to resolve, for any PHP version
+          key: ${{ runner.os }}-php${{ matrix.php-versions }}-${{ hashFiles('composer.json') }}
           restore-keys: |
-            ${{ runner.os }}-php-
+            ${{ runner.os }}-php${{ matrix.php-versions }}-
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: Download production IDPs metadata
-        run: bin/download_idp_metadata.php example/idp_metadata
-
       - name: Coding standard
         run: find . | grep 'php$' | grep -v vendor | grep -v tests | xargs ./vendor/bin/phpcs --standard=PSR2
 
+      # the suite runs against the metadata committed under tests/fixtures/, so it never depends
+      # on the SPID registry being reachable or on its payload format staying the same
       - name: Run tests
         run: ./vendor/bin/phpunit --stderr --testdox tests
+
+  registry-smoke:
+    # Exercises the live SPID registry, whose endpoint and payload format have already changed
+    # once without notice. It runs nightly and on demand, never on a pull request, so an outage
+    # or another breaking change at registry.spid.gov.it cannot block a contribution: it opens
+    # a red nightly build instead.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+    runs-on: ubuntu-latest
+    name: SPID registry smoke test
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup PHP with PECL extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl, json, openssl, xml
+
+      - name: Download production IdP metadata
+        run: bin/download_idp_metadata.php example/idp_metadata
+
+      - name: Check the downloaded metadata is usable
+        run: |
+          php -r '
+          $files = glob("example/idp_metadata/*.xml");
+          if (count($files) === 0) {
+              fwrite(STDERR, "no metadata was downloaded" . PHP_EOL);
+              exit(1);
+          }
+          foreach ($files as $file) {
+              $xml = simplexml_load_file($file);
+              if ($xml === false) {
+                  fwrite(STDERR, "$file is not valid XML" . PHP_EOL);
+                  exit(1);
+              }
+              $xml->registerXPathNamespace("md", "urn:oasis:names:tc:SAML:2.0:metadata");
+              $xml->registerXPathNamespace("ds", "http://www.w3.org/2000/09/xmldsig#");
+              $entityId = (string) $xml->attributes()->entityID;
+              $sso = $xml->xpath("//md:SingleSignOnService");
+              $slo = $xml->xpath("//md:SingleLogoutService");
+              $cert = $xml->xpath("//ds:X509Certificate");
+              if ($entityId === "" || empty($sso) || empty($slo) || empty($cert)) {
+                  fwrite(STDERR, "$file is missing fields the library reads" . PHP_EOL);
+                  exit(1);
+              }
+              // Idp::loadFromXml() reads only the FIRST certificate, and the registry does not
+              // order them by validity: assert the one the library will actually use is live
+              $raw = preg_replace("/\s+/", "", (string) $cert[0]);
+              $pem = "-----BEGIN CERTIFICATE-----\n" . chunk_split($raw, 64, "\n") . "-----END CERTIFICATE-----\n";
+              $parsed = openssl_x509_parse($pem);
+              if ($parsed === false) {
+                  fwrite(STDERR, "$file: the first signing certificate does not parse" . PHP_EOL);
+                  exit(1);
+              }
+              if ($parsed["validTo_time_t"] < time()) {
+                  fwrite(STDERR, "$file: the first signing certificate expired on " . date("Y-m-d", $parsed["validTo_time_t"]) . PHP_EOL);
+                  exit(1);
+              }
+              echo "$file: $entityId, " . count($sso) . " SSO, " . count($slo) . " SLO, cert valid to " . date("Y-m-d", $parsed["validTo_time_t"]) . PHP_EOL;
+          }
+          echo "checked " . count($files) . " IdP metadata files" . PHP_EOL;
+          '

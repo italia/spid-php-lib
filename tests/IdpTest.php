@@ -14,7 +14,7 @@ final class IdpTest extends PHPUnit\Framework\TestCase
         ],
         'sp_org_name' => 'test_simevo',
         'sp_org_display_name' => 'Test Simevo',
-        'idp_metadata_folder' => './example/idp_metadata/',
+        'idp_metadata_folder' => './tests/fixtures/idp_metadata/',
         'sp_attributeconsumingservice' => [
             ["name", "familyName", "fiscalNumber", "email"],
             ["name", "familyName", "fiscalNumber", "email", "spidCode"]
@@ -23,16 +23,12 @@ final class IdpTest extends PHPUnit\Framework\TestCase
 
     private static $idps = [];
 
+    // see the note on SpTest::setupIdps(): the suite runs against committed fixtures, never
+    // against the live SPID registry
     public static function setupIdps()
     {
         self::$idps = glob(IdpTest::$settings['idp_metadata_folder'] . "*.xml");
-        // If no IDP is found, download production IDPs for tests
-        if (count(self::$idps) == 0) {
-            exec('php ./bin/download_idp_metadata.php ./example/idp_metadata/');
-            self::$idps = glob(IdpTest::$settings['idp_metadata_folder'] . "*.xml");
-            return true;
-        }
-        return false;
+        return self::$idps;
     }
 
     public function testCanBeCreatedFromValidSP()
@@ -46,7 +42,8 @@ final class IdpTest extends PHPUnit\Framework\TestCase
 
     public function testCanLoadFromValidXML()
     {
-        $result = self::setupIdps();
+        self::setupIdps();
+        $this->assertNotEmpty(self::$idps);
 
         $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
         $idp = new Italia\Spid\Spid\Saml\Idp($sp);
@@ -57,15 +54,12 @@ final class IdpTest extends PHPUnit\Framework\TestCase
         );
         $this->assertNotEmpty($idp->idpFileName);
         $this->assertNotEmpty($idp->metadata);
-
-        // If IDPs were downloaded for testing purposes, then delete them
-        if ($result) {
-            array_map('unlink', self::$idps);
-        }
     }
 
     public function testCanLoadFromValidXMLFullPath()
     {
+        self::setupIdps();
+
         $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
         $idp = new Italia\Spid\Spid\Saml\Idp($sp);
         $loaded = $idp->loadFromXml(self::$idps[0]);
@@ -79,6 +73,8 @@ final class IdpTest extends PHPUnit\Framework\TestCase
 
     public function testLoadXMLWIthWrongFilePath()
     {
+        self::setupIdps();
+
         $sp = new Italia\Spid\Spid\Saml(IdpTest::$settings);
         $idp = new Italia\Spid\Spid\Saml\Idp($sp);
         $sp->settings['idp_metadata_folder'] = '/wrong/path/to/metadata/';

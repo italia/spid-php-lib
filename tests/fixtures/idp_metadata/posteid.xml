@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  entityID="https://posteid.poste.it">
+  <md:IDPSSODescriptor WantAuthnRequestsSigned="true"
+    protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <md:KeyDescriptor use="signing">
+      <ds:KeyInfo>
+        <ds:X509Data>
+        <ds:X509Certificate>MIIFizCCA3OgAwIBAgIIFYLDd7sRdIowDQYJKoZIhvcNAQELBQAwZTELMAkGA1UEBhMCSVQxHjAcBgNVBAoMFVBvc3RlIEl0YWxpYW5lIFMucC5BLjEaMBgGA1UEYQwRVkFUSVQtMDExMTQ2MDEwMDYxGjAYBgNVBAMMEVBvc3RlIEl0YWxpYW5lIENBMB4XDTI0MDIwODEzNTQzOVoXDTI3MDIwODEzNTQzOVowRzELMAkGA1UEBhMCSVQxHjAcBgNVBAoMFVBvc3RlIEl0YWxpYW5lIFMucC5BLjEYMBYGA1UEAwwPaWRwLXBvc3RlaWQyMDI0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlAUwk/CYRRsQSTfczqFAZ9TF/6Jwnr82pNfx/hcHXqDn/MrIkhg4t9vWf8N+cPW/CfcvFuySdo+ecs07KCm2A8stUQ+zRH49/GK0v3rHmEs5/lPacwuXTdWPdKL1/f7APQBoebk5y13QVH1yO4RHW0UItKBtqF16eaI9ceiS7O4tn+M7QQyj5wftVHrlRNZlFhHoXeLpsum0WLesjSrceUHntbUtyXyQGmX6tT0tcmwJwdbK9H670uK/xioenaGoU3pfnd/6W0glHh8G1fztTPfrazMjHT2+Ii+aKX4hFeVIu19xaNbNGFL5RpIG1XEKGL/EoJXKCtnKVn/8PveztwIDAQABo4IBWzCCAVcwHwYDVR0jBBgwFoAUbNNNuRe4R3dHflC8gGhCz2e8P3kwPwYIKwYBBQUHAQEEMzAxMC8GCCsGAQUFBzABhiNodHRwOi8vcG9zdGVjZXJ0LnBvc3RlLml0L3BpLW9jc3BDQTArBgNVHREEJDAigSBpZHAtcG9zdGVpZDIwMjRAcG9zdGVpdGFsaWFuZS5pdDA+BgNVHSAENzA1MDMGCCtMMAEFAQEEMCcwJQYIKwYBBQUHAgEWGWh0dHA6Ly9wb3N0ZWNlcnQucG9zdGUuaXQwHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMDgGA1UdHwQxMC8wLaAroCmGJ2h0dHA6Ly9wb3N0ZWNlcnQucG9zdGUuaXQvcGktQ0EvY3JsLmNybDAdBgNVHQ4EFgQUm2Mfz8pVslcPa8X1rgKVQjJRczcwDgYDVR0PAQH/BAQDAgWgMA0GCSqGSIb3DQEBCwUAA4ICAQBORueMtFdRkTK8iIXHWZiLlOxgWI9vKC5xcuJJpkSGjnu4kb80nim3m5FPo9VhlDrl6vGsxbZbOK8E3qNLMh+uUYJOmryUULjh+rlth4meWLcQ+W6IWwbM7Of2yG4wEE8UIB8tgoNZmI4MQWxk5kZU2gzPjbYpGk+3gHvVODloQBrwG+C0yhQt3BBBtdB26W6ebESGUyBEBhOGuszzyBVGuWiHUBcyHsEH/qoS0Mh6AMpPbGjoFcgGQv6dQ5Rm1s+mt184kfl/k9kDHH8a9NgD5eVLenArTW8yqiX23ck0qepKDC0dn9wq9hNFD+UquT1fHrzZhxJhk93r6AY6yCHMN8sIHTY8zg8TNTGSE7PkeWmXxvjiw3o7vWS/79qbePrCfy/7ICvI/ys5/Z0pATWBMGXkEN+Mee4Ivf+YPDpxfcZLj3DQ/XJ5FscYM2uTOZAwYT+9LcLonpJUexazCWfTNsF//Knyo/ZhcslEhoPT5F1b8yO5uwXeM/PRRkaX1ACl2ApLKobHyG0qG8lYGMFuIAsHtsC+tJfZrX4F55kcTzVfR/cp7S50XyFhBqs4piM/ZsF4jSPXhVDCF9Nw/XC8VvVOWq8I5kVmuf8/32Nqk9bFaevGvv7ExcZKVsUbSfu8kB/t9eePoNtjqHAUxoxWs807k9vQE3d3DlYGa3M0Cw==</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </md:KeyDescriptor>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://posteid.poste.it/jod-fs/sloservicepost"/>
+      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://posteid.poste.it/jod-fs/sloserviceredirect"/>
+    <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://posteid.poste.it/jod-fs/ssoservicepost"/>
+      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://posteid.poste.it/jod-fs/ssoserviceredirect"/>
+  </md:IDPSSODescriptor>
+</md:EntityDescriptor>
