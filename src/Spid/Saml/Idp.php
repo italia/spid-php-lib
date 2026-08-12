@@ -142,9 +142,18 @@ class Idp implements IdpInterface
     }
     public function authnRequest($ass, $attr, $binding, $level = 1, $redirectTo = null, $shouldRedirect = true) : string
     {
+        // Reject a level the SPID rules do not define before it is interpolated
+        // into the AuthnRequest (thanks to @VinsMach, italia/spid-php-lib#157).
+        // Comparing against the exact accepted values, rather than casting first,
+        // keeps something like "2; anything" from reaching the request as
+        // SpidL2; anything: only the normalised integer is kept.
+        if (!in_array($level, [1, 2, 3, '1', '2', '3'], true)) {
+            throw new \Exception("Invalid SPID level requested. Allowed values are 1, 2, 3.");
+        }
+
         $this->assertID = $ass;
         $this->attrID = $attr;
-        $this->level = $level;
+        $this->level = (int) $level;
 
         $authn = new AuthnRequest($this);
         $url = $binding == Settings::BINDING_REDIRECT ?

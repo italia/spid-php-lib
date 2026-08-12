@@ -268,6 +268,23 @@ final class ResponseSecurityTest extends TestCase
         self::$f->post($this->session(['requestedLevel' => 2, 'requestedComparison' => 'maximum']), $response);
     }
 
+    /**
+     * @dataProvider undefinedLevels
+     */
+    public function testAuthnRequestRefusesAnUndefinedLevel($level): void
+    {
+        $saml = new Italia\Spid\Spid\Saml(self::$f->settings, false);
+        $idp = $saml->loadIdpFromFile('idp');
+
+        $this->expectException(\Exception::class);
+        $idp->authnRequest(0, null, Italia\Spid\Spid\Saml\Settings::BINDING_POST, $level, null, false);
+    }
+
+    public function undefinedLevels(): array
+    {
+        return [[0], [4], [-1], ['2; DROP'], ['']];
+    }
+
     // -----------------------------------------------------------------
     // Session fixation: the pre-login identifier must not carry the
     // authenticated state.
