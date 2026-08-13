@@ -22,6 +22,7 @@ $settings = [
     ],
     'sp_org_name' => 'test',
     'sp_org_display_name' => 'Test',
+    //'sp_org_url' => 'https://www.aggregatorSite.com/', // Only for aggregator
     'sp_key_cert_values' => [
         'countryName' => 'IT',
         'stateOrProvinceName' => 'Milan',
@@ -33,7 +34,31 @@ $settings = [
     'sp_attributeconsumingservice' => [
         ["name", "familyName", "fiscalNumber", "email"],
         ["name", "familyName", "fiscalNumber", "email", "spidCode"]
-    ]
+    ],
+    /*'sp_contact_persons' => [ // Only for aggregator
+        [
+            'contactType' => 'other',
+            'entityType' => 'spid:aggregator',
+            'ipaCode' => '',
+            'vatNumber' => 'VATNumber',
+            'fiscalCode' => 'FiscalCode',
+            'emptyTag' => 'PublicServicesLightAggregator',
+            'company' => 'AggregatorCompany',
+            'emailAddress' => 'aggregator@mail.com',
+            'telephoneNumber' => 'TelephoneNumber'
+        ],
+        [
+            'contactType' => 'other',
+            'entityType' => 'spid:aggregated',
+            'ipaCode' => 'IPAcode',
+            'vatNumber' => '',
+            'fiscalCode' => '',
+            'emptyTag' => 'Public',
+            'company' => 'Test',
+            'emailAddress' => '',
+            'telephoneNumber' => ''
+        ]
+    ]*/
 ];
 $sp = new Italia\Spid\Sp($settings);
 
